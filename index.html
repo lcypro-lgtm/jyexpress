@@ -120,17 +120,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-  <script>
-  // Babel 오류 캐치
-  window.onerror = function(msg, src, line, col, err) {
-    document.getElementById("root").innerHTML =
-      '<div style="padding:20px;font-family:sans-serif;color:red">' +
-      '<h2>앱 오류</h2><pre style="white-space:pre-wrap;font-size:12px">' +
-      msg + '\nLine: ' + line + '\n' + (err?err.stack:'') +
-      '</pre></div>';
-    return false;
-  };
-  </script>
   <script type="text/babel">
     const { useState, useRef, useEffect } = React;
 
@@ -417,7 +406,7 @@ function TransBadge({transport}){
 
 function LocBadge({loc}){
   if(!loc?.zone) return null;
-  const txt=`${loc.zone}${loc.rack?` ${loc.rack}`:""}${loc.pallet?`-${loc.pallet}`:""}`;
+  const txt=loc.zone+(loc.rack?" "+loc.rack:"")+(loc.pallet?"-"+loc.pallet:"");
   return(
     <span style={{background:`${C.loc}15`,color:C.loc,border:`1px solid ${C.loc}44`,
       fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:10}}>
@@ -608,7 +597,7 @@ function Login({members,pendingCount,onLogin,onRequest}){
   return(
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"36px 20px"}}>
       <div style={{textAlign:"center",marginBottom:28}}>
-        <div style={{width:76,height:76,borderRadius:24,background:`linear-gradient(145deg,${C.accentL},${C.accent})`,margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:38,boxShadow:"0 8px 24px rgba(18,89,195,0.35)"}}>🏭</div>
+        <div style={{width:76,height:76,borderRadius:24,background:"linear-gradient(145deg,"+C.accentL+","+C.accent+")",margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:38,boxShadow:"0 8px 24px rgba(18,89,195,0.35)"}}>🏭</div>
         <div style={{fontSize:22,fontWeight:900,color:C.text}}>지용금속 출하관리</div>
         <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름 선택 → 비밀번호 입력 후 접속</div>
       </div>
@@ -626,8 +615,8 @@ function Login({members,pendingCount,onLogin,onRequest}){
                 ? users.map(u=>(
                   <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                     style={{padding:"14px 16px",cursor:"pointer",marginBottom:8,
-                      border:`2px solid ${sel?.id===u.id?color:C.border}`,
-                      background:sel?.id===u.id?`${color}08`:C.card}}>
+                      border:"2px solid "+(sel?.id===u.id?color:C.border),
+                      background:sel?.id===u.id?(color+"08"):C.card}}>
                     <div style={{display:"flex",alignItems:"center",gap:12}}>
                       <Avatar name={u.name} color={color} size={46}/>
                       <div style={{flex:1}}>
@@ -646,8 +635,8 @@ function Login({members,pendingCount,onLogin,onRequest}){
                     {users.map(u=>(
                       <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                         style={{padding:"12px 10px",cursor:"pointer",
-                          border:`2px solid ${sel?.id===u.id?color:C.border}`,
-                          background:sel?.id===u.id?`${color}08`:C.card,
+                          border:"2px solid "+(sel?.id===u.id?color:C.border),
+                          background:sel?.id===u.id?(color+"08"):C.card,
                           display:"flex",flexDirection:"column",alignItems:"center",gap:5,position:"relative"}}>
                         <Avatar name={u.name} color={color} size={36}/>
                         <div style={{textAlign:"center"}}>
@@ -1566,7 +1555,7 @@ function NewPost({members,zones,onBack,onSave}){
               {[
                 {l:"출하구분",v:`${cc.icon} ${cat}`},{l:"거래처",v:client},
                 {l:"의뢰자",v:requester},{l:"긴급도",v:`${URG_ICON[urgency]} ${urgency}`},
-                {l:"포장형태",v:packaging},{l:"운송",v:`${TRANS_ICON[transport]} ${transport}${carNum?` (${carNum})`:""}`},
+                {l:"포장형태",v:packaging},{l:"운송",v:TRANS_ICON[transport]+" "+transport+(carNum?" ("+carNum+")":"")},
                 {l:"날짜",v:date},
               ].map(({l,v})=>(
                 <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
@@ -2334,62 +2323,34 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
             <div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>부서</div><input value={fDept} onChange={e=>setFDept(e.target.value)} placeholder="출하팀" style={inp}/></div>
             {fRole==="staff"&&<div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>담당 구역</div><input value={fRegion} onChange={e=>setFRegion(e.target.value)} style={inp}/></div>}
 
-            {/* 비밀번호 설정 — 필수 */}
+            {/* 비밀번호 설정 */}
             <div style={{marginBottom:12}}>
-              <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:6}}>
-                🔒 비밀번호 * <span style={{fontWeight:400,fontSize:11,color:C.sub}}>(반드시 설정해야 접속 가능)</span>
-              </div>
-              <input type="text" value={fPw} onChange={e=>setFPw(e.target.value)}
-                placeholder="비밀번호 입력 (필수)"
-                style={{...inp, border:`1.5px solid ${fPw.trim()?C.done:C.danger}`}}/>
-              {!fPw.trim()&&(
-                <div style={{fontSize:11,color:C.danger,marginTop:4}}>
-                  ⚠️ 비밀번호를 설정하지 않으면 해당 사용자는 로그인할 수 없습니다
-                </div>
-              )}
+              <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>🔒 비밀번호</div>
+              <input type="text" value={fPw} onChange={e=>setFPw(e.target.value)} placeholder="비밀번호 (필수)" style={inp}/>
+              {!fPw.trim()&&<div style={{fontSize:11,color:C.danger,marginTop:4}}>⚠ 비밀번호 미설정 시 접속 불가</div>}
             </div>
-
-            {/* 권한 설정 — 관리자가 아닌 경우만 */}
+            {/* 권한 설정 */}
             {ed.role!=="admin"&&(
               <div style={{marginBottom:16}}>
-                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>🛡️ 추가 권한 부여</div>
-                <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                  <div onClick={()=>setFPermReg(v=>!v)}
-                    style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
-                      background:fPermReg?`${C.accent}08`:C.card2,
-                      border:`1.5px solid ${fPermReg?C.accent:C.border}`,
-                      borderRadius:10,cursor:"pointer"}}>
-                    <div style={{width:22,height:22,borderRadius:"50%",
-                      background:fPermReg?C.accent:C.muted,
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      fontSize:12,color:"#fff",flexShrink:0}}>
-                      {fPermReg?"✓":""}
-                    </div>
-                    <div>
-                      <div style={{fontSize:13,fontWeight:700,color:fPermReg?C.accent:C.text}}>출하 의뢰 등록</div>
-                      <div style={{fontSize:11,color:C.sub}}>출하일정 직접 등록 가능</div>
-                    </div>
-                  </div>
-                  <div onClick={()=>setFPermShip(v=>!v)}
-                    style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
-                      background:fPermShip?`${C.process}08`:C.card2,
-                      border:`1.5px solid ${fPermShip?C.process:C.border}`,
-                      borderRadius:10,cursor:"pointer"}}>
-                    <div style={{width:22,height:22,borderRadius:"50%",
-                      background:fPermShip?C.process:C.muted,
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      fontSize:12,color:"#fff",flexShrink:0}}>
-                      {fPermShip?"✓":""}
-                    </div>
-                    <div>
-                      <div style={{fontSize:13,fontWeight:700,color:fPermShip?C.process:C.text}}>사내출하 등록</div>
-                      <div style={{fontSize:11,color:C.sub}}>사내출하 직접 등록 가능</div>
-                    </div>
-                  </div>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>🛡️ 추가 권한</div>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>setFPermReg(!fPermReg)}
+                    style={{flex:1,padding:"9px 4px",borderRadius:10,fontSize:12,fontWeight:700,
+                      border:"2px solid "+(fPermReg?C.accent:C.border),
+                      background:fPermReg?(C.accent+"15"):C.card2,
+                      color:fPermReg?C.accent:C.sub,cursor:"pointer"}}>
+                    {fPermReg?"✓ ":""}의뢰등록
+                  </button>
+                  <button onClick={()=>setFPermShip(!fPermShip)}
+                    style={{flex:1,padding:"9px 4px",borderRadius:10,fontSize:12,fontWeight:700,
+                      border:"2px solid "+(fPermShip?C.process:C.border),
+                      background:fPermShip?(C.process+"15"):C.card2,
+                      color:fPermShip?C.process:C.sub,cursor:"pointer"}}>
+                    {fPermShip?"✓ ":""}사내출하
+                  </button>
                 </div>
               </div>
             )}
-
             <div style={{display:"flex",gap:10}}>
               <Btn onClick={()=>setEd(null)} color={C.muted} outline style={{flex:1}}>취소</Btn>
               <Btn onClick={saveEd} style={{flex:1}}>{isNew?"추가":"저장"}</Btn>
@@ -2439,8 +2400,8 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
                           {u.dept}{u.region&&<span> · {u.region}</span>}
                           {u.specialty&&<span style={{marginLeft:6,background:u.specialty==="양산"?`${C.yangsan}15`:`${C.general}15`,color:u.specialty==="양산"?C.yangsan:C.general,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:8}}>{u.specialty==="양산"?"🏭 양산":"📦 일반"}</span>}
                         </div>
-                        <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
-                          {u.password?<span style={{background:`${C.done}15`,color:C.done,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>🔒 설정됨</span>:<span style={{background:`${C.danger}15`,color:C.danger,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>⚠ 미설정</span>}
+                        <div style={{fontSize:10,color:u.password?C.done:C.danger,marginTop:3,fontWeight:700}}>
+                          {u.password?"🔒 비밀번호설정":"⚠ 비밀번호없음"}
                         </div>
                       </div>
                       <div style={{display:"flex",gap:8}}>
