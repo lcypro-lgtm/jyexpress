@@ -20,13 +20,13 @@
     // 아래 값들을 실제 값으로 교체하세요.
     // 설정 방법: 앱 → 톱니바퀴 → 프로젝트 설정 → 내 앱 → SDK 설정 및 구성
     const FIREBASE_CONFIG = {
-      apiKey:            "AIzaSyA8M4ynRkVpUeNyc4fqCsuSoHK4fyEzCI0",
-      authDomain:        "jyexpress-b31fd.firebaseapp.com",
-      databaseURL:       "https://jyexpress-b31fd-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId:         "jyexpress-b31fd",
-      storageBucket:     "jyexpress-b31fd.firebasestorage.app",
-      messagingSenderId: "194501780480",
-      appId:             "1:194501780480:web:c18abecc78fde87947a4e5"
+      apiKey:            "여기에_apiKey_입력",
+      authDomain:        "여기에_authDomain_입력",
+      databaseURL:       "여기에_databaseURL_입력",
+      projectId:         "여기에_projectId_입력",
+      storageBucket:     "여기에_storageBucket_입력",
+      messagingSenderId: "여기에_messagingSenderId_입력",
+      appId:             "여기에_appId_입력"
     };
 
     // 설정값이 실제 값인지 확인
@@ -157,6 +157,7 @@ const C = {
 const CAT = {
   양산출하:{ color:C.yangsan, bg:`${C.yangsan}18`, icon:"🏭", desc:"기아·자동차 납품" },
   일반출하:{ color:C.general, bg:`${C.general}15`, icon:"📦", desc:"일반 거래처 출하" },
+  사내출하:{ color:C.process, bg:`${C.process}15`, icon:"🏢", desc:"사내 자체 출하" },
   사내방문:{ color:C.visit,   bg:`${C.visit}15`,   icon:"🚶", desc:"내방 방문 기록" },
 };
 
@@ -192,13 +193,13 @@ const haversine=(la1,lo1,la2,lo2)=>{
 
 const calcDone=post=>{
   if(post.category==="사내방문") return { done:(post.visits||[]).length, total:(post.visits||[]).length, pct:100 };
-  const all=post.groups.flatMap(g=>g.items);
+  const all=(post.groups||[]).flatMap(g=>(g.items||[]));
   const done=all.filter(i=>i.stage?i.stage==="회수":i.done).length;
   return { done, total:all.length, pct:all.length?Math.round(done/all.length*100):0 };
 };
-
 const checkQuality=post=>{
-  if(post.category==="사내방문") return { ok:true, missing:[] };
+  if(post.category==="사내방문"||post.category==="사내출하") return { ok:true, missing:[] };
+  if(!(post.groups||[]).length) return { ok:false, missing:["품목정보"] };
   const m=[];
   if(!post.client?.trim()) m.push("거래처명");
   if(!post.requester?.trim()) m.push("의뢰자");
@@ -231,12 +232,12 @@ const mkI=(id,text,detail,extra,done,doneBy,doneAt,hasProc,pType,dueDate,stage,t
 });
 
 const INIT_MEMBERS=[
-  { id:"admin", name:"이창용", role:"admin",  dept:"관리자",  region:"전체",    specialty:null },
-  { id:"s1",   name:"김철수", role:"staff",  dept:"출하팀",  region:"양산전담", specialty:"양산" },
-  { id:"s2",   name:"이영희", role:"staff",  dept:"출하팀",  region:"일반출하", specialty:"일반" },
-  { id:"s3",   name:"박민준", role:"staff",  dept:"출하팀",  region:"일반출하", specialty:"일반" },
-  { id:"r1",   name:"한상훈", role:"viewer", dept:"생산팀",  region:null,       specialty:null },
-  { id:"r2",   name:"윤지혜", role:"viewer", dept:"영업팀",  region:null,       specialty:null },
+  { id:"admin", name:"이창용", role:"admin",  dept:"관리자",  region:"전체",    specialty:null, password:"", permissions:{canRegister:true,canInternalShip:true} },
+  { id:"s1",   name:"김철수", role:"staff",  dept:"출하팀",  region:"양산전담", specialty:"양산", password:"", permissions:{canRegister:false,canInternalShip:false} },
+  { id:"s2",   name:"이영희", role:"staff",  dept:"출하팀",  region:"일반출하", specialty:"일반", password:"", permissions:{canRegister:false,canInternalShip:false} },
+  { id:"s3",   name:"박민준", role:"staff",  dept:"출하팀",  region:"일반출하", specialty:"일반", password:"", permissions:{canRegister:false,canInternalShip:false} },
+  { id:"r1",   name:"한상훈", role:"viewer", dept:"생산팀",  region:null,       specialty:null, password:"", permissions:{canRegister:false,canInternalShip:false} },
+  { id:"r2",   name:"윤지혜", role:"viewer", dept:"영업팀",  region:null,       specialty:null, password:"", permissions:{canRegister:false,canInternalShip:false} },
 ];
 
 const INIT_PENDING=[
@@ -476,7 +477,7 @@ function StageBtn({item,onAdvance,canEdit}){
 function PostCard({post,onClick}){
   const cc=CAT[post.category]||CAT["일반출하"];
   const isVisit=post.category==="사내방문";
-  const {done,total,pct}=calcDone(post);
+  const {done,total,pct}=calcDone({...post,groups:post.groups||[]});
   return(
     <Card onClick={onClick} style={{marginBottom:10,cursor:"pointer",WebkitTapHighlightColor:"transparent"}}>
       <div style={{height:4,background:cc.color}}/>
@@ -573,18 +574,32 @@ function FbSetupGuide(){
 /* ══ 로그인 ══ */
 function Login({members,pendingCount,onLogin,onRequest}){
   const [sel,setSel]=useState(null);
+  const [pw,setPw]=useState("");
+  const [pwError,setPwError]=useState(false);
+  const [showPw,setShowPw]=useState(false);
+
   const roles=[
     {key:"admin",label:"관리자",color:C.accent,icon:"👑",users:members.filter(u=>u.role==="admin")},
     {key:"staff",label:"출하팀",color:C.general,icon:"👷",users:members.filter(u=>u.role==="staff")},
     {key:"viewer",label:"조회",color:C.done,icon:"👁️",users:members.filter(u=>u.role==="viewer")},
   ];
+
+  function handleLogin(){
+    if(!sel) return;
+    if(!sel.password){ setPwError(true); return; }
+    if(pw!==sel.password){ setPwError(true); return; }
+    setPwError(false);
+    onLogin(sel);
+  }
+
+  const hasPw = sel && !!sel.password;
+
   return(
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"36px 20px"}}>
       <div style={{textAlign:"center",marginBottom:28}}>
-        <div style={{width:72,height:72,borderRadius:20,background:C.accent,margin:"0 auto 14px",
-          display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,boxShadow:C.shadowM}}>🏭</div>
+        <div style={{width:76,height:76,borderRadius:24,background:`linear-gradient(145deg,${C.accentL},${C.accent})`,margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:38,boxShadow:"0 8px 24px rgba(18,89,195,0.35)"}}>🏭</div>
         <div style={{fontSize:22,fontWeight:900,color:C.text}}>지용금속 출하관리</div>
-        <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름을 선택해 접속하세요</div>
+        <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름 선택 → 비밀번호 입력 후 접속</div>
       </div>
       <div style={{width:"100%",maxWidth:360}}>
         {roles.map(({key,label,color,icon,users})=>{
@@ -598,7 +613,7 @@ function Login({members,pendingCount,onLogin,onRequest}){
               </div>
               {key==="admin"
                 ? users.map(u=>(
-                  <Card key={u.id} onClick={()=>setSel(sel?.id===u.id?null:u)}
+                  <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                     style={{padding:"14px 16px",cursor:"pointer",marginBottom:8,
                       border:`2px solid ${sel?.id===u.id?color:C.border}`,
                       background:sel?.id===u.id?`${color}08`:C.card}}>
@@ -618,7 +633,7 @@ function Login({members,pendingCount,onLogin,onRequest}){
                 : (
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                     {users.map(u=>(
-                      <Card key={u.id} onClick={()=>setSel(sel?.id===u.id?null:u)}
+                      <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                         style={{padding:"12px 10px",cursor:"pointer",
                           border:`2px solid ${sel?.id===u.id?color:C.border}`,
                           background:sel?.id===u.id?`${color}08`:C.card,
@@ -627,10 +642,7 @@ function Login({members,pendingCount,onLogin,onRequest}){
                         <div style={{textAlign:"center"}}>
                           <div style={{fontSize:13,fontWeight:700,color:C.text}}>{u.name}</div>
                           <div style={{fontSize:10,color:C.sub,marginTop:1}}>{u.dept}{u.region?` · ${u.region}`:""}</div>
-                          {u.specialty&&<div style={{fontSize:9,fontWeight:700,marginTop:2,
-                            color:u.specialty==="양산"?C.yangsan:C.general}}>
-                            {u.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}
-                          </div>}
+                          {u.specialty&&<div style={{fontSize:9,fontWeight:700,marginTop:2,color:u.specialty==="양산"?C.yangsan:C.general}}>{u.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}</div>}
                         </div>
                         {sel?.id===u.id&&<span style={{position:"absolute",top:6,right:8,color,fontSize:14,fontWeight:900}}>✓</span>}
                       </Card>
@@ -641,13 +653,55 @@ function Login({members,pendingCount,onLogin,onRequest}){
             </div>
           );
         })}
-        <button onClick={()=>sel&&onLogin(sel)}
+
+        {/* 비밀번호 입력 영역 */}
+        {sel&&(
+          <div style={{marginBottom:12}}>
+            {!hasPw&&(
+              <div style={{background:`${C.danger}08`,border:`1px solid ${C.danger}33`,borderRadius:12,padding:"14px",marginBottom:8}}>
+                <div style={{fontSize:14,fontWeight:800,color:C.danger,marginBottom:4}}>⛔ 비밀번호 미설정</div>
+                <div style={{fontSize:12,color:C.sub,lineHeight:1.7}}>
+                  {sel.role==="admin"?"관리자 계정에 비밀번호를 설정하세요.":"관리자에게 비밀번호 설정을 요청하세요."}
+                </div>
+              </div>
+            )}
+            {hasPw&&(
+              <div>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>🔒 비밀번호</div>
+                <div style={{position:"relative"}}>
+                  <input
+                    type={showPw?"text":"password"}
+                    value={pw}
+                    onChange={e=>{setPw(e.target.value);setPwError(false);}}
+                    onKeyDown={e=>e.key==="Enter"&&handleLogin()}
+                    placeholder="비밀번호 입력"
+                    autoFocus
+                    style={{width:"100%",background:C.card,
+                      border:`1.5px solid ${pwError?C.danger:C.accent}`,
+                      borderRadius:10,color:C.text,fontSize:15,
+                      padding:"11px 44px 11px 14px",outline:"none",boxSizing:"border-box",
+                      boxShadow:`0 0 0 3px ${pwError?C.danger+"22":C.accent+"18"}`}}/>
+                  <button onClick={()=>setShowPw(v=>!v)}
+                    style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",
+                      background:"none",border:"none",color:C.sub,fontSize:18,cursor:"pointer"}}>
+                    {showPw?"🙈":"👁️"}
+                  </button>
+                </div>
+                {pwError&&<div style={{fontSize:12,color:C.danger,marginTop:5}}>⚠️ 비밀번호가 틀렸습니다</div>}
+              </div>
+            )}
+          </div>
+        )}
+
+        <button onClick={handleLogin} disabled={!sel||!hasPw}
           style={{width:"100%",padding:"15px 0",marginBottom:12,
-            background:sel?C.accent:C.muted,color:sel?"#fff":C.dim,
+            background:(!sel||!hasPw)?C.muted:`linear-gradient(135deg,${C.accentL},${C.accent})`,
+            color:(!sel||!hasPw)?C.dim:"#fff",
             border:"none",borderRadius:14,fontSize:16,fontWeight:800,
-            cursor:sel?"pointer":"not-allowed",transition:"all 0.2s",
-            boxShadow:sel?`0 4px 14px ${C.accent}55`:"none"}}>
-          {sel?`${sel.name}으로 접속`:"이름을 선택하세요"}
+            cursor:(!sel||!hasPw)?"not-allowed":"pointer",
+            transition:"all 0.2s",
+            boxShadow:(!sel||!hasPw)?"none":"0 4px 14px rgba(18,89,195,0.35)"}}>
+          {!sel?"이름을 선택하세요":!hasPw?"비밀번호 설정 후 접속 가능":`${sel.name}으로 접속`}
         </button>
         <button onClick={onRequest}
           style={{width:"100%",padding:"13px 0",background:C.card,color:C.sub,
@@ -658,6 +712,7 @@ function Login({members,pendingCount,onLogin,onRequest}){
     </div>
   );
 }
+
 
 /* ══ 접속 신청 ══ */
 function AccessRequest({onSubmit,onBack}){
@@ -723,7 +778,7 @@ function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRo
   const [clientSearch,setClientSearch]=useState("");
   const today=todayStr();
   const todayPs=posts.filter(p=>p.date===today);
-  const shownBase=tab==="오늘"?todayPs:tab==="전체"?posts:posts.filter(p=>p.category===tab);
+  const shownBase=tab==="오늘"?todayPs:tab==="전체"?posts:posts.filter(p=>p.category===tab||( tab==="사내출하"&&p.category==="사내출하"));
   const shown=clientSearch.trim()
     ?shownBase.filter(p=>(p.client||"").includes(clientSearch)||(p.requester||"").includes(clientSearch)||(p.groups||[]).some(g=>(g.region||"").includes(clientSearch)))
     :shownBase;
@@ -759,7 +814,11 @@ function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRo
             </button>
             <button onClick={onRoute} style={{background:C.muted,color:C.route,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer"}}>🗺️</button>
             <button onClick={onStats} style={{background:C.muted,color:C.accent,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer"}}>📊</button>
-            <button onClick={onNew} style={{background:`linear-gradient(135deg,${C.accentL},${C.accent})`,color:"#fff",border:"none",borderRadius:9,padding:"7px 12px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 12px rgba(18,89,195,0.35)"}}>+ 등록</button>
+            {(user.role==="admin"||user.permissions?.canRegister)&&(
+              {(user.role==="admin"||user.permissions?.canRegister)&&(
+                <button onClick={onNew} style={{background:`linear-gradient(135deg,${C.accentL},${C.accent})`,color:"#fff",border:"none",borderRadius:9,padding:"7px 12px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 12px rgba(18,89,195,0.35)"}}>+ 등록</button>
+              )}
+            )}
             <button onClick={onUserMgmt} style={{position:"relative",background:C.muted,color:C.sub,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer"}}>
               👥{pending.length>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 5px"}}>{pending.length}</span>}
             </button>
@@ -809,12 +868,13 @@ function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRo
         )}
 
         {/* KPI */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
           {[
             {label:"양산출하",val:`${yangPct}%`,sub:`${yangItems.filter(i=>i.done||i.stage==="회수").length}/${yangItems.length}건`,color:C.yangsan,icon:"🏭"},
             {label:"일반출하",val:`${genPct}%`,sub:`${genItems.filter(i=>i.done||i.stage==="회수").length}/${genItems.length}건`,color:C.general,icon:"📦"},
             {label:"오늘 운행",val:`${todayKm.toFixed(0)}km`,sub:`${routes.filter(r=>r.date===today).length}명 운행`,color:C.route,icon:"🚗"},
             {label:"사내방문",val:`${visitCnt}건`,sub:"오늘 방문",color:C.visit,icon:"🚶"},
+            {label:"사내출하",val:`${todayPs.filter(p=>p.category==="사내출하").length}건`,sub:"오늘 사내",color:C.process,icon:"🏢"},
           ].map(k=>(
             <Card key={k.label} style={{padding:"14px",position:"relative",overflow:"hidden"}}>
               <div style={{position:"absolute",top:-6,right:-4,fontSize:40,opacity:0.07}}>{k.icon}</div>
@@ -888,7 +948,7 @@ function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRo
 
         {/* 탭 필터 */}
         <div style={{display:"flex",gap:0,marginBottom:12,background:C.card,borderRadius:12,padding:4,boxShadow:C.shadow}}>
-          {["오늘","전체","양산출하","일반출하","사내방문"].map(t=>{
+          {["오늘","전체","양산출하","일반출하","사내출하","사내방문"].map(t=>{
             const sl=tab===t; const cc=CAT[t];
             return(
               <button key={t} onClick={()=>setTab(t)}
@@ -896,7 +956,7 @@ function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRo
                   background:sl?(cc?cc.color:C.accent):"transparent",
                   color:sl?"#fff":C.sub,cursor:"pointer",transition:"all 0.15s"}}>
                 {cc?cc.icon:t==="오늘"?"📅":"📋"}<br/>
-                {t==="양산출하"?"양산":t==="일반출하"?"일반":t==="사내방문"?"방문":t}
+                {t==="양산출하"?"양산":t==="일반출하"?"일반":t==="사내출하"?"사내":t==="사내방문"?"방문":t}
               </button>
             );
           })}
@@ -908,7 +968,7 @@ function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRo
 }
 
 /* ══ 열람자·직원 대시보드 ══ */
-function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocation,onNewRequest,onMyRequests,onLogout}){
+function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocation,onNew,onNewRequest,onMyRequests,onNewInternalShip,onLogout}){
   const [tab,setTab]=useState("출하현황");
   const isStaff=user.role==="staff";
   const today=todayStr();
@@ -942,6 +1002,12 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
             <button onClick={onMyRequests} style={{position:"relative",background:C.muted,color:C.accent,border:`1px solid ${C.accent}33`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer",fontWeight:700}}>
               📬{myReqCnt>0&&<span style={{position:"absolute",top:-4,right:-4,background:myPendingCnt>0?C.warn:C.done,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 5px"}}>{myReqCnt}</span>}
             </button>
+            {(user.permissions?.canInternalShip)&&(
+              <button onClick={onNewInternalShip} style={{background:`linear-gradient(135deg,${C.process},#0F7A56)`,color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>🏢사내</button>
+            )}
+            {(user.permissions?.canRegister)&&(
+              <button onClick={onNew} style={{background:`linear-gradient(135deg,${C.accentL},${C.accent})`,color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ 등록</button>
+            )}
             <button onClick={onNewRequest} style={{background:`linear-gradient(135deg,${C.accentL},${C.accent})`,color:"#fff",border:"none",borderRadius:9,padding:"7px 11px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+요청</button>
             <button onClick={onLogout} style={{background:C.muted,color:C.sub,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:12,cursor:"pointer"}}>나가기</button>
           </div>
@@ -1061,11 +1127,13 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
 
 /* ══ 게시글 상세 ══ */
 function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto,onDelete,onUpdateLoc}){
-  const {done,total,pct}=calcDone(post);
+  const {done,total,pct}=calcDone({...post,groups:post.groups||[],visits:post.visits||[]});
   const cc=CAT[post.category]||CAT["일반출하"];
   const isAdmin=user.role==="admin";
   const isStaff=user.role==="staff";
   const canEdit=isAdmin||isStaff;
+  // 안전 기본값: groups가 없을 때 빈 배열로
+  const safeGroups=post.groups||[];
   const [viewImg,setViewImg]=useState(null);
   const [confirmDel,setConfirmDel]=useState(false);
   const {ok,missing}=checkQuality(post);
@@ -1151,7 +1219,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
         </Card>
 
         {/* 그룹별 항목 */}
-        {post.groups.map(group=>{
+        {safeGroups.map(group=>{
           const assignedUser=members.find(u=>u.id===group.assignee);
           const canToggle=canEdit&&(isAdmin||(isStaff&&user.id===group.assignee));
           return(
@@ -1325,9 +1393,9 @@ function NewPost({members,zones,onBack,onSave}){
               <div style={{marginBottom:12}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>출하 구분</div>
                 <div style={{display:"flex",gap:8}}>
-                  {["양산출하","일반출하"].map(c=>{ const ccc=CAT[c]; const sel=cat===c; return(
-                    <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"11px 4px",borderRadius:12,fontSize:13,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
-                      {ccc.icon} {c}
+                  {["양산출하","일반출하","사내출하"].map(c=>{ const ccc=CAT[c]||CAT["일반출하"]; const sel=cat===c; return(
+                    <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
+                      {ccc.icon}<br/>{c.replace("출하","")}
                     </button>
                   );})}
                 </div>
@@ -2182,15 +2250,38 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
   const [fRegion,setFRegion]=useState(""); const [fRole,setFRole]=useState("staff"); const [fSpec,setFSpec]=useState("일반");
   const inp={background:C.card,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"10px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
   const ROLE_META2={admin:{label:"관리자",color:C.accent,icon:"👑"},staff:{label:"출하팀",color:C.general,icon:"👷"},viewer:{label:"조회",color:C.done,icon:"👁️"}};
-  function openEd(u){ setEd(u); setIsNew(false); setFName(u.name); setFDept(u.dept||""); setFRegion(u.region||""); setFRole(u.role); setFSpec(u.specialty||"일반"); }
-  function openNew(){ setEd({id:uidS()}); setIsNew(true); setFName(""); setFDept(""); setFRegion(""); setFRole("staff"); setFSpec("일반"); }
+  const [fPw,setFPw]=useState("");
+  const [fPermReg,setFPermReg]=useState(false);
+  const [fPermShip,setFPermShip]=useState(false);
+  function openEd(u){
+    setEd(u); setIsNew(false); setFName(u.name); setFDept(u.dept||"");
+    setFRegion(u.region||""); setFRole(u.role); setFSpec(u.specialty||"일반");
+    setFPw(u.password||"");
+    setFPermReg(u.permissions?.canRegister||false);
+    setFPermShip(u.permissions?.canInternalShip||false);
+  }
+  function openNew(){
+    setEd({id:uidS()}); setIsNew(true); setFName(""); setFDept("");
+    setFRegion(""); setFRole("staff"); setFSpec("일반"); setFPw("");
+    setFPermReg(false); setFPermShip(false);
+  }
   function saveEd(){
     if(!fName.trim()) return;
     const role=ed.role==="admin"?"admin":fRole;
-    const u={...ed,name:fName.trim(),dept:fDept.trim(),region:role==="viewer"?null:fRegion.trim()||null,role,specialty:role==="staff"?fSpec:null};
+    const u={
+      ...ed,
+      name:fName.trim(), dept:fDept.trim(),
+      region:role==="viewer"?null:fRegion.trim()||null,
+      role, specialty:role==="staff"?fSpec:null,
+      password:fPw.trim(),
+      permissions:{
+        canRegister: role==="admin"?true:fPermReg,
+        canInternalShip: role==="admin"?true:fPermShip,
+      }
+    };
     const newList=isNew?[...list,u]:list.map(x=>x.id===u.id?u:x);
     setList(newList);
-    onSaveMbr(newList); // 저장 즉시 반영 (로그인 유저 동기화 포함)
+    onSaveMbr(newList);
     setEd(null);
   }
   return(
@@ -2230,7 +2321,53 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
             )}
             <div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>이름 *</div><input value={fName} onChange={e=>setFName(e.target.value)} style={inp}/></div>
             <div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>부서</div><input value={fDept} onChange={e=>setFDept(e.target.value)} placeholder="출하팀" style={inp}/></div>
-            {fRole==="staff"&&<div style={{marginBottom:16}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>담당 구역</div><input value={fRegion} onChange={e=>setFRegion(e.target.value)} style={inp}/></div>}
+            {fRole==="staff"&&<div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>담당 구역</div><input value={fRegion} onChange={e=>setFRegion(e.target.value)} style={inp}/></div>}
+
+            {/* 비밀번호 설정 — 필수 */}
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:6}}>
+                🔒 비밀번호 * <span style={{fontWeight:400,fontSize:11,color:C.sub}}>(반드시 설정해야 접속 가능)</span>
+              </div>
+              <input type="text" value={fPw} onChange={e=>setFPw(e.target.value)}
+                placeholder="비밀번호 입력 (필수)"
+                style={{...inp, border:`1.5px solid ${fPw.trim()?C.done:C.danger}`}}/>
+              {!fPw.trim()&&(
+                <div style={{fontSize:11,color:C.danger,marginTop:4}}>
+                  ⚠️ 비밀번호를 설정하지 않으면 해당 사용자는 로그인할 수 없습니다
+                </div>
+              )}
+            </div>
+
+            {/* 권한 설정 — 관리자가 아닌 경우만 */}
+            {ed.role!=="admin"&&(
+              <div style={{marginBottom:16}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>🛡️ 추가 권한 부여</div>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  {[
+                    {key:"reg",  label:"출하 의뢰 등록",  desc:"출하일정 직접 등록 가능", val:fPermReg,  set:setFPermReg},
+                    {key:"ship", label:"사내출하 등록",    desc:"사내출하 직접 등록 가능", val:fPermShip, set:setFPermShip},
+                  ].map(p=>(
+                    <div key={p.key} onClick={()=>p.set(v=>!v)}
+                      style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
+                        background:p.val?`${C.accent}08`:C.card2,
+                        border:`1.5px solid ${p.val?C.accent:C.border}`,
+                        borderRadius:10,cursor:"pointer",transition:"all 0.15s"}}>
+                      <div style={{width:22,height:22,borderRadius:"50%",
+                        background:p.val?C.accent:C.muted,border:`2px solid ${p.val?C.accent:C.border}`,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        fontSize:12,color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
+                        {p.val?"✓":""}
+                      </div>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:700,color:p.val?C.accent:C.text}}>{p.label}</div>
+                        <div style={{fontSize:11,color:C.sub}}>{p.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div style={{display:"flex",gap:10}}>
               <Btn onClick={()=>setEd(null)} color={C.muted} outline style={{flex:1}}>취소</Btn>
               <Btn onClick={saveEd} style={{flex:1}}>{isNew?"추가":"저장"}</Btn>
@@ -2279,6 +2416,11 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
                         <div style={{fontSize:11,color:C.sub,marginTop:2}}>
                           {u.dept}{u.region&&<span> · {u.region}</span>}
                           {u.specialty&&<span style={{marginLeft:6,background:u.specialty==="양산"?`${C.yangsan}15`:`${C.general}15`,color:u.specialty==="양산"?C.yangsan:C.general,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:8}}>{u.specialty==="양산"?"🏭 양산":"📦 일반"}</span>}
+                        </div>
+                        <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
+                          {u.password&&<span style={{background:`${C.done}15`,color:C.done,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>🔒 비밀번호설정</span>}
+                          {u.permissions?.canRegister&&<span style={{background:`${C.accent}15`,color:C.accent,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>✓ 의뢰등록</span>}
+                          {u.permissions?.canInternalShip&&<span style={{background:`${C.process}15`,color:C.process,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>✓ 사내출하</span>}
                         </div>
                       </div>
                       <div style={{display:"flex",gap:8}}>
@@ -2565,9 +2707,9 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
             <div style={{marginBottom:14}}>
               <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>출하 구분</div>
               <div style={{display:"flex",gap:8}}>
-                {["양산출하","일반출하"].map(c=>{ const ccc=CAT[c],sel=cat===c; return(
-                  <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"11px 4px",borderRadius:12,fontSize:13,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
-                    {ccc.icon} {c}
+                {["양산출하","일반출하","사내출하"].map(c=>{ const ccc=CAT[c]||CAT["일반출하"],sel=cat===c; return(
+                  <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
+                    {ccc.icon}<br/>{c.replace("출하","")}
                   </button>
                 );})}
               </div>
@@ -3304,23 +3446,31 @@ function App(){
           posts={posts} routes={routes} members={members}
           user={user} requests={requests}
           onOpen={openPost}
+          onNew={()=>setScreen("new")}
           onRoute={()=>setScreen("route")}
           onLocation={()=>setScreen("location")}
           onNewRequest={()=>setScreen("reqform")}
           onMyRequests={()=>setScreen("myreqs")}
+          onNewInternalShip={()=>setScreen("new")}
           onLogout={()=>{ setUser(null); setScreen("main"); }}/>
       )}
 
       {/* 게시글 상세 */}
-      {screen==="detail"&&activePost&&(
-        <PostDetail
-          post={activePost} members={members} user={user}
-          onBack={()=>setScreen("main")}
-          onToggle={toggleItem}
-          onAdvanceStage={advanceStage}
-          onAddPhoto={addPhoto}
-          onDelete={deletePost}
-          onUpdateLoc={updateLoc}/>
+      {screen==="detail"&&(
+        activePost
+          ? <PostDetail
+              post={activePost} members={members} user={user}
+              onBack={()=>setScreen("main")}
+              onToggle={toggleItem}
+              onAdvanceStage={advanceStage}
+              onAddPhoto={addPhoto}
+              onDelete={deletePost}
+              onUpdateLoc={updateLoc}/>
+          : <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+              <div style={{fontSize:40,marginBottom:14}}>📭</div>
+              <div style={{fontSize:16,color:C.sub,marginBottom:20}}>게시글을 찾을 수 없습니다</div>
+              <button onClick={()=>setScreen("main")} style={{background:C.accent,color:"#fff",border:"none",borderRadius:12,padding:"11px 24px",fontSize:14,fontWeight:700,cursor:"pointer"}}>← 돌아가기</button>
+            </div>
       )}
 
       {/* 사내방문 기록 */}
