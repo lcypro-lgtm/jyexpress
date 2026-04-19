@@ -322,10 +322,13 @@ function Hdr({title,sub,onBack,right}){
 }
 
 function PBar({pct,color,h=6}){
+  const bgColor = pct===100
+    ? "linear-gradient(90deg,"+C.done+",#00C896)"
+    : "linear-gradient(90deg,"+(color||C.accent)+","+(color||C.accentL||C.accent)+")";
   return(
     <div style={{height:h,background:C.border,borderRadius:99,overflow:"hidden"}}>
-      <div style={{width:`${pct}%`,height:"100%",borderRadius:99,transition:"width 0.4s",
-        background:pct===100?`linear-gradient(90deg,${C.done},#00C896)`:`linear-gradient(90deg,${color||C.accent},${color||C.accentL||C.accent})`}}/>
+      <div style={{width:pct+"%",height:"100%",borderRadius:99,transition:"width 0.4s",
+        background:bgColor}}/>
     </div>
   );
 }
@@ -420,7 +423,7 @@ function QBadge({post}){
   if(post.category==="사내방문") return null;
   const {ok}=checkQuality(post);
   return(
-    <span style={{background:ok?`${C.done}15`:`${C.danger}10`,color:ok?C.done:C.danger,
+    <span style={{background:ok?(C.done+"15"):(C.danger+"10"),color:ok?C.done:C.danger,
       border:`1px solid ${ok?C.done:C.danger}44`,fontSize:10,fontWeight:800,
       padding:"2px 7px",borderRadius:10}}>
       {ok?"✓ 완전":"⚠ 정보부족"}
@@ -922,7 +925,7 @@ function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRo
                     <div>
                       <span style={{fontSize:14,fontWeight:700,color:C.text}}>{u.name}</span>
                       <span style={{fontSize:9,fontWeight:700,marginLeft:6,padding:"1px 5px",borderRadius:6,
-                        background:u.specialty==="양산"?`${C.yangsan}15`:`${C.general}15`,
+                        background:u.specialty==="양산"?(C.yangsan+"15"):(C.general+"15"),
                         color:u.specialty==="양산"?C.yangsan:C.general}}>
                         {u.specialty==="양산"?"🏭":"📦"} {u.specialty}
                       </span>
@@ -995,7 +998,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="지용금속 출하관리"
-        sub={isStaff?`${user.name} · ${user.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}`:`${user.name} · ${user.dept}`}
+        sub={isStaff?(user.name+" · "+(user.specialty==="양산"?"🏭 양산전담":"📦 일반담당")):(user.name+" · "+user.dept)}
         right={
           <div style={{display:"flex",gap:7}}>
             {isStaff&&<button onClick={onLocation} style={{background:C.muted,color:C.loc,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 9px",fontSize:13,cursor:"pointer"}}>📍</button>}
@@ -1158,7 +1161,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
       <Hdr title={post.category} onBack={onBack}
         right={
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <span style={{background:pct===100?`${C.done}15`:`${C.warn}15`,color:pct===100?C.done:C.warn,border:`1px solid ${pct===100?C.done:C.warn}55`,borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
+            <span style={{background:pct===100?(C.done+"15"):(C.warn+"15"),color:pct===100?C.done:C.warn,border:`1px solid ${pct===100?C.done:C.warn}55`,borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
             {isAdmin&&<Btn onClick={()=>setConfirmDel(true)} color={C.danger} outline small>삭제</Btn>}
           </div>
         }/>
@@ -1268,7 +1271,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
                           <div>
                             <div style={{fontSize:11,color:over?C.danger:C.sub}}>
                               📅 납기: {item.dueDate}
-                              {dl!==null&&item.stage!=="회수"&&<span style={{color:over?C.danger:dl<=2?C.warn:C.done,fontWeight:700,marginLeft:4}}>{over?`⚠️ ${Math.abs(dl)}일 초과`:`D-${dl}`}</span>}
+                              {dl!==null&&item.stage!=="회수"&&<span style={{color:over?C.danger:dl<=2?C.warn:C.done,fontWeight:700,marginLeft:4}}>{over?("⚠️ "+Math.abs(dl)+"일 초과"):("D-"+dl)}</span>}
                             </div>
                             <div style={{display:"flex",gap:4,marginTop:6}}>
                               {STAGES.map((s,si)=>{
@@ -1394,441 +1397,12 @@ function NewPost({members,zones,onBack,onSave}){
               <div style={{marginBottom:12}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>출하 구분</div>
                 <div style={{display:"flex",gap:8}}>
-                  {["양산출하","일반출하","사내출하"].map(c=>{ const ccc=CAT[c]||CAT["일반출하"]; const sel=cat===c; return(
-                    <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
-                      {ccc.icon}<br/>{c.replace("출하","")}
-                    </button>
-                  );})}
-                </div>
-              </div>
-              <div style={{marginBottom:12}}>
-                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:7}}>거래처 *</div>
-                <input value={client} onChange={e=>setClient(e.target.value)} placeholder="예: 기아자동차 광주공장" style={inp}/>
-              </div>
-              <div style={{marginBottom:12}}>
-                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:7}}>의뢰자 * <span style={{color:C.sub,fontWeight:400,fontSize:11}}>(이름+부서 명기)</span></div>
-                <input value={requester} onChange={e=>setRequester(e.target.value)} placeholder="예: 생산팀 한상훈" style={inp}/>
-              </div>
-              <div style={{marginBottom:12}}>
-                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:8}}>긴급도 *</div>
-                <div style={{display:"flex",gap:8}}>
-                  {URGENCY.map(u=>{ const c=URG_COLOR[u]; const sel=urgency===u; return(
-                    <button key={u} onClick={()=>setUrgency(u)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:13,fontWeight:800,border:`2px solid ${sel?c:C.border}`,background:sel?`${c}15`:C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
-                      {URG_ICON[u]} {u}
-                    </button>
-                  );})}
-                </div>
-              </div>
-              <div style={{marginBottom:12}}>
-                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:7}}>포장 형태 *</div>
-                <input value={packaging} onChange={e=>setPackaging(e.target.value)} placeholder="예: 파렛 랩핑 / 박스 포장 3개" style={inp}/>
-              </div>
-              <div style={{marginBottom:12}}>
-                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>운송 방법</div>
-                <div style={{display:"flex",gap:6,marginBottom:transport!=="자차"&&transport!=="기타"?8:0}}>
-                  {TRANSPORT.map(t=>{ const tc=TRANS_COLOR[t]||C.dim; const sel=transport===t; return(
-                    <button key={t} onClick={()=>setTransport(t)} style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:11,fontWeight:700,border:`1.5px solid ${sel?tc:C.border}`,background:sel?`${tc}15`:C.card2,color:sel?tc:C.sub,cursor:"pointer"}}>
-                      {TRANS_ICON[t]}<br/>{t}
-                    </button>
-                  );})}
-                </div>
-                {transport!=="자차"&&transport!=="기타"&&<input value={carNum} onChange={e=>setCarNum(e.target.value)} placeholder={transport==="용차"?"차량번호":"퀵 업체명"} style={{...inp,marginTop:8}}/>}
-              </div>
-              <div>
-                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:7}}>전달사항</div>
-                <input value={note} onChange={e=>setNote(e.target.value)} placeholder="출하팀에 전달할 특이사항" style={inp}/>
-              </div>
-            </Card>
-            <button onClick={()=>step1Valid&&setStep(2)} style={{width:"100%",padding:"14px",borderRadius:14,background:step1Valid?C.accent:C.muted,color:step1Valid?"#fff":C.dim,border:"none",fontSize:15,fontWeight:800,cursor:step1Valid?"pointer":"not-allowed"}}>
-              {step1Valid?"다음: 품목 & 위치 입력 →":"필수 항목을 모두 입력해 주세요"}
-            </button>
-          </>
-        )}
-
-        {/* ─ 단계 2: 품목 & 위치 ─ */}
-        {step===2&&(
-          <>
-            <div style={{background:`${C.loc}10`,border:`1px solid ${C.loc}30`,borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.loc,lineHeight:1.8}}>
-              📍 <strong>완제품 위치(구역·선반·파렛)를 반드시 입력</strong>해 주세요. 위치 불명확 시 출하가 지연됩니다.
-            </div>
-            {groups.map(group=>(
-              <Card key={group.id} style={{marginBottom:12}}>
-                <div style={{background:C.card2,padding:"12px 14px",borderBottom:`1px solid ${C.border}`}}>
-                  <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:12}}>
-                    <div style={{width:4,height:20,borderRadius:2,background:cc.color,flexShrink:0}}/>
-                    <input placeholder={cat==="양산출하"?"납품처·공장명":"지역·거래처명"} value={group.region} onChange={e=>setReg(group.id,e.target.value)} style={{...inp,fontWeight:700,fontSize:14}}/>
-                    {groups.length>1&&<button onClick={()=>rmGroup(group.id)} style={{background:`${C.danger}10`,border:`1px solid ${C.danger}33`,color:C.danger,borderRadius:8,padding:"7px 10px",cursor:"pointer",flexShrink:0}}>✕</button>}
-                  </div>
-                  <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:8}}>담당자 배정</div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                    {members.filter(u=>u.role==="staff").map(u=>(
-                      <button key={u.id} onClick={()=>setAsgn(group.id,u.id)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${group.assignee===u.id?C.general:C.border}`,background:group.assignee===u.id?`${C.general}15`:C.card,color:group.assignee===u.id?C.general:C.sub,cursor:"pointer"}}>
-                        {u.name} {u.specialty&&<span style={{fontSize:9}}>{u.specialty==="양산"?"🏭":"📦"}</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div style={{padding:"12px 14px"}}>
-                  {group.items.map(item=>(
-                    <div key={item.id} style={{background:C.card2,borderRadius:12,padding:"12px",marginBottom:12,border:`1px solid ${C.border}`}}>
-                      <div style={{display:"flex",gap:8,marginBottom:8}}>
-                        <input placeholder="품목명 *" value={item.text} onChange={e=>setItm(group.id,item.id,"text",e.target.value)} style={{...inp,flex:1,fontWeight:700}}/>
-                        <input placeholder="수량" value={item.extra} onChange={e=>setItm(group.id,item.id,"extra",e.target.value)} style={{...inp,width:68}}/>
-                        {group.items.length>1&&<button onClick={()=>rmItm(group.id,item.id)} style={{background:"none",border:"none",color:C.dim,fontSize:18,cursor:"pointer",flexShrink:0}}>✕</button>}
-                      </div>
-                      <input placeholder="LOT번호 / 규격 *" value={item.detail} onChange={e=>setItm(group.id,item.id,"detail",e.target.value)} style={{...inp,fontSize:12,fontFamily:"monospace",marginBottom:12}}/>
-                      {/* 위치 */}
-                      <div style={{background:`${C.loc}08`,borderRadius:10,padding:"12px",border:`1px solid ${C.loc}33`}}>
-                        <div style={{fontSize:12,color:C.loc,fontWeight:800,marginBottom:10}}>📍 완제품 위치 *</div>
-                        <div style={{marginBottom:8}}>
-                          <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:6}}>창고 구역</div>
-                          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                            {zones.map(z=>(
-                              <button key={z} onClick={()=>setLoc(group.id,item.id,"zone",z)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.loc?.zone===z?C.loc:C.border}`,background:item.loc?.zone===z?`${C.loc}15`:C.card,color:item.loc?.zone===z?C.loc:C.sub,cursor:"pointer"}}>{z}</button>
-                            ))}
-                          </div>
-                        </div>
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
-                          <div><div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>선반 번호</div><input value={item.loc?.rack||""} onChange={e=>setLoc(group.id,item.id,"rack",e.target.value)} placeholder="예: 3-B" style={{...inp,fontSize:12}}/></div>
-                          <div><div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>파렛 번호</div><input value={item.loc?.pallet||""} onChange={e=>setLoc(group.id,item.id,"pallet",e.target.value)} placeholder="예: 2" style={{...inp,fontSize:12}}/></div>
-                        </div>
-                        <input value={item.loc?.memo||""} onChange={e=>setLoc(group.id,item.id,"memo",e.target.value)} placeholder="위치 메모 (예: 파렛 앞줄)" style={{...inp,fontSize:12,marginBottom:8}}/>
-                        <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>위치 사진</div>
-                        <div style={{display:"flex",gap:6}}>
-                          {item.loc?.photo&&<div style={{width:60,height:60,borderRadius:8,overflow:"hidden",border:`1px solid ${C.border}`}}><img src={item.loc.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div>}
-                          <PhotoUpBtn onAdd={url=>setLoc(group.id,item.id,"photo",url)} small/>
-                        </div>
-                      </div>
-                      {/* 공정 */}
-                      <div style={{marginTop:10,display:"flex",alignItems:"center",gap:8}}>
-                        <button onClick={()=>setItm(group.id,item.id,"hasProc",!item.hasProc)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${item.hasProc?C.process:C.border}`,background:item.hasProc?`${C.process}12`:C.card,color:item.hasProc?C.process:C.sub,cursor:"pointer"}}>⚙️ 공정 포함</button>
-                      </div>
-                      {item.hasProc&&(
-                        <div style={{marginTop:10,padding:"10px 12px",background:C.card,borderRadius:9,border:`1px solid ${C.border}`}}>
-                          <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:8}}>공정 종류</div>
-                          <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
-                            {PROC_TYPES.map(pt=>(
-                              <button key={pt} onClick={()=>setItm(group.id,item.id,"procType",pt)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.procType===pt?C.process:C.border}`,background:item.procType===pt?`${C.process}12`:C.card2,color:item.procType===pt?C.process:C.sub,cursor:"pointer"}}>{pt}</button>
-                            ))}
-                          </div>
-                          <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>납기일</div>
-                          <input type="date" value={item.dueDate} onChange={e=>setItm(group.id,item.id,"dueDate",e.target.value)} style={{...inp,fontSize:12}}/>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  <button onClick={()=>addItm(group.id)} style={{width:"100%",padding:"10px",borderRadius:10,border:`1.5px dashed ${C.border}`,background:C.card2,color:C.sub,fontSize:13,cursor:"pointer"}}>+ 품목 추가</button>
-                </div>
-              </Card>
-            ))}
-            <button onClick={addGroup} style={{width:"100%",padding:"11px",borderRadius:12,border:`2px dashed ${cc.color}88`,background:`${cc.color}08`,color:cc.color,fontSize:14,fontWeight:700,cursor:"pointer",marginBottom:14}}>
-              + {cat==="양산출하"?"납품처":"지역"} 추가
-            </button>
-            <div style={{display:"flex",gap:10}}>
-              <Btn onClick={()=>setStep(1)} color={C.muted} outline style={{flex:1}}>← 이전</Btn>
-              <button onClick={()=>step2Valid&&setStep(3)} style={{flex:2,padding:"14px",borderRadius:14,background:step2Valid?C.accent:C.muted,color:step2Valid?"#fff":C.dim,border:"none",fontSize:14,fontWeight:800,cursor:step2Valid?"pointer":"not-allowed"}}>
-                {step2Valid?"다음: 최종 확인 →":"품목명·LOT 필수"}
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* ─ 단계 3: 최종 확인 ─ */}
-        {step===3&&(
-          <>
-            <Card style={{padding:"16px",marginBottom:14,border:`2px solid ${finalOk?C.done:C.danger}44`}}>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:finalOk?0:12}}>
-                <div style={{fontSize:28}}>{finalOk?"✅":"⚠️"}</div>
-                <div>
-                  <div style={{fontSize:14,fontWeight:800,color:finalOk?C.done:C.danger}}>{finalOk?"의뢰서 완전 — 출하 진행 가능":"의뢰서 불완전"}</div>
-                  <div style={{fontSize:11,color:C.sub,marginTop:2}}>{finalOk?"출하팀이 즉시 업무를 시작할 수 있습니다":"아래 항목을 보완해 주세요"}</div>
-                </div>
-              </div>
-              {!finalOk&&missing.map(m=>(
-                <div key={m} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:`${C.danger}08`,borderRadius:8,marginTop:6}}>
-                  <span style={{color:C.danger}}>✗</span>
-                  <span style={{fontSize:12,color:C.danger,fontWeight:700}}>{m} 누락</span>
-                </div>
-              ))}
-            </Card>
-            <Card style={{padding:"16px",marginBottom:14}}>
-              <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>의뢰 요약</div>
-              {[
-                {l:"출하구분",v:`${cc.icon} ${cat}`},{l:"거래처",v:client},
-                {l:"의뢰자",v:requester},{l:"긴급도",v:`${URG_ICON[urgency]} ${urgency}`},
-                {l:"포장형태",v:packaging},{l:"운송",v:TRANS_ICON[transport]+" "+transport+(carNum?" ("+carNum+")":"")},
-                {l:"날짜",v:date},
-              ].map(({l,v})=>(
-                <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
-                  <span style={{fontSize:12,color:C.sub,fontWeight:700}}>{l}</span>
-                  <span style={{fontSize:13,fontWeight:700,color:C.text}}>{v}</span>
-                </div>
-              ))}
-              {note&&<div style={{marginTop:8,fontSize:12,color:C.sub,background:C.card2,borderRadius:8,padding:"8px 10px"}}>💬 {note}</div>}
-            </Card>
-            <Card style={{padding:"14px",marginBottom:14}}>
-              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10}}>품목 & 위치</div>
-              {groups.flatMap(g=>g.items.filter(i=>i.text)).map(item=>(
-                <div key={item.id} style={{background:C.card2,borderRadius:10,padding:"10px 12px",marginBottom:8,border:`1px solid ${C.border}`}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4,flexWrap:"wrap"}}>
-                    <span style={{fontSize:13,fontWeight:700,color:C.text}}>{item.text}</span>
-                    {item.extra&&<span style={{background:`${C.warn}15`,color:C.warn,fontSize:11,fontWeight:700,padding:"1px 6px",borderRadius:5}}>{item.extra}</span>}
-                    {item.hasProc&&<span style={{background:`${C.process}12`,color:C.process,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:5}}>⚙️{item.procType}</span>}
-                  </div>
-                  {item.detail&&<div style={{fontSize:11,color:C.sub,fontFamily:"monospace"}}>{item.detail}</div>}
-                  <div style={{marginTop:4}}><LocBadge loc={item.loc}/></div>
-                </div>
-              ))}
-            </Card>
-            <div style={{background:`${C.accent}08`,border:`1px solid ${C.accent}30`,borderRadius:12,padding:"14px",marginBottom:16}}>
-              <div style={{fontSize:13,fontWeight:800,color:C.accent,marginBottom:8}}>📌 의뢰자 확인 사항</div>
-              {["위 정보는 정확하며, 완제품이 해당 위치에 있음을 확인했습니다","출하 차질 시 즉시 출하팀에 연락하겠습니다","긴급 요청 시 추가 비용이 발생할 수 있음을 인지했습니다"].map((t,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:5}}>
-                  <span style={{color:C.done,flexShrink:0,marginTop:1}}>✓</span>
-                  <span style={{fontSize:12,color:C.sub,lineHeight:1.5}}>{t}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{display:"flex",gap:10}}>
-              <Btn onClick={()=>setStep(2)} color={C.muted} outline style={{flex:1}}>← 이전</Btn>
-              <button onClick={save} style={{flex:2,padding:"14px",borderRadius:14,background:C.accent,border:"none",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 14px ${C.accent}55`}}>
-                의뢰 등록 완료
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ══ 운행 거리 관리 ══ */
-function RouteScreen({routes,setRoutes,members,user,onBack}){
-  const [selId,setSelId]=useState(null);
-  const [showForm,setShowForm]=useState(false);
-  const [stopAddr,setStopAddr]=useState("");
-  const [stopNote,setStopNote]=useState("");
-  const [stopType,setStopType]=useState("경유");
-  const [gpsLoading,setGpsLoading]=useState(false);
-  const [gpsCoords,setGpsCoords]=useState(null);
-  const today=todayStr();
-  const inp={background:C.card2,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"9px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
-
-  const getKm=route=>{ let k=0; for(let i=1;i<route.stops.length;i++){ const a=route.stops[i-1],b=route.stops[i]; if(a.lat&&b.lat) k+=haversine(a.lat,a.lng,b.lat,b.lng); } return k; };
-  const thisMonth=new Date().toISOString().slice(0,7);
-  const myRoute=routes.find(r=>r.date===today&&r.staffId===user.id);
-
-  function getGPS(){
-    setGpsLoading(true);
-    if(!navigator.geolocation){ setGpsLoading(false); alert("이 브라우저는 GPS를 지원하지 않습니다"); return; }
-    navigator.geolocation.getCurrentPosition(
-      pos=>{ setGpsCoords({lat:pos.coords.latitude,lng:pos.coords.longitude}); setGpsLoading(false); },
-      ()=>{ setGpsLoading(false); alert("위치 권한을 허용해 주세요"); }
-    );
-  }
-
-  function addStop(){
-    if(!stopAddr.trim()) return;
-    const stop={id:"rs"+uid(),time:nowTime(),address:stopAddr.trim(),lat:gpsCoords?.lat||null,lng:gpsCoords?.lng||null,type:stopType,note:stopNote.trim()};
-    if(!myRoute){
-      const nr={id:"rt"+uid(),date:today,staffId:user.id,staffName:user.name,status:"진행중",stops:[stop]};
-      setRoutes(rs=>[...rs,nr]);
-    } else {
-      setRoutes(rs=>rs.map(r=>r.id!==myRoute.id?r:{...r,stops:[...r.stops,stop]}));
-    }
-    setStopAddr(""); setStopNote(""); setGpsCoords(null); setShowForm(false);
-  }
-
-  function finishRoute(id){
-    setRoutes(rs=>rs.map(r=>r.id!==id?r:{...r,status:"완료"}));
-  }
-
-  const staffSummary=members.filter(u=>u.role==="staff").map(u=>{
-    const rs=routes.filter(r=>r.staffId===u.id&&r.date.startsWith(thisMonth));
-    const km=rs.reduce((a,r)=>a+getKm(r),0);
-    const days=new Set(rs.map(r=>r.date)).size;
-    return{...u,monthKm:parseFloat(km.toFixed(1)),days,cnt:rs.length};
-  });
-
-  const todayRoutes=routes.filter(r=>r.date===today);
-
-  return(
-    <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="운행 거리 관리" sub="일일 출하 운행 기록" onBack={onBack}/>
-
-      {/* 직원용 오늘 운행 패널 */}
-      {user.role==="staff"&&(
-        <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,padding:"14px 16px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-            <div>
-              <div style={{fontSize:13,fontWeight:700,color:C.text}}>오늘 내 운행</div>
-              <div style={{fontSize:26,fontWeight:900,fontFamily:"monospace",color:C.route,marginTop:2}}>
-                {myRoute?getKm(myRoute).toFixed(1):0}<span style={{fontSize:13}}> km</span>
-              </div>
-              <div style={{fontSize:11,color:C.sub,marginTop:1}}>{myRoute?`${myRoute.stops.length}개 정류장`:"-"}</div>
-            </div>
-            <div style={{display:"flex",gap:8}}>
-              {myRoute?.status==="진행중"&&(
-                <button onClick={()=>finishRoute(myRoute.id)} style={{background:`${C.done}15`,color:C.done,border:`1px solid ${C.done}44`,borderRadius:9,padding:"8px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>✓ 완료</button>
-              )}
-              <button onClick={()=>setShowForm(s=>!s)} style={{background:showForm?C.muted:C.route,color:"#fff",border:"none",borderRadius:9,padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}}>
-                {showForm?"닫기":"+ 정류장"}
-              </button>
-            </div>
-          </div>
-
-          {showForm&&(
-            <div style={{background:C.card2,borderRadius:12,padding:"14px",border:`1px solid ${C.border}`}}>
-              <div style={{fontSize:12,color:C.route,fontWeight:700,marginBottom:10}}>🗺️ 정류장 추가</div>
-              <div style={{display:"flex",gap:8,marginBottom:10}}>
-                {["출발","경유","복귀"].map(t=>(
-                  <button key={t} onClick={()=>setStopType(t)} style={{flex:1,padding:"7px 0",borderRadius:8,fontSize:12,fontWeight:700,border:`1.5px solid ${stopType===t?C.route:C.border}`,background:stopType===t?`${C.route}15`:C.card,color:stopType===t?C.route:C.sub,cursor:"pointer"}}>{t}</button>
-                ))}
-              </div>
-              <div style={{marginBottom:8}}><input value={stopAddr} onChange={e=>setStopAddr(e.target.value)} placeholder="목적지 주소 또는 거래처명" style={inp}/></div>
-              <div style={{marginBottom:10}}><input value={stopNote} onChange={e=>setStopNote(e.target.value)} placeholder="비고 (예: 브래킷 납품 완료)" style={inp}/></div>
-              <div style={{display:"flex",gap:8}}>
-                <button onClick={getGPS} style={{flex:1,padding:"9px",borderRadius:9,background:gpsCoords?`${C.done}15`:C.muted,border:`1px solid ${gpsCoords?C.done:C.border}`,color:gpsCoords?C.done:C.sub,fontSize:12,fontWeight:700,cursor:"pointer"}}>
-                  {gpsLoading?"확인중...":`📍 ${gpsCoords?"GPS ✓":"GPS 받기"}`}
-                </button>
-                <button onClick={addStop} style={{flex:2,padding:"9px",borderRadius:9,background:C.route,border:"none",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>저장</button>
-              </div>
-              {!gpsCoords&&<div style={{fontSize:11,color:C.dim,marginTop:6,textAlign:"center"}}>GPS 없이 저장 시 거리가 0으로 기록됩니다</div>}
-            </div>
-          )}
-
-          {/* 오늘 정류장 목록 */}
-          {myRoute&&myRoute.stops.length>0&&(
-            <div style={{marginTop:12}}>
-              {myRoute.stops.map((stop,i)=>(
-                <div key={stop.id} style={{display:"flex",gap:10,marginBottom:i<myRoute.stops.length-1?6:0}}>
-                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:28}}>
-                    <div style={{width:26,height:26,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:`${C.route}25`,border:`2px solid ${C.route}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route,flexShrink:0}}>
-                      {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
-                    </div>
-                    {i<myRoute.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:10,marginTop:3}}/>}
-                  </div>
-                  <div style={{flex:1,paddingBottom:6}}>
-                    <div style={{display:"flex",justifyContent:"space-between"}}>
-                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>{stop.address}</div>
-                      <div style={{fontSize:11,color:C.sub}}>{stop.time}</div>
-                    </div>
-                    {stop.note&&<div style={{fontSize:11,color:C.sub}}>{stop.note}</div>}
-                    {i>0&&stop.lat&&myRoute.stops[i-1].lat&&(
-                      <div style={{fontSize:11,color:C.route}}>📏 {haversine(myRoute.stops[i-1].lat,myRoute.stops[i-1].lng,stop.lat,stop.lng).toFixed(1)}km</div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{padding:"14px 14px 100px"}}>
-        {/* 이번달 누적 */}
-        <Card style={{padding:"16px",marginBottom:14}}>
-          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:4}}>📊 이번달 운행 누적</div>
-          <div style={{fontSize:11,color:C.sub,marginBottom:14}}>{new Date().getFullYear()}년 {new Date().getMonth()+1}월</div>
-          {staffSummary.map(u=>(
-            <div key={u.id} style={{background:C.card2,borderRadius:12,padding:"12px 14px",marginBottom:8,border:`1px solid ${C.border}`}}>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-                <Avatar name={u.name} color={u.specialty==="양산"?C.yangsan:C.general} size={34}/>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <div>
-                      <span style={{fontSize:14,fontWeight:700,color:C.text}}>{u.name}</span>
-                      <span style={{fontSize:9,marginLeft:6,color:u.specialty==="양산"?C.yangsan:C.general}}>{u.specialty==="양산"?"🏭":"📦"}</span>
-                    </div>
-                    <div>
-                      <span style={{fontSize:20,fontWeight:900,fontFamily:"monospace",color:C.route}}>{u.monthKm}</span>
-                      <span style={{fontSize:11,color:C.sub}}> km</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div style={{display:"flex",gap:8}}>
-                {[{l:"운행일수",v:`${u.days}일`,c:C.route},{l:"출하건수",v:`${u.cnt}건`,c:C.accent},{l:"일평균",v:u.days?`${(u.monthKm/u.days).toFixed(0)}km`:"–",c:C.general}].map(x=>(
-                  <div key={x.l} style={{flex:1,background:C.card,borderRadius:8,padding:"6px 0",textAlign:"center",border:`1px solid ${C.border}`}}>
-                    <div style={{fontSize:14,fontWeight:800,color:x.c}}>{x.v}</div>
-                    <div style={{fontSize:10,color:C.sub,marginTop:1}}>{x.l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </Card>
-
-        {/* 오늘 운행 목록 */}
-        <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:10}}>오늘 운행 기록</div>
-        {todayRoutes.length===0&&<Card style={{padding:"40px 20px",textAlign:"center"}}><div style={{fontSize:36,marginBottom:10}}>🚗</div><div style={{color:C.sub}}>오늘 운행 기록이 없습니다</div></Card>}
-        {todayRoutes.map(route=>{
-          const km=getKm(route); const sel=selId===route.id;
-          return(
-            <Card key={route.id} onClick={()=>setSelId(sel?null:route.id)} style={{marginBottom:10,cursor:"pointer"}}>
-              <div style={{height:3,background:C.route}}/>
-              <div style={{padding:"13px 14px"}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
-                  <div>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{fontSize:14,fontWeight:700,color:C.text}}>{route.staffName}</span>
-                      <span style={{background:route.status==="완료"?`${C.done}15`:`${C.warn}15`,color:route.status==="완료"?C.done:C.warn,fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>{route.status==="완료"?"✓ 완료":"진행중"}</span>
-                    </div>
-                    <div style={{fontSize:11,color:C.sub,marginTop:2}}>{route.stops.length}개 정류장</div>
-                  </div>
-                  <div style={{textAlign:"right"}}>
-                    <div style={{fontSize:24,fontWeight:900,fontFamily:"monospace",color:C.route}}>{km.toFixed(1)}</div>
-                    <div style={{fontSize:10,color:C.sub}}>km</div>
-                  </div>
-                </div>
-                {sel&&(
-                  <div style={{borderTop:`1px solid ${C.border}`,paddingTop:10}}>
-                    {route.stops.map((stop,i)=>(
-                      <div key={stop.id} style={{display:"flex",gap:8,marginBottom:i<route.stops.length-1?6:0}}>
-                        <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:24}}>
-                          <div style={{width:22,height:22,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:`${C.route}25`,border:`2px solid ${C.route}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route}}>
-                            {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
-                          </div>
-                          {i<route.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:8,marginTop:2}}/>}
-                        </div>
-                        <div style={{flex:1,paddingBottom:5}}>
-                          <div style={{display:"flex",justifyContent:"space-between"}}>
-                            <span style={{fontSize:12,fontWeight:700,color:C.text}}>{stop.address}</span>
-                            <span style={{fontSize:11,color:C.sub}}>{stop.time}</span>
-                          </div>
-                          {stop.note&&<div style={{fontSize:11,color:C.sub}}>{stop.note}</div>}
-                          {i>0&&stop.lat&&route.stops[i-1].lat&&<div style={{fontSize:11,color:C.route}}>📏 {haversine(route.stops[i-1].lat,route.stops[i-1].lng,stop.lat,stop.lng).toFixed(1)}km</div>}
-                        </div>
-                      </div>
-                    ))}
-                    {user.role==="admin"&&route.status==="진행중"&&(
-                      <button onClick={e=>{e.stopPropagation();finishRoute(route.id);}} style={{width:"100%",marginTop:8,padding:"9px",borderRadius:9,background:`${C.done}15`,border:`1px solid ${C.done}44`,color:C.done,fontWeight:700,cursor:"pointer",fontSize:12}}>✓ 운행 완료 처리</button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ══ 완제품 위치 현황 ══ */
-/* ══ 창고 구역 관리 (관리자 전용) ══ */
-function ZoneMgmtModal({zones,onSave,onClose}){
-  const [list,setList]=useState([...zones]);
-  const [newName,setNewName]=useState("");
-  const [editIdx,setEditIdx]=useState(null);
-  const [editVal,setEditVal]=useState("");
 
 
 function App(){
   return(
     <div style={{padding:20,fontFamily:"sans-serif"}}>
-      <h1>✅ 첫 1700줄 OK</h1>
-      <p>이 메시지가 보이면 1-1700줄은 정상입니다</p>
+      <h1>✅ 첫 1275줄 OK</h1>
     </div>
   );
 }
