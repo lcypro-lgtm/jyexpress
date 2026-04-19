@@ -2343,27 +2343,38 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
               <div style={{marginBottom:16}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>🛡️ 추가 권한 부여</div>
                 <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                  {[
-                    {key:"reg",  label:"출하 의뢰 등록",  desc:"출하일정 직접 등록 가능", val:fPermReg,  set:setFPermReg},
-                    {key:"ship", label:"사내출하 등록",    desc:"사내출하 직접 등록 가능", val:fPermShip, set:setFPermShip},
-                  ].map(p=>(
-                    <div key={p.key} onClick={()=>p.set(v=>!v)}
-                      style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
-                        background:p.val?`${C.accent}08`:C.card2,
-                        border:`1.5px solid ${p.val?C.accent:C.border}`,
-                        borderRadius:10,cursor:"pointer",transition:"all 0.15s"}}>
-                      <div style={{width:22,height:22,borderRadius:"50%",
-                        background:p.val?C.accent:C.muted,border:`2px solid ${p.val?C.accent:C.border}`,
-                        display:"flex",alignItems:"center",justifyContent:"center",
-                        fontSize:12,color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
-                        {p.val?"✓":""}
-                      </div>
-                      <div>
-                        <div style={{fontSize:13,fontWeight:700,color:p.val?C.accent:C.text}}>{p.label}</div>
-                        <div style={{fontSize:11,color:C.sub}}>{p.desc}</div>
-                      </div>
+                  <div onClick={()=>setFPermReg(v=>!v)}
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
+                      background:fPermReg?`${C.accent}08`:C.card2,
+                      border:`1.5px solid ${fPermReg?C.accent:C.border}`,
+                      borderRadius:10,cursor:"pointer"}}>
+                    <div style={{width:22,height:22,borderRadius:"50%",
+                      background:fPermReg?C.accent:C.muted,
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:12,color:"#fff",flexShrink:0}}>
+                      {fPermReg?"✓":""}
                     </div>
-                  ))}
+                    <div>
+                      <div style={{fontSize:13,fontWeight:700,color:fPermReg?C.accent:C.text}}>출하 의뢰 등록</div>
+                      <div style={{fontSize:11,color:C.sub}}>출하일정 직접 등록 가능</div>
+                    </div>
+                  </div>
+                  <div onClick={()=>setFPermShip(v=>!v)}
+                    style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
+                      background:fPermShip?`${C.process}08`:C.card2,
+                      border:`1.5px solid ${fPermShip?C.process:C.border}`,
+                      borderRadius:10,cursor:"pointer"}}>
+                    <div style={{width:22,height:22,borderRadius:"50%",
+                      background:fPermShip?C.process:C.muted,
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontSize:12,color:"#fff",flexShrink:0}}>
+                      {fPermShip?"✓":""}
+                    </div>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:700,color:fPermShip?C.process:C.text}}>사내출하 등록</div>
+                      <div style={{fontSize:11,color:C.sub}}>사내출하 직접 등록 가능</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -2418,9 +2429,7 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
                           {u.specialty&&<span style={{marginLeft:6,background:u.specialty==="양산"?`${C.yangsan}15`:`${C.general}15`,color:u.specialty==="양산"?C.yangsan:C.general,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:8}}>{u.specialty==="양산"?"🏭 양산":"📦 일반"}</span>}
                         </div>
                         <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
-                          {u.password&&<span style={{background:`${C.done}15`,color:C.done,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>🔒 비밀번호설정</span>}
-                          {u.permissions?.canRegister&&<span style={{background:`${C.accent}15`,color:C.accent,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>✓ 의뢰등록</span>}
-                          {u.permissions?.canInternalShip&&<span style={{background:`${C.process}15`,color:C.process,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>✓ 사내출하</span>}
+                          {u.password?<span style={{background:`${C.done}15`,color:C.done,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>🔒 설정됨</span>:<span style={{background:`${C.danger}15`,color:C.danger,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>⚠ 미설정</span>}
                         </div>
                       </div>
                       <div style={{display:"flex",gap:8}}>
