@@ -287,7 +287,7 @@ function PBar({pct,color,h=6}){
   return(
     <div style={{height:h,background:C.border,borderRadius:99,overflow:"hidden"}}>
       <div style={{width:`${pct}%`,height:"100%",borderRadius:99,transition:"width 0.4s",
-        background:pct===100?`linear-gradient(90deg,${C.done},#00C896)`:`linear-gradient(90deg,${color||C.accent},${color||C.accentL||C.accent})`}}/>
+        background:pct===100?"linear-gradient(90deg,"+C.done+",#00C896)":"linear-gradient(90deg,"+(color||C.accent)+","+(color||C.accentL||C.accent)+")"}}/>
     </div>
   );
 }
@@ -360,7 +360,7 @@ function TransBadge({transport}){
   if(!transport||transport==="자차") return null;
   const c=TRANS_COLOR[transport]||C.dim;
   return(
-    <span style={{background:`${c}18`,color:c,border:`1px solid ${c}44`,
+    <span style={{background:c+"18",color:c,border:"1px solid "+c+"44",
       fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>
       {TRANS_ICON[transport]} {transport}
     </span>
@@ -369,9 +369,9 @@ function TransBadge({transport}){
 
 function LocBadge({loc}){
   if(!loc?.zone) return null;
-  const txt=`${loc.zone}${loc.rack?` ${loc.rack}`:""}${loc.pallet?`-${loc.pallet}`:""}`;
+  const txt=`${loc.zone}${loc.rack?" "+loc.rack:""}${loc.pallet?"-"+loc.pallet:""}`;
   return(
-    <span style={{background:C.loc+"15",color:C.loc,border:`1px solid ${C.loc}44`,
+    <span style={{background:C.loc+"15",color:C.loc,border:"1px solid "+C.loc+"44",
       fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:10}}>
       📍{txt}
     </span>
@@ -383,7 +383,7 @@ function QBadge({post}){
   const {ok}=checkQuality(post);
   return(
     <span style={{background:ok?C.done+"15":C.danger+"10",color:ok?C.done:C.danger,
-      border:`1px solid ${ok?C.done:C.danger}44`,fontSize:10,fontWeight:800,
+      border:"1px solid "+ok?C.done:C.danger+"44",fontSize:10,fontWeight:800,
       padding:"2px 7px",borderRadius:10}}>
       {ok?"✓ 완전":"⚠ 정보부족"}
     </span>
@@ -394,7 +394,7 @@ function UrgBadge({urgency}){
   if(!urgency||urgency==="일반") return null;
   const c=URG_COLOR[urgency];
   return(
-    <span style={{background:`${c}15`,color:c,border:`1px solid ${c}44`,
+    <span style={{background:c+"15",color:c,border:"1px solid "+c+"44",
       fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>
       {URG_ICON[urgency]} {urgency}
     </span>
@@ -427,7 +427,7 @@ function StageBtn({item,onAdvance,canEdit}){
   return(
     <button onClick={canEdit&&!done?onAdvance:undefined}
       style={{padding:"5px 11px",borderRadius:20,border:`1.5px solid ${color}`,
-        background:done?color:`${color}12`,color:done?"#fff":color,
+        background:done?color:color+"12",color:done?"#fff":color,
         fontSize:11,fontWeight:800,cursor:canEdit&&!done?"pointer":"default",
         display:"flex",alignItems:"center",gap:3,flexShrink:0,
         transition:"all 0.15s",userSelect:"none",WebkitTapHighlightColor:"transparent"}}>
@@ -576,8 +576,8 @@ function Login({members,pendingCount,onLogin,onRequest}){
                 ? users.map(u=>(
                   <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                     style={{padding:"14px 16px",cursor:"pointer",marginBottom:8,
-                      border:`2px solid ${sel?.id===u.id?color:C.border}`,
-                      background:sel?.id===u.id?`${color}08`:C.card}}>
+                      border:"2px solid "+sel?.id===u.id?color:C.border,
+                      background:sel?.id===u.id?color+"08":C.card}}>
                     <div style={{display:"flex",alignItems:"center",gap:12}}>
                       <Avatar name={u.name} color={color} size={46}/>
                       <div style={{flex:1}}>
@@ -596,8 +596,8 @@ function Login({members,pendingCount,onLogin,onRequest}){
                     {users.map(u=>(
                       <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                         style={{padding:"12px 10px",cursor:"pointer",
-                          border:`2px solid ${sel?.id===u.id?color:C.border}`,
-                          background:sel?.id===u.id?`${color}08`:C.card,
+                          border:"2px solid "+sel?.id===u.id?color:C.border,
+                          background:sel?.id===u.id?color+"08":C.card,
                           display:"flex",flexDirection:"column",alignItems:"center",gap:5,position:"relative"}}>
                         <Avatar name={u.name} color={color} size={36}/>
                         <div style={{textAlign:"center"}}>
@@ -678,7 +678,7 @@ function AccessRequest({onSubmit,onBack}){
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="접속 신청" sub="관리자 승인 후 사용 가능" onBack={onBack}/>
       <div style={{padding:"18px 16px 80px"}}>
-        <div style={{background:C.accent+"10",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"12px 14px",marginBottom:20,fontSize:12,color:C.accent}}>
+        <div style={{background:C.accent+"10",border:"1px solid "+C.accent+"30",borderRadius:12,padding:"12px 14px",marginBottom:20,fontSize:12,color:C.accent}}>
           📋 정보를 입력하면 관리자가 검토 후 승인합니다.
         </div>
         <div style={{marginBottom:14}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>이름 *</div><input value={name} onChange={e=>setName(e.target.value)} placeholder="실명 입력" style={inp}/></div>
@@ -693,7 +693,7 @@ function AccessRequest({onSubmit,onBack}){
               return(
                 <Card key={r.k} onClick={()=>setRole(r.k)}
                   style={{flex:1,padding:"14px 10px",cursor:"pointer",textAlign:"center",
-                    border:`2px solid ${sel?rc:C.border}`,background:sel?`${rc}08`:C.card}}>
+                    border:"2px solid "+sel?rc:C.border,background:sel?rc+"08":C.card}}>
                   <div style={{fontSize:28,marginBottom:5}}>{r.i}</div>
                   <div style={{fontSize:14,fontWeight:800,color:sel?rc:C.text}}>{r.l}</div>
                   <div style={{fontSize:11,color:C.sub,marginTop:2}}>{r.d}</div>
@@ -802,12 +802,12 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="JIYONG 출하관리"
-        sub={isStaff?`${user.name} · ${user.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}`:`${user.name} · ${user.dept}`}
+        sub={isStaff?user.name+" · "+(user.specialty==="양산"?"🏭 양산전담":"📦 일반담당"):user.name+" · "+user.dept}
         right={
           <div style={{display:"flex",gap:7}}>
             {isStaff&&<button onClick={onLocation} style={{background:C.muted,color:C.loc,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 9px",fontSize:13,cursor:"pointer"}}>📍</button>}
             {isStaff&&<button onClick={onRoute} style={{background:C.muted,color:C.route,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 9px",fontSize:13,cursor:"pointer"}}>🗺️</button>}
-            <button onClick={onMyRequests} style={{position:"relative",background:C.muted,color:C.accent,border:`1px solid ${C.accent}33`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer",fontWeight:700}}>
+            <button onClick={onMyRequests} style={{position:"relative",background:C.muted,color:C.accent,border:"1px solid "+C.accent+"33",borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer",fontWeight:700}}>
               📬{myReqCnt>0&&<span style={{position:"absolute",top:-4,right:-4,background:myPendingCnt>0?C.warn:C.done,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 5px"}}>{myReqCnt}</span>}
             </button>
             {(user.permissions?.canInternalShip)&&(
@@ -822,7 +822,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
         }/>
 
       {isStaff&&(
-        <div style={{background:C.route+"08",borderBottom:`1px solid ${C.route}22`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{background:C.route+"08",borderBottom:"1px solid "+C.route+"22",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <span style={{fontSize:12,color:C.route,fontWeight:700}}>🚗 오늘 운행: <strong style={{fontFamily:"monospace"}}>{myKm.toFixed(1)}km</strong> · {myRoute?.stops.length||0}개 정류장</span>
           <button onClick={onRoute} style={{background:C.route,color:"#fff",border:"none",borderRadius:8,padding:"5px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>기록</button>
         </div>
@@ -862,7 +862,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
                     style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
                     <div style={{width:40,height:40,borderRadius:"50%",flexShrink:0,
                       background:pct===100?C.done+"15":pct>50?C.warn+"10":C.muted,
-                      border:`2px solid ${pct===100?C.done:pct>50?C.warn:C.border}`,
+                      border:"2px solid "+pct===100?C.done:pct>50?C.warn:C.border,
                       display:"flex",alignItems:"center",justifyContent:"center"}}>
                       <span style={{fontSize:pct===100?16:11,fontWeight:900,color:pct===100?C.done:pct>50?C.warn:C.sub}}>{pct===100?"✓":pct+"%"}</span>
                     </div>
@@ -905,7 +905,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
                     <PBar pct={pct} color={cc.color} h={6}/>
                     {group.items.slice(0,2).map(i=>i.loc?.zone&&(
                       <div key={i.id} style={{fontSize:10,color:C.sub,marginTop:4}}>
-                        📍 {i.text}: {i.loc.zone}{i.loc.rack?` ${i.loc.rack}`:""}{i.loc.pallet?`-${i.loc.pallet}`:""}
+                        📍 {i.text}: {i.loc.zone}{i.loc.rack?" "+i.loc.rack:""}{i.loc.pallet?"-"+i.loc.pallet:""}
                       </div>
                     ))}
                     <div style={{marginTop:10,padding:"8px 12px",background:C.muted,borderRadius:8,fontSize:12,color:C.accent,textAlign:"center",fontWeight:700}}>탭해서 확인하기 →</div>
@@ -965,12 +965,12 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
       <Hdr title={post.category} onBack={onBack}
         right={
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <span style={{background:pct===100?C.done+"15":C.warn+"15",color:pct===100?C.done:C.warn,border:`1px solid ${pct===100?C.done:C.warn}55`,borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
+            <span style={{background:pct===100?C.done+"15":C.warn+"15",color:pct===100?C.done:C.warn,border:"1px solid "+(pct===100?C.done:C.warn)+"55",borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
             {isAdmin&&<Btn onClick={()=>setConfirmDel(true)} color={C.danger} outline small>삭제</Btn>}
           </div>
         }/>
 
-      {!canEdit&&<div style={{background:C.accent+"08",borderBottom:`1px solid ${C.accent}22`,padding:"9px 16px",fontSize:11,color:C.accent}}>👁️ 조회 전용 화면</div>}
+      {!canEdit&&<div style={{background:C.accent+"08",borderBottom:"1px solid "+C.accent+"22",padding:"9px 16px",fontSize:11,color:C.accent}}>👁️ 조회 전용 화면</div>}
 
       <div style={{padding:"14px 14px 80px"}}>
         {/* 헤더 카드 */}
@@ -1001,7 +1001,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
           </div>
 
           {!ok&&canEdit&&(
-            <div style={{background:C.danger+"08",borderRadius:10,padding:"10px 12px",marginBottom:10,border:`1px solid ${C.danger}22`}}>
+            <div style={{background:C.danger+"08",borderRadius:10,padding:"10px 12px",marginBottom:10,border:"1px solid "+C.danger+"22"}}>
               <div style={{fontSize:12,fontWeight:700,color:C.danger,marginBottom:4}}>⚠️ 불완전 의뢰서 — 의뢰자에게 확인 필요</div>
               {missing.map(m=><div key={m} style={{fontSize:11,color:C.danger}}>· {m} 누락</div>)}
             </div>
@@ -1063,7 +1063,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
                             {loc.memo&&<span style={{fontSize:10,color:C.sub}}>{loc.memo}</span>}
                             {!loc.confirmed&&canToggle&&(
                               <button onClick={()=>onUpdateLoc(post.id,item.id,{...loc,confirmed:true})}
-                                style={{background:C.done+"15",border:`1px solid ${C.done}44`,color:C.done,borderRadius:8,padding:"2px 8px",fontSize:10,fontWeight:700,cursor:"pointer"}}>
+                                style={{background:C.done+"15",border:"1px solid "+C.done+"44",color:C.done,borderRadius:8,padding:"2px 8px",fontSize:10,fontWeight:700,cursor:"pointer"}}>
                                 위치확인 ✓
                               </button>
                             )}
@@ -1075,7 +1075,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
                           <div>
                             <div style={{fontSize:11,color:over?C.danger:C.sub}}>
                               📅 납기: {item.dueDate}
-                              {dl!==null&&item.stage!=="회수"&&<span style={{color:over?C.danger:dl<=2?C.warn:C.done,fontWeight:700,marginLeft:4}}>{over?`⚠️ ${Math.abs(dl)}일 초과`:`D-${dl}`}</span>}
+                              {dl!==null&&item.stage!=="회수"&&<span style={{color:over?C.danger:dl<=2?C.warn:C.done,fontWeight:700,marginLeft:4}}>{over?"⚠️ "+Math.abs(dl)+"일 초과":"D-"+dl}</span>}
                             </div>
                             <div style={{display:"flex",gap:4,marginTop:6}}>
                               {STAGES.map((s,si)=>{
@@ -1190,7 +1190,7 @@ function NewPost({members,zones,onBack,onSave}){
         {/* ─ 단계 1: 기본 정보 ─ */}
         {step===1&&(
           <>
-            <div style={{background:C.accent+"08",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.accent,lineHeight:1.8}}>
+            <div style={{background:C.accent+"08",border:"1px solid "+C.accent+"30",borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.accent,lineHeight:1.8}}>
               📋 출하팀이 즉시 출발할 수 있도록 <strong>모든 필수 항목</strong>을 정확히 입력해 주세요
             </div>
             <Card style={{padding:"16px",marginBottom:14}}>
@@ -1202,7 +1202,7 @@ function NewPost({members,zones,onBack,onSave}){
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>출하 구분</div>
                 <div style={{display:"flex",gap:8}}>
                   {["양산출하","일반출하","사내출하"].map(c=>{ const ccc=CAT[c]||CAT["일반출하"]; const sel=cat===c; return(
-                    <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
+                    <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:"2px solid "+sel?ccc.color:C.border,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
                       {ccc.icon}<br/>{c.replace("출하","")}
                     </button>
                   );})}
@@ -1220,7 +1220,7 @@ function NewPost({members,zones,onBack,onSave}){
                 <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:8}}>긴급도 *</div>
                 <div style={{display:"flex",gap:8}}>
                   {URGENCY.map(u=>{ const c=URG_COLOR[u]; const sel=urgency===u; return(
-                    <button key={u} onClick={()=>setUrgency(u)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:13,fontWeight:800,border:`2px solid ${sel?c:C.border}`,background:sel?`${c}15`:C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
+                    <button key={u} onClick={()=>setUrgency(u)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:13,fontWeight:800,border:"2px solid "+sel?c:C.border,background:sel?c+"15":C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
                       {URG_ICON[u]} {u}
                     </button>
                   );})}
@@ -1234,7 +1234,7 @@ function NewPost({members,zones,onBack,onSave}){
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>운송 방법</div>
                 <div style={{display:"flex",gap:6,marginBottom:transport!=="자차"&&transport!=="기타"?8:0}}>
                   {TRANSPORT.map(t=>{ const tc=TRANS_COLOR[t]||C.dim; const sel=transport===t; return(
-                    <button key={t} onClick={()=>setTransport(t)} style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:11,fontWeight:700,border:`1.5px solid ${sel?tc:C.border}`,background:sel?`${tc}15`:C.card2,color:sel?tc:C.sub,cursor:"pointer"}}>
+                    <button key={t} onClick={()=>setTransport(t)} style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:11,fontWeight:700,border:`1.5px solid ${sel?tc:C.border}`,background:sel?tc+"15":C.card2,color:sel?tc:C.sub,cursor:"pointer"}}>
                       {TRANS_ICON[t]}<br/>{t}
                     </button>
                   );})}
@@ -1255,7 +1255,7 @@ function NewPost({members,zones,onBack,onSave}){
         {/* ─ 단계 2: 품목 & 위치 ─ */}
         {step===2&&(
           <>
-            <div style={{background:C.loc+"10",border:`1px solid ${C.loc}30`,borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.loc,lineHeight:1.8}}>
+            <div style={{background:C.loc+"10",border:"1px solid "+C.loc+"30",borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.loc,lineHeight:1.8}}>
               📍 <strong>완제품 위치(구역·선반·파렛)를 반드시 입력</strong>해 주세요. 위치 불명확 시 출하가 지연됩니다.
             </div>
             {groups.map(group=>(
@@ -1264,7 +1264,7 @@ function NewPost({members,zones,onBack,onSave}){
                   <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:12}}>
                     <div style={{width:4,height:20,borderRadius:2,background:cc.color,flexShrink:0}}/>
                     <input placeholder={cat==="양산출하"?"납품처·공장명":"지역·거래처명"} value={group.region} onChange={e=>setReg(group.id,e.target.value)} style={{...inp,fontWeight:700,fontSize:14}}/>
-                    {groups.length>1&&<button onClick={()=>rmGroup(group.id)} style={{background:C.danger+"10",border:`1px solid ${C.danger}33`,color:C.danger,borderRadius:8,padding:"7px 10px",cursor:"pointer",flexShrink:0}}>✕</button>}
+                    {groups.length>1&&<button onClick={()=>rmGroup(group.id)} style={{background:C.danger+"10",border:"1px solid "+C.danger+"33",color:C.danger,borderRadius:8,padding:"7px 10px",cursor:"pointer",flexShrink:0}}>✕</button>}
                   </div>
                   <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:8}}>담당자 배정</div>
                   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -1285,7 +1285,7 @@ function NewPost({members,zones,onBack,onSave}){
                       </div>
                       <input placeholder="LOT번호 / 규격 *" value={item.detail} onChange={e=>setItm(group.id,item.id,"detail",e.target.value)} style={{...inp,fontSize:12,fontFamily:"monospace",marginBottom:12}}/>
                       {/* 위치 */}
-                      <div style={{background:C.loc+"08",borderRadius:10,padding:"12px",border:`1px solid ${C.loc}33`}}>
+                      <div style={{background:C.loc+"08",borderRadius:10,padding:"12px",border:"1px solid "+C.loc+"33"}}>
                         <div style={{fontSize:12,color:C.loc,fontWeight:800,marginBottom:10}}>📍 완제품 위치 *</div>
                         <div style={{marginBottom:8}}>
                           <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:6}}>창고 구역</div>
@@ -1328,7 +1328,7 @@ function NewPost({members,zones,onBack,onSave}){
                 </div>
               </Card>
             ))}
-            <button onClick={addGroup} style={{width:"100%",padding:"11px",borderRadius:12,border:`2px dashed ${cc.color}88`,background:`${cc.color}08`,color:cc.color,fontSize:14,fontWeight:700,cursor:"pointer",marginBottom:14}}>
+            <button onClick={addGroup} style={{width:"100%",padding:"11px",borderRadius:12,border:`2px dashed ${cc.color}88`,background:cc.color+"08",color:cc.color,fontSize:14,fontWeight:700,cursor:"pointer",marginBottom:14}}>
               + {cat==="양산출하"?"납품처":"지역"} 추가
             </button>
             <div style={{display:"flex",gap:10}}>
@@ -1363,7 +1363,7 @@ function NewPost({members,zones,onBack,onSave}){
               {[
                 {l:"출하구분",v:`${cc.icon} ${cat}`},{l:"거래처",v:client},
                 {l:"의뢰자",v:requester},{l:"긴급도",v:`${URG_ICON[urgency]} ${urgency}`},
-                {l:"포장형태",v:packaging},{l:"운송",v:`${TRANS_ICON[transport]} ${transport}${carNum?` (${carNum})`:""}`},
+                {l:"포장형태",v:packaging},{l:"운송",v:TRANS_ICON[transport]+" "+transport+(carNum?" ("+carNum+")":"")},
                 {l:"날짜",v:date},
               ].map(({l,v})=>(
                 <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
@@ -1387,7 +1387,7 @@ function NewPost({members,zones,onBack,onSave}){
                 </div>
               ))}
             </Card>
-            <div style={{background:C.accent+"08",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"14px",marginBottom:16}}>
+            <div style={{background:C.accent+"08",border:"1px solid "+C.accent+"30",borderRadius:12,padding:"14px",marginBottom:16}}>
               <div style={{fontSize:13,fontWeight:800,color:C.accent,marginBottom:8}}>📌 의뢰자 확인 사항</div>
               {["위 정보는 정확하며, 완제품이 해당 위치에 있음을 확인했습니다","출하 차질 시 즉시 출하팀에 연락하겠습니다","긴급 요청 시 추가 비용이 발생할 수 있음을 인지했습니다"].map((t,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:5}}>
@@ -1476,7 +1476,7 @@ function RouteScreen({routes,setRoutes,members,user,onBack}){
             </div>
             <div style={{display:"flex",gap:8}}>
               {myRoute?.status==="진행중"&&(
-                <button onClick={()=>finishRoute(myRoute.id)} style={{background:C.done+"15",color:C.done,border:`1px solid ${C.done}44`,borderRadius:9,padding:"8px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>✓ 완료</button>
+                <button onClick={()=>finishRoute(myRoute.id)} style={{background:C.done+"15",color:C.done,border:"1px solid "+C.done+"44",borderRadius:9,padding:"8px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>✓ 완료</button>
               )}
               <button onClick={()=>setShowForm(s=>!s)} style={{background:showForm?C.muted:C.route,color:"#fff",border:"none",borderRadius:9,padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}}>
                 {showForm?"닫기":"+ 정류장"}
@@ -1510,7 +1510,7 @@ function RouteScreen({routes,setRoutes,members,user,onBack}){
               {myRoute.stops.map((stop,i)=>(
                 <div key={stop.id} style={{display:"flex",gap:10,marginBottom:i<myRoute.stops.length-1?6:0}}>
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:28}}>
-                    <div style={{width:26,height:26,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:`2px solid ${C.route}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route,flexShrink:0}}>
+                    <div style={{width:26,height:26,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:"2px solid "+C.route,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route,flexShrink:0}}>
                       {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
                     </div>
                     {i<myRoute.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:10,marginTop:3}}/>}
@@ -1555,7 +1555,7 @@ function RouteScreen({routes,setRoutes,members,user,onBack}){
                 </div>
               </div>
               <div style={{display:"flex",gap:8}}>
-                {[{l:"운행일수",v:`${u.days}일`,c:C.route},{l:"출하건수",v:`${u.cnt}건`,c:C.accent},{l:"일평균",v:u.days?`${(u.monthKm/u.days).toFixed(0)}km`:"–",c:C.general}].map(x=>(
+                {[{l:"운행일수",v:u.days+"일",c:C.route},{l:"출하건수",v:u.cnt+"건",c:C.accent},{l:"일평균",v:u.days?`${(u.monthKm/u.days).toFixed(0)}km`:"–",c:C.general}].map(x=>(
                   <div key={x.l} style={{flex:1,background:C.card,borderRadius:8,padding:"6px 0",textAlign:"center",border:`1px solid ${C.border}`}}>
                     <div style={{fontSize:14,fontWeight:800,color:x.c}}>{x.v}</div>
                     <div style={{fontSize:10,color:C.sub,marginTop:1}}>{x.l}</div>
@@ -1593,7 +1593,7 @@ function RouteScreen({routes,setRoutes,members,user,onBack}){
                     {route.stops.map((stop,i)=>(
                       <div key={stop.id} style={{display:"flex",gap:8,marginBottom:i<route.stops.length-1?6:0}}>
                         <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:24}}>
-                          <div style={{width:22,height:22,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:`2px solid ${C.route}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route}}>
+                          <div style={{width:22,height:22,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:"2px solid "+C.route,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route}}>
                             {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
                           </div>
                           {i<route.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:8,marginTop:2}}/>}
@@ -1609,7 +1609,7 @@ function RouteScreen({routes,setRoutes,members,user,onBack}){
                       </div>
                     ))}
                     {user.role==="admin"&&route.status==="진행중"&&(
-                      <button onClick={e=>{e.stopPropagation();finishRoute(route.id);}} style={{width:"100%",marginTop:8,padding:"9px",borderRadius:9,background:C.done+"15",border:`1px solid ${C.done}44`,color:C.done,fontWeight:700,cursor:"pointer",fontSize:12}}>✓ 운행 완료 처리</button>
+                      <button onClick={e=>{e.stopPropagation();finishRoute(route.id);}} style={{width:"100%",marginTop:8,padding:"9px",borderRadius:9,background:C.done+"15",border:"1px solid "+C.done+"44",color:C.done,fontWeight:700,cursor:"pointer",fontSize:12}}>✓ 운행 완료 처리</button>
                     )}
                   </div>
                 )}
@@ -1690,9 +1690,9 @@ function ZoneMgmtModal({zones,onSave,onClose}){
                 ) : (
                   <>
                     <button onClick={()=>startEdit(i)}
-                      style={{background:C.accent+"15",border:`1px solid ${C.accent}33`,color:C.accent,borderRadius:7,padding:"5px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>수정</button>
+                      style={{background:C.accent+"15",border:"1px solid "+C.accent+"33",color:C.accent,borderRadius:7,padding:"5px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>수정</button>
                     <button onClick={()=>removeZone(i)}
-                      style={{background:C.danger+"10",border:`1px solid ${C.danger}33`,color:C.danger,borderRadius:7,padding:"5px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>삭제</button>
+                      style={{background:C.danger+"10",border:"1px solid "+C.danger+"33",color:C.danger,borderRadius:7,padding:"5px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>삭제</button>
                   </>
                 )}
               </div>
@@ -1824,10 +1824,10 @@ function LocationScreen({posts,user,zones,onUpdateLoc,onUpdateItemText,onBack}){
 
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,padding:"10px 12px",
               background:eConfirmed?C.done+"10":C.warn+"08",borderRadius:10,
-              border:`1px solid ${eConfirmed?C.done:C.warn}33`,cursor:"pointer"}}
+              border:"1px solid "+eConfirmed?C.done:C.warn+"33",cursor:"pointer"}}
               onClick={()=>setEConfirmed(v=>!v)}>
               <div style={{width:24,height:24,borderRadius:"50%",
-                background:eConfirmed?C.done:C.muted,border:`2px solid ${eConfirmed?C.done:C.border}`,
+                background:eConfirmed?C.done:C.muted,border:"2px solid "+eConfirmed?C.done:C.border,
                 display:"flex",alignItems:"center",justifyContent:"center",
                 fontSize:13,color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
                 {eConfirmed?"✓":""}
@@ -1907,7 +1907,7 @@ function LocationScreen({posts,user,zones,onUpdateLoc,onUpdateItemText,onBack}){
                     }
                   </div>
                   <button onClick={()=>openEdit(item)}
-                    style={{background:C.loc+"15",border:`1px solid ${C.loc}44`,color:C.loc,
+                    style={{background:C.loc+"15",border:"1px solid "+C.loc+"44",color:C.loc,
                       borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:700,
                       cursor:"pointer",flexShrink:0,marginLeft:8}}>
                     ✏️ 수정
@@ -1917,7 +1917,7 @@ function LocationScreen({posts,user,zones,onUpdateLoc,onUpdateItemText,onBack}){
                 {item.detail&&<div style={{fontSize:11,color:C.sub,fontFamily:"monospace",marginBottom:4}}>{item.detail}</div>}
                 <div style={{fontSize:11,color:C.sub,marginBottom:8}}>거래처: {item.client} · {item.region}</div>
 
-                <div style={{background:C.loc+"08",borderRadius:10,padding:"10px 12px",border:`1px solid ${C.loc}33`}}>
+                <div style={{background:C.loc+"08",borderRadius:10,padding:"10px 12px",border:"1px solid "+C.loc+"33"}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <span style={{fontSize:18}}>📍</span>
                     <div>
@@ -1989,7 +1989,7 @@ function VisitLog({post,user,onBack,onAddVisit,onAddVisitPhoto}){
             <div style={{fontSize:11,color:C.sub,marginBottom:7,fontWeight:600}}>운송 방법</div>
             <div style={{display:"flex",gap:8,marginBottom:vTrans==="용차"?8:0}}>
               {["직접","용차","퀵"].map(t=>{ const tc=t==="용차"?C.warn:t==="퀵"?C.quick:C.done; const sl=vTrans===t; return(
-                <button key={t} onClick={()=>setVTrans(t)} style={{flex:1,padding:"8px 0",borderRadius:9,fontSize:12,fontWeight:800,border:`2px solid ${sl?tc:C.border}`,background:sl?`${tc}15`:C.card2,color:sl?tc:C.sub,cursor:"pointer"}}>
+                <button key={t} onClick={()=>setVTrans(t)} style={{flex:1,padding:"8px 0",borderRadius:9,fontSize:12,fontWeight:800,border:"2px solid "+sl?tc:C.border,background:sl?tc+"15":C.card2,color:sl?tc:C.sub,cursor:"pointer"}}>
                   {TRANS_ICON[t]||"🚶"} {t}
                 </button>
               );})}
@@ -2028,7 +2028,7 @@ function VisitLog({post,user,onBack,onAddVisit,onAddVisitPhoto}){
               </div>
               {v.purpose&&<div style={{background:C.card2,borderRadius:10,padding:"8px 12px",marginTop:6,border:`1px solid ${C.border}`}}><div style={{fontSize:10,color:C.sub,fontWeight:700,marginBottom:2}}>목적</div><div style={{fontSize:13,color:C.text}}>{v.purpose}</div></div>}
               <div style={{display:"flex",gap:8,marginTop:10,alignItems:"center"}}>
-                <span style={{background:v.transport==="용차"?C.warn+"15":v.transport==="퀵"?C.quick+"15":C.done+"10",color:v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done,border:`1px solid ${v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done}44`,fontSize:11,fontWeight:800,padding:"3px 10px",borderRadius:20}}>
+                <span style={{background:v.transport==="용차"?C.warn+"15":v.transport==="퀵"?C.quick+"15":C.done+"10",color:v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done,border:"1px solid "+v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done+"44",fontSize:11,fontWeight:800,padding:"3px 10px",borderRadius:20}}>
                   {TRANS_ICON[v.transport]||"🚶"} {v.transport==="직접"?"직접 수령":v.transport}
                 </span>
                 {v.carNum&&<span style={{fontSize:12,fontWeight:700,color:C.warn,fontFamily:"monospace"}}>{v.carNum}</span>}
@@ -2110,7 +2110,7 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
             {ed.role==="admin" ? (
               <div style={{marginBottom:12}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>역할</div>
-                <div style={{background:C.accent+"10",border:`1px solid ${C.accent}33`,borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:8}}>
+                <div style={{background:C.accent+"10",border:"1px solid "+C.accent+"33",borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:8}}>
                   <span style={{fontSize:18}}>👑</span>
                   <span style={{fontSize:14,fontWeight:700,color:C.accent}}>관리자 (역할 변경 불가)</span>
                 </div>
@@ -2118,13 +2118,13 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
             ) : (
               <div style={{marginBottom:12}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>역할</div>
-                <div style={{display:"flex",gap:8}}>{["staff","viewer"].map(r=>{ const rm=ROLE_META2[r]; const sl=fRole===r; return <button key={r} onClick={()=>setFRole(r)} style={{flex:1,padding:"10px 0",borderRadius:10,fontSize:13,fontWeight:700,border:`2px solid ${sl?rm.color:C.border}`,background:sl?`${rm.color}10`:C.card2,color:sl?rm.color:C.sub,cursor:"pointer"}}>{rm.icon} {rm.label}</button>; })}</div>
+                <div style={{display:"flex",gap:8}}>{["staff","viewer"].map(r=>{ const rm=ROLE_META2[r]; const sl=fRole===r; return <button key={r} onClick={()=>setFRole(r)} style={{flex:1,padding:"10px 0",borderRadius:10,fontSize:13,fontWeight:700,border:"2px solid "+sl?rm.color:C.border,background:sl?rm.color+"10":C.card2,color:sl?rm.color:C.sub,cursor:"pointer"}}>{rm.icon} {rm.label}</button>; })}</div>
               </div>
             )}
             {fRole==="staff"&&ed.role!=="admin"&&(
               <div style={{marginBottom:12}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>전담 분야</div>
-                <div style={{display:"flex",gap:8}}>{[{k:"양산",c:C.yangsan},{k:"일반",c:C.general}].map(s=>{ const sl=fSpec===s.k; return <button key={s.k} onClick={()=>setFSpec(s.k)} style={{flex:1,padding:"9px 0",borderRadius:10,fontSize:13,fontWeight:700,border:`2px solid ${sl?s.c:C.border}`,background:sl?`${s.c}10`:C.card2,color:sl?s.c:C.sub,cursor:"pointer"}}>{s.k==="양산"?"🏭":"📦"} {s.k}출하</button>; })}</div>
+                <div style={{display:"flex",gap:8}}>{[{k:"양산",c:C.yangsan},{k:"일반",c:C.general}].map(s=>{ const sl=fSpec===s.k; return <button key={s.k} onClick={()=>setFSpec(s.k)} style={{flex:1,padding:"9px 0",borderRadius:10,fontSize:13,fontWeight:700,border:"2px solid "+sl?s.c:C.border,background:sl?s.c+"10":C.card2,color:sl?s.c:C.sub,cursor:"pointer"}}>{s.k==="양산"?"🏭":"📦"} {s.k}출하</button>; })}</div>
               </div>
             )}
             <div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>이름 *</div><input value={fName} onChange={e=>setFName(e.target.value)} style={inp}/></div>
@@ -2152,7 +2152,7 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
                         border:`1.5px solid ${p.val?C.accent:C.border}`,
                         borderRadius:10,cursor:"pointer",transition:"all 0.15s"}}>
                       <div style={{width:22,height:22,borderRadius:"50%",
-                        background:p.val?C.accent:C.muted,border:`2px solid ${p.val?C.accent:C.border}`,
+                        background:p.val?C.accent:C.muted,border:"2px solid "+p.val?C.accent:C.border,
                         display:"flex",alignItems:"center",justifyContent:"center",
                         fontSize:12,color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
                         {p.val?"✓":""}
@@ -2346,7 +2346,7 @@ function StatsScreen({posts,routes,members,onBack}){
           <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:4}}>⚖️ 직원별 업무 부하</div>
           <div style={{fontSize:12,color:C.sub,marginBottom:14}}>업무 재분배 판단 기준 · 이번달 운행 포함</div>
           {staffStats.map((u,i)=>(
-            <div key={u.id} style={{background:C.card2,borderRadius:12,padding:"12px 14px",marginBottom:8,border:i===0&&u.total>5?`1px solid ${C.danger}44`:`1px solid ${C.border}`}}>
+            <div key={u.id} style={{background:C.card2,borderRadius:12,padding:"12px 14px",marginBottom:8,border:i===0&&u.total>5?"1px solid "+C.danger+"44":`1px solid ${C.border}`}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
                 <Avatar name={u.name} color={u.specialty==="양산"?C.yangsan:C.general} size={34}/>
                 <div style={{flex:1}}>
@@ -2386,7 +2386,7 @@ function StatsScreen({posts,routes,members,onBack}){
           <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>🚐 외부자원 활용 현황</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
             {transRank.map(([t,cnt])=>{ const color=TRANS_COLOR[t]||C.dim; return(
-              <div key={t} style={{background:C.card2,border:`1px solid ${color}33`,borderRadius:12,padding:"14px",textAlign:"center"}}>
+              <div key={t} style={{background:C.card2,border:"1px solid "+color+"33",borderRadius:12,padding:"14px",textAlign:"center"}}>
                 <div style={{fontSize:26}}>{TRANS_ICON[t]||"📦"}</div>
                 <div style={{fontSize:22,fontWeight:900,fontFamily:"monospace",color,marginTop:4}}>{cnt}</div>
                 <div style={{fontSize:11,color,fontWeight:700,marginTop:2}}>{t}</div>
@@ -2399,13 +2399,13 @@ function StatsScreen({posts,routes,members,onBack}){
         <Card style={{padding:"16px"}}>
           <div style={{fontSize:14,fontWeight:800,color:C.accent,marginBottom:12}}>💡 업무 재분배 시사점</div>
           {staffStats[0]?.total>staffStats[staffStats.length-1]?.total*1.5&&(
-            <div style={{background:C.danger+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:`1px solid ${C.danger}22`}}>
+            <div style={{background:C.danger+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:"1px solid "+C.danger+"22"}}>
               <span style={{fontSize:12,color:C.danger}}>⚠️ <strong>{staffStats[0]?.name}</strong>의 업무 부하가 집중되고 있습니다. 용차·퀵 대체 또는 업무 이관을 검토하세요.</span>
             </div>
           )}
-          {procRank[0]&&<div style={{background:C.process+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:`1px solid ${C.process}22`}}><span style={{fontSize:12,color:C.process}}>⚙️ <strong>{procRank[0][0]}</strong> 공정이 가장 많습니다 ({procRank[0][1]}회). 전담 협력업체 계약을 검토하세요.</span></div>}
-          {(transFreq["용차"]||0)+(transFreq["퀵"]||0)>(transFreq["자차"]||0)&&<div style={{background:C.warn+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:`1px solid ${C.warn}22`}}><span style={{fontSize:12,color:C.warn}}>🚐 외부자원 활용이 자차를 초과했습니다. 비용 대비 효율 점검이 필요합니다.</span></div>}
-          {clientRank[0]&&<div style={{background:C.accent+"08",borderRadius:10,padding:"11px 13px",border:`1px solid ${C.accent}22`}}><span style={{fontSize:12,color:C.accent}}>🏢 <strong>{clientRank[0][0]}</strong>가 가장 빈번합니다 ({clientRank[0][1]}회). 전담 인력·루트 최적화를 고려하세요.</span></div>}
+          {procRank[0]&&<div style={{background:C.process+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:"1px solid "+C.process+"22"}}><span style={{fontSize:12,color:C.process}}>⚙️ <strong>{procRank[0][0]}</strong> 공정이 가장 많습니다 ({procRank[0][1]}회). 전담 협력업체 계약을 검토하세요.</span></div>}
+          {(transFreq["용차"]||0)+(transFreq["퀵"]||0)>(transFreq["자차"]||0)&&<div style={{background:C.warn+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:"1px solid "+C.warn+"22"}}><span style={{fontSize:12,color:C.warn}}>🚐 외부자원 활용이 자차를 초과했습니다. 비용 대비 효율 점검이 필요합니다.</span></div>}
+          {clientRank[0]&&<div style={{background:C.accent+"08",borderRadius:10,padding:"11px 13px",border:"1px solid "+C.accent+"22"}}><span style={{fontSize:12,color:C.accent}}>🏢 <strong>{clientRank[0][0]}</strong>가 가장 빈번합니다 ({clientRank[0][1]}회). 전담 인력·루트 최적화를 고려하세요.</span></div>}
         </Card>
       </div>
     </div>
@@ -2499,7 +2499,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
       <div style={{padding:"16px 16px 100px"}}>
         {/* ─ 단계 1 ─ */}
         {step===1&&(<>
-          <div style={{background:C.accent+"08",border:`1px solid ${C.accent}25`,borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.accent,lineHeight:1.8}}>
+          <div style={{background:C.accent+"08",border:"1px solid "+C.accent+"25",borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.accent,lineHeight:1.8}}>
             📋 출하 요청을 작성하면 관리자가 검토 후 출하 계획에 반영합니다
           </div>
           <Card style={{padding:"16px",marginBottom:14}}>
@@ -2507,7 +2507,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
               <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>출하 구분</div>
               <div style={{display:"flex",gap:8}}>
                 {["양산출하","일반출하","사내출하"].map(c=>{ const ccc=CAT[c]||CAT["일반출하"],sel=cat===c; return(
-                  <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
+                  <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:"2px solid "+sel?ccc.color:C.border,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
                     {ccc.icon}<br/>{c.replace("출하","")}
                   </button>
                 );})}
@@ -2530,7 +2530,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
               <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:8}}>긴급도 *</div>
               <div style={{display:"flex",gap:8}}>
                 {URGENCY.map(u=>{ const c=URG_COLOR[u],sel=urgency===u; return(
-                  <button key={u} onClick={()=>setUrgency(u)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:13,fontWeight:800,border:`2px solid ${sel?c:C.border}`,background:sel?`${c}15`:C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
+                  <button key={u} onClick={()=>setUrgency(u)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:13,fontWeight:800,border:"2px solid "+sel?c:C.border,background:sel?c+"15":C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
                     {URG_ICON[u]} {u}
                   </button>
                 );})}
@@ -2544,7 +2544,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
               <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>운송 방법</div>
               <div style={{display:"flex",gap:6,marginBottom:transport!=="자차"&&transport!=="기타"?8:0}}>
                 {TRANSPORT.map(t=>{ const tc=TRANS_COLOR[t]||C.dim,sel=transport===t; return(
-                  <button key={t} onClick={()=>setTransport(t)} style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:11,fontWeight:700,border:`1.5px solid ${sel?tc:C.border}`,background:sel?`${tc}15`:C.card2,color:sel?tc:C.sub,cursor:"pointer"}}>
+                  <button key={t} onClick={()=>setTransport(t)} style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:11,fontWeight:700,border:`1.5px solid ${sel?tc:C.border}`,background:sel?tc+"15":C.card2,color:sel?tc:C.sub,cursor:"pointer"}}>
                     {TRANS_ICON[t]}<br/>{t}
                   </button>
                 );})}
@@ -2563,7 +2563,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
 
         {/* ─ 단계 2 ─ */}
         {step===2&&(<>
-          <div style={{background:C.loc+"10",border:`1px solid ${C.loc}30`,borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.loc,lineHeight:1.8}}>
+          <div style={{background:C.loc+"10",border:"1px solid "+C.loc+"30",borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.loc,lineHeight:1.8}}>
             📍 <strong>완제품 위치(구역·선반·파렛)를 정확히 입력</strong>하면 출하팀이 빠르게 찾을 수 있습니다
           </div>
           <Card style={{padding:"14px",marginBottom:12}}>
@@ -2575,7 +2575,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
                   {items.length>1&&<button onClick={()=>setItems(its=>its.filter(i=>i.id!==item.id))} style={{background:"none",border:"none",color:C.dim,fontSize:18,cursor:"pointer",flexShrink:0}}>✕</button>}
                 </div>
                 <input placeholder="LOT번호 / 규격 *" value={item.detail} onChange={e=>setItm(item.id,"detail",e.target.value)} style={{...inp,fontSize:12,fontFamily:"monospace",marginBottom:12}}/>
-                <div style={{background:C.loc+"08",borderRadius:10,padding:"12px",border:`1px solid ${C.loc}33`}}>
+                <div style={{background:C.loc+"08",borderRadius:10,padding:"12px",border:"1px solid "+C.loc+"33"}}>
                   <div style={{fontSize:12,color:C.loc,fontWeight:800,marginBottom:10}}>📍 완제품 위치</div>
                   <div style={{marginBottom:8}}>
                     <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:6}}>창고 구역</div>
@@ -2658,7 +2658,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
               </div>
             ))}
           </Card>
-          <div style={{background:C.accent+"08",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.sub,lineHeight:1.8}}>
+          <div style={{background:C.accent+"08",border:"1px solid "+C.accent+"30",borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.sub,lineHeight:1.8}}>
             ✅ 제출 후 <strong style={{color:C.accent}}>"요청 현황"</strong> 탭에서 처리 상태를 확인할 수 있습니다
           </div>
           <div style={{display:"flex",gap:10}}>
@@ -2736,7 +2736,7 @@ function MyRequests({requests,user,onBack,onNewRequest}){
                 </div>
                 {/* 관리자 검토 메모 */}
                 {req.reviewNote&&(
-                  <div style={{background:req.status==="거부"?C.danger+"08":C.done+"08",borderRadius:9,padding:"8px 11px",border:`1px solid ${req.status==="거부"?C.danger:C.done}33`,fontSize:12,color:req.status==="거부"?C.danger:C.done}}>
+                  <div style={{background:req.status==="거부"?C.danger+"08":C.done+"08",borderRadius:9,padding:"8px 11px",border:"1px solid "+req.status==="거부"?C.danger:C.done+"33",fontSize:12,color:req.status==="거부"?C.danger:C.done}}>
                     💬 관리자: {req.reviewNote}
                   </div>
                 )}
@@ -2837,7 +2837,7 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
               </div>
 
               {/* 관리자 검토 */}
-              <div style={{background:C.accent+"06",borderRadius:12,padding:"14px",border:`1px solid ${C.accent}25`,marginBottom:16}}>
+              <div style={{background:C.accent+"06",borderRadius:12,padding:"14px",border:"1px solid "+C.accent+"25",marginBottom:16}}>
                 <div style={{fontSize:13,fontWeight:800,color:C.accent,marginBottom:12}}>✏️ 검토 · 수정</div>
                 <div style={{marginBottom:12}}>
                   <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>확정 출하일 <span style={{color:C.sub,fontWeight:400,fontSize:11}}>(수정 가능)</span></div>
@@ -2865,7 +2865,7 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
                   <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>처리 결과 선택</div>
                   <div style={{display:"flex",gap:8}}>
                     {["승인","수정됨","거부"].map(s=>{ const c=S_COLOR[s],sel=eStatus===s; return(
-                      <button key={s} onClick={()=>setEStatus(s)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:12,fontWeight:800,border:`2px solid ${sel?c:C.border}`,background:sel?`${c}15`:C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
+                      <button key={s} onClick={()=>setEStatus(s)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:12,fontWeight:800,border:"2px solid "+sel?c:C.border,background:sel?c+"15":C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
                         {S_ICON[s]} {s}
                       </button>
                     );})}
@@ -2900,7 +2900,7 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
       <div style={{padding:"14px 14px 100px"}}>
         {/* ── 일별 계획 탭 ── */}
         {tab==="일별계획"&&(<>
-          <div style={{background:C.accent+"08",border:`1px solid ${C.accent}25`,borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.accent,lineHeight:1.8}}>
+          <div style={{background:C.accent+"08",border:"1px solid "+C.accent+"25",borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.accent,lineHeight:1.8}}>
             🗓️ 승인된 요청이 날짜별로 자동 정리된 출하 계획입니다. 수정하려면 각 항목의 <strong>수정</strong> 버튼을 탭하세요.
           </div>
           {Object.keys(byDate).sort().length===0&&(
@@ -2944,7 +2944,7 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
                           ))}
                         </div>
                       </div>
-                      <button onClick={()=>openReview(req)} style={{background:C.accent+"15",border:`1px solid ${C.accent}33`,color:C.accent,borderRadius:9,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>수정</button>
+                      <button onClick={()=>openReview(req)} style={{background:C.accent+"15",border:"1px solid "+C.accent+"33",color:C.accent,borderRadius:9,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>수정</button>
                     </div>
                   );
                 })}
@@ -2973,7 +2973,7 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
                       <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5,flexWrap:"wrap"}}>
                         <span style={{background:cc.bg,color:cc.color,fontSize:11,fontWeight:800,padding:"3px 9px",borderRadius:20}}>{cc.icon} {req.category}</span>
                         <UrgBadge urgency={req.urgency}/>
-                        <span style={{background:`${sc}15`,color:sc,border:`1px solid ${sc}44`,fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>{S_ICON[req.status]} {req.status}</span>
+                        <span style={{background:sc+"15",color:sc,border:"1px solid "+sc+"44",fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>{S_ICON[req.status]} {req.status}</span>
                       </div>
                       <div style={{fontSize:15,fontWeight:800,color:C.text}}>{req.client}</div>
                       <div style={{fontSize:11,color:C.sub,marginTop:2}}>의뢰: {req.requester} · 제출: {req.requestedAt.slice(0,10)}</div>
@@ -2989,7 +2989,7 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
                         ))}
                       </div>
                     </div>
-                    <button onClick={()=>openReview(req)} style={{background:C.accent+"15",border:`1px solid ${C.accent}33`,color:C.accent,borderRadius:9,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0,alignSelf:"flex-start"}}>검토</button>
+                    <button onClick={()=>openReview(req)} style={{background:C.accent+"15",border:"1px solid "+C.accent+"33",color:C.accent,borderRadius:9,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0,alignSelf:"flex-start"}}>검토</button>
                   </div>
                 </div>
               </Card>
