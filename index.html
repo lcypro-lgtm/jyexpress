@@ -20,13 +20,13 @@
     // 아래 값들을 실제 값으로 교체하세요.
     // 설정 방법: 앱 → 톱니바퀴 → 프로젝트 설정 → 내 앱 → SDK 설정 및 구성
     const FIREBASE_CONFIG = {
-      apiKey:            "여기에_apiKey_입력",
-      authDomain:        "여기에_authDomain_입력",
-      databaseURL:       "여기에_databaseURL_입력",
-      projectId:         "여기에_projectId_입력",
-      storageBucket:     "여기에_storageBucket_입력",
-      messagingSenderId: "여기에_messagingSenderId_입력",
-      appId:             "여기에_appId_입력"
+      apiKey:            "AIzaSyA8M4ynRkVpUeNyc4fqCsuSoHK4fyEzCI0",
+      authDomain:        "jyexpress-b31fd.firebaseapp.com",
+      databaseURL:       "https://jyexpress-b31fd-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId:         "jyexpress-b31fd",
+      storageBucket:     "jyexpress-b31fd.firebasestorage.app",
+      messagingSenderId: "194501780480",
+      appId:             "1:194501780480:web:c18abecc78fde87947a4e5"
     };
 
     // 설정값이 실제 값인지 확인
@@ -124,6 +124,7 @@
     const { useState, useRef, useEffect } = React;
 
 
+
 const C = {
   // Samsung One UI 색상
   bg:      "#F2F4F8",   // One UI 배경 (블루그레이)
@@ -156,10 +157,10 @@ const C = {
 };
 
 const CAT = {
-  양산출하:{ color:C.yangsan, bg:`${C.yangsan}18`, icon:"🏭", desc:"기아·자동차 납품" },
-  일반출하:{ color:C.general, bg:`${C.general}15`, icon:"📦", desc:"일반 거래처 출하" },
-  사내출하:{ color:C.process, bg:`${C.process}15`, icon:"🏢", desc:"사내 자체 출하" },
-  사내방문:{ color:C.visit,   bg:`${C.visit}15`,   icon:"🚶", desc:"내방 방문 기록" },
+  양산출하:{ color:C.yangsan, bg:C.yangsan+"18", icon:"🏭", desc:"기아·자동차 납품" },
+  일반출하:{ color:C.general, bg:C.general+"15", icon:"📦", desc:"일반 거래처 출하" },
+  사내출하:{ color:C.process, bg:C.process+"15", icon:"🏢", desc:"사내 자체 출하" },
+  사내방문:{ color:C.visit,   bg:C.visit+"15",   icon:"🚶", desc:"내방 방문 기록" },
 };
 
 const STAGES=["의뢰출하","완료","회수"];
@@ -193,14 +194,14 @@ const haversine=(la1,lo1,la2,lo2)=>{
 };
 
 const calcDone=post=>{
-  if(post.category==="사내방문") return { done:(post.visits||[]).length, total:(post.visits||[]).length, pct:100 };
+  if(post.category==="사내방문") return {done:(post.visits||[]).length,total:(post.visits||[]).length,pct:100};
   const all=(post.groups||[]).flatMap(g=>(g.items||[]));
   const done=all.filter(i=>i.stage?i.stage==="회수":i.done).length;
-  return { done, total:all.length, pct:all.length?Math.round(done/all.length*100):0 };
+  return {done,total:all.length,pct:all.length?Math.round(done/all.length*100):0};
 };
+
 const checkQuality=post=>{
   if(post.category==="사내방문"||post.category==="사내출하") return { ok:true, missing:[] };
-  if(!(post.groups||[]).length) return { ok:false, missing:["품목정보"] };
   const m=[];
   if(!post.client?.trim()) m.push("거래처명");
   if(!post.requester?.trim()) m.push("의뢰자");
@@ -232,14 +233,8 @@ const mkI=(id,text,detail,extra,done,doneBy,doneAt,hasProc,pType,dueDate,stage,t
   photos:[],
 });
 
-const INIT_MEMBERS=[
-  { id:"admin", name:"이창용", role:"admin",  dept:"관리자",  region:"전체",    specialty:null, password:"", permissions:{canRegister:true,canInternalShip:true} },
-  { id:"s1",   name:"김철수", role:"staff",  dept:"출하팀",  region:"양산전담", specialty:"양산", password:"", permissions:{canRegister:false,canInternalShip:false} },
-  { id:"s2",   name:"이영희", role:"staff",  dept:"출하팀",  region:"일반출하", specialty:"일반", password:"", permissions:{canRegister:false,canInternalShip:false} },
-  { id:"s3",   name:"박민준", role:"staff",  dept:"출하팀",  region:"일반출하", specialty:"일반", password:"", permissions:{canRegister:false,canInternalShip:false} },
-  { id:"r1",   name:"한상훈", role:"viewer", dept:"생산팀",  region:null,       specialty:null, password:"", permissions:{canRegister:false,canInternalShip:false} },
-  { id:"r2",   name:"윤지혜", role:"viewer", dept:"영업팀",  region:null,       specialty:null, password:"", permissions:{canRegister:false,canInternalShip:false} },
-];
+const INIT_MEMBERS=[];
+
 
 const INIT_PENDING=[
   { id:"p1", name:"오현미", dept:"자재팀", purpose:"출하 현황 조회", requestedAt:"2026-04-14 08:30", wantedRole:"viewer" },
@@ -260,48 +255,8 @@ const INIT_ROUTES=[
     ]},
 ];
 
-const INIT_POSTS=[
-  { id:"p01", date:"2026-04-14", author:"이창용", time:"06:50",
-    category:"양산출하", client:"기아자동차", requester:"생산팀 한상훈",
-    transport:"자차", carNum:"", urgency:"당일", packaging:"파렛 랩핑", note:"", photos:[],
-    groups:[{ id:"g01", region:"기아 광주공장", assignee:"s1", items:[
-      mkI("i01","브래킷 A형","LOT 0408-3 (500EA)","",true,"김철수","07:45",true,"도금","","회수","자차","A창고","3-B","2"),
-      mkI("i02","샤프트 B형","LOT 0408-7 (300EA)","",false,null,null,true,"열처리","2026-04-16","완료","자차","A창고","3-C","1"),
-      mkI("i03","플레이트 C형","LOT 0409-1 (200EA)","2회",false,null,null,false,"","",null,"자차","B창고","1-A","3"),
-    ]}], visits:[] },
+const INIT_POSTS=[];
 
-  { id:"p02", date:"2026-04-14", author:"이창용", time:"08:00",
-    category:"일반출하", client:"예성도장", requester:"영업팀 윤지혜",
-    transport:"퀵", carNum:"", urgency:"긴급", packaging:"박스 포장", note:"", photos:[],
-    groups:[{ id:"g02", region:"하남·평동", assignee:"s2", items:[
-      mkI("i04","예성도장","0408-8","",true,"이영희","09:00",true,"도장","","회수","퀵","C창고","2-B","1"),
-      mkI("i05","넥스오토","GZ힌지","",false,null,null,false,"","",null,"퀵","A창고","5-A","2"),
-      mkI("i06","오케이정밀","0410-9","2회",false,null,null,false,"","",null,"퀵","B창고","2-C","1"),
-    ]}], visits:[] },
-
-  { id:"p03", date:"2026-04-14", author:"이창용", time:"07:00",
-    category:"사내방문", client:"", requester:"", transport:"", carNum:"",
-    urgency:"일반", packaging:"", note:"", photos:[], groups:[],
-    visits:[
-      { id:"v1", visitorName:"김민수", dept:"생산1팀", items:"완제품 파렛 2EA", purpose:"라인 투입", transport:"직접", carNum:"", recordedBy:"김철수", recordedAt:"08:20", photos:[] },
-      { id:"v2", visitorName:"이수진", dept:"품질팀",  items:"반제품 샘플 5EA", purpose:"검사용",   transport:"용차",  carNum:"경기 34나 7890", recordedBy:"이영희", recordedAt:"09:45", photos:[] },
-    ] },
-
-  { id:"p04", date:"2026-04-13", author:"이창용", time:"07:00",
-    category:"양산출하", client:"기아자동차", requester:"생산팀 한상훈",
-    transport:"자차", carNum:"", urgency:"당일", packaging:"파렛 랩핑", note:"", photos:[],
-    groups:[{ id:"g04", region:"기아 광주공장", assignee:"s1", items:[
-      mkI("i10","브래킷 A형","LOT 0407-3 (500EA)","",true,"김철수","09:00",false,"","",null,"자차","A창고","3-B","1"),
-    ]}], visits:[] },
-
-  { id:"p05", date:"2026-04-13", author:"이창용", time:"08:30",
-    category:"일반출하", client:"그린피아", requester:"영업팀 윤지혜",
-    transport:"자차", carNum:"", urgency:"일반", packaging:"낱개 포장", note:"", photos:[],
-    groups:[{ id:"g05", region:"HK", assignee:"s3", items:[
-      mkI("i11","그린피아","0407-39","2회",true,"박민준","10:10",false,"","",null,"자차","A창고","4-A","1"),
-      mkI("i12","광주쇼트","0408-18","",false,null,null,true,"CNC","2026-04-17","의뢰출하","자차","B창고","3-A","2"),
-    ]}], visits:[] },
-];
 
 /* ══ 공통 UI 컴포넌트 ══ */
 function Hdr({title,sub,onBack,right}){
@@ -322,13 +277,10 @@ function Hdr({title,sub,onBack,right}){
 }
 
 function PBar({pct,color,h=6}){
-  const bgColor = pct===100
-    ? "linear-gradient(90deg,"+C.done+",#00C896)"
-    : "linear-gradient(90deg,"+(color||C.accent)+","+(color||C.accentL||C.accent)+")";
   return(
     <div style={{height:h,background:C.border,borderRadius:99,overflow:"hidden"}}>
-      <div style={{width:pct+"%",height:"100%",borderRadius:99,transition:"width 0.4s",
-        background:bgColor}}/>
+      <div style={{width:`${pct}%`,height:"100%",borderRadius:99,transition:"width 0.4s",
+        background:pct===100?`linear-gradient(90deg,${C.done},#00C896)`:`linear-gradient(90deg,${color||C.accent},${color||C.accentL||C.accent})`}}/>
     </div>
   );
 }
@@ -410,9 +362,9 @@ function TransBadge({transport}){
 
 function LocBadge({loc}){
   if(!loc?.zone) return null;
-  const txt=loc.zone+(loc.rack?" "+loc.rack:"")+(loc.pallet?"-"+loc.pallet:"");
+  const txt=`${loc.zone}${loc.rack?` ${loc.rack}`:""}${loc.pallet?`-${loc.pallet}`:""}`;
   return(
-    <span style={{background:`${C.loc}15`,color:C.loc,border:`1px solid ${C.loc}44`,
+    <span style={{background:C.loc+"15",color:C.loc,border:`1px solid ${C.loc}44`,
       fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:10}}>
       📍{txt}
     </span>
@@ -423,7 +375,7 @@ function QBadge({post}){
   if(post.category==="사내방문") return null;
   const {ok}=checkQuality(post);
   return(
-    <span style={{background:ok?(C.done+"15"):(C.danger+"10"),color:ok?C.done:C.danger,
+    <span style={{background:ok?C.done+"15":C.danger+"10",color:ok?C.done:C.danger,
       border:`1px solid ${ok?C.done:C.danger}44`,fontSize:10,fontWeight:800,
       padding:"2px 7px",borderRadius:10}}>
       {ok?"✓ 완전":"⚠ 정보부족"}
@@ -581,29 +533,24 @@ function Login({members,pendingCount,onLogin,onRequest}){
   const [pw,setPw]=useState("");
   const [pwError,setPwError]=useState(false);
   const [showPw,setShowPw]=useState(false);
-
   const roles=[
     {key:"admin",label:"관리자",color:C.accent,icon:"👑",users:members.filter(u=>u.role==="admin")},
     {key:"staff",label:"출하팀",color:C.general,icon:"👷",users:members.filter(u=>u.role==="staff")},
     {key:"viewer",label:"조회",color:C.done,icon:"👁️",users:members.filter(u=>u.role==="viewer")},
   ];
-
   function handleLogin(){
     if(!sel) return;
-    if(!sel.password){ setPwError(true); return; }
-    if(pw!==sel.password){ setPwError(true); return; }
-    setPwError(false);
+    if(sel.password&&pw!==sel.password){ setPwError(true); return; }
     onLogin(sel);
   }
-
-  const hasPw = sel && !!sel.password;
 
   return(
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"36px 20px"}}>
       <div style={{textAlign:"center",marginBottom:28}}>
-        <div style={{width:76,height:76,borderRadius:24,background:"linear-gradient(145deg,"+C.accentL+","+C.accent+")",margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:38,boxShadow:"0 8px 24px rgba(18,89,195,0.35)"}}>🏭</div>
+        <div style={{width:72,height:72,borderRadius:20,background:C.accent,margin:"0 auto 14px",
+          display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,boxShadow:C.shadowM}}>🏭</div>
         <div style={{fontSize:22,fontWeight:900,color:C.text}}>지용금속 출하관리</div>
-        <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름 선택 → 비밀번호 입력 후 접속</div>
+        <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름을 선택해 접속하세요</div>
       </div>
       <div style={{width:"100%",maxWidth:360}}>
         {roles.map(({key,label,color,icon,users})=>{
@@ -619,8 +566,8 @@ function Login({members,pendingCount,onLogin,onRequest}){
                 ? users.map(u=>(
                   <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                     style={{padding:"14px 16px",cursor:"pointer",marginBottom:8,
-                      border:"2px solid "+(sel?.id===u.id?color:C.border),
-                      background:sel?.id===u.id?(color+"08"):C.card}}>
+                      border:`2px solid ${sel?.id===u.id?color:C.border}`,
+                      background:sel?.id===u.id?`${color}08`:C.card}}>
                     <div style={{display:"flex",alignItems:"center",gap:12}}>
                       <Avatar name={u.name} color={color} size={46}/>
                       <div style={{flex:1}}>
@@ -639,14 +586,17 @@ function Login({members,pendingCount,onLogin,onRequest}){
                     {users.map(u=>(
                       <Card key={u.id} onClick={()=>{setSel(sel?.id===u.id?null:u);setPw("");setPwError(false);}}
                         style={{padding:"12px 10px",cursor:"pointer",
-                          border:"2px solid "+(sel?.id===u.id?color:C.border),
-                          background:sel?.id===u.id?(color+"08"):C.card,
+                          border:`2px solid ${sel?.id===u.id?color:C.border}`,
+                          background:sel?.id===u.id?`${color}08`:C.card,
                           display:"flex",flexDirection:"column",alignItems:"center",gap:5,position:"relative"}}>
                         <Avatar name={u.name} color={color} size={36}/>
                         <div style={{textAlign:"center"}}>
                           <div style={{fontSize:13,fontWeight:700,color:C.text}}>{u.name}</div>
                           <div style={{fontSize:10,color:C.sub,marginTop:1}}>{u.dept}{u.region?` · ${u.region}`:""}</div>
-                          {u.specialty&&<div style={{fontSize:9,fontWeight:700,marginTop:2,color:u.specialty==="양산"?C.yangsan:C.general}}>{u.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}</div>}
+                          {u.specialty&&<div style={{fontSize:9,fontWeight:700,marginTop:2,
+                            color:u.specialty==="양산"?C.yangsan:C.general}}>
+                            {u.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}
+                          </div>}
                         </div>
                         {sel?.id===u.id&&<span style={{position:"absolute",top:6,right:8,color,fontSize:14,fontWeight:900}}>✓</span>}
                       </Card>
@@ -657,55 +607,36 @@ function Login({members,pendingCount,onLogin,onRequest}){
             </div>
           );
         })}
-
-        {/* 비밀번호 입력 영역 */}
-        {sel&&(
+        {/* 비밀번호 입력 — 비밀번호 설정된 사용자만 표시 */}
+        {sel&&sel.password&&(
           <div style={{marginBottom:12}}>
-            {!hasPw&&(
-              <div style={{background:`${C.danger}08`,border:`1px solid ${C.danger}33`,borderRadius:12,padding:"14px",marginBottom:8}}>
-                <div style={{fontSize:14,fontWeight:800,color:C.danger,marginBottom:4}}>⛔ 비밀번호 미설정</div>
-                <div style={{fontSize:12,color:C.sub,lineHeight:1.7}}>
-                  {sel.role==="admin"?"관리자 계정에 비밀번호를 설정하세요.":"관리자에게 비밀번호 설정을 요청하세요."}
-                </div>
-              </div>
-            )}
-            {hasPw&&(
-              <div>
-                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>🔒 비밀번호</div>
-                <div style={{position:"relative"}}>
-                  <input
-                    type={showPw?"text":"password"}
-                    value={pw}
-                    onChange={e=>{setPw(e.target.value);setPwError(false);}}
-                    onKeyDown={e=>e.key==="Enter"&&handleLogin()}
-                    placeholder="비밀번호 입력"
-                    autoFocus
-                    style={{width:"100%",background:C.card,
-                      border:`1.5px solid ${pwError?C.danger:C.accent}`,
-                      borderRadius:10,color:C.text,fontSize:15,
-                      padding:"11px 44px 11px 14px",outline:"none",boxSizing:"border-box",
-                      boxShadow:`0 0 0 3px ${pwError?C.danger+"22":C.accent+"18"}`}}/>
-                  <button onClick={()=>setShowPw(v=>!v)}
-                    style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",
-                      background:"none",border:"none",color:C.sub,fontSize:18,cursor:"pointer"}}>
-                    {showPw?"🙈":"👁️"}
-                  </button>
-                </div>
-                {pwError&&<div style={{fontSize:12,color:C.danger,marginTop:5}}>⚠️ 비밀번호가 틀렸습니다</div>}
-              </div>
-            )}
+            <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>🔒 비밀번호</div>
+            <div style={{position:"relative"}}>
+              <input
+                type={showPw?"text":"password"}
+                value={pw} onChange={e=>{setPw(e.target.value);setPwError(false);}}
+                onKeyDown={e=>e.key==="Enter"&&handleLogin()}
+                placeholder="비밀번호 입력"
+                autoFocus
+                style={{width:"100%",background:C.card,border:`1.5px solid ${pwError?C.danger:C.border}`,
+                  borderRadius:10,color:C.text,fontSize:15,padding:"11px 44px 11px 14px",
+                  outline:"none",boxSizing:"border-box"}}/>
+              <button onClick={()=>setShowPw(v=>!v)}
+                style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",
+                  background:"none",border:"none",color:C.sub,fontSize:18,cursor:"pointer"}}>
+                {showPw?"🙈":"👁️"}
+              </button>
+            </div>
+            {pwError&&<div style={{fontSize:12,color:C.danger,marginTop:5}}>⚠️ 비밀번호가 틀렸습니다</div>}
           </div>
         )}
-
-        <button onClick={handleLogin} disabled={!sel||!hasPw}
+        <button onClick={handleLogin}
           style={{width:"100%",padding:"15px 0",marginBottom:12,
-            background:(!sel||!hasPw)?C.muted:`linear-gradient(135deg,${C.accentL},${C.accent})`,
-            color:(!sel||!hasPw)?C.dim:"#fff",
-            border:"none",borderRadius:14,fontSize:16,fontWeight:800,
-            cursor:(!sel||!hasPw)?"not-allowed":"pointer",
-            transition:"all 0.2s",
-            boxShadow:(!sel||!hasPw)?"none":"0 4px 14px rgba(18,89,195,0.35)"}}>
-          {!sel?"이름을 선택하세요":!hasPw?"비밀번호 설정 후 접속 가능":`${sel.name}으로 접속`}
+            background:sel?"linear-gradient(135deg,"+C.accentL+","+C.accent+")":C.muted,
+            color:sel?"#fff":C.dim,border:"none",borderRadius:14,fontSize:16,fontWeight:800,
+            cursor:sel?"pointer":"not-allowed",transition:"all 0.2s",
+            boxShadow:sel?"0 4px 14px rgba(18,89,195,0.35)":"none"}}>
+          {sel?`${sel.name}으로 접속`:"이름을 선택하세요"}
         </button>
         <button onClick={onRequest}
           style={{width:"100%",padding:"13px 0",background:C.card,color:C.sub,
@@ -716,7 +647,6 @@ function Login({members,pendingCount,onLogin,onRequest}){
     </div>
   );
 }
-
 
 /* ══ 접속 신청 ══ */
 function AccessRequest({onSubmit,onBack}){
@@ -738,7 +668,7 @@ function AccessRequest({onSubmit,onBack}){
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="접속 신청" sub="관리자 승인 후 사용 가능" onBack={onBack}/>
       <div style={{padding:"18px 16px 80px"}}>
-        <div style={{background:`${C.accent}10`,border:`1px solid ${C.accent}30`,borderRadius:12,padding:"12px 14px",marginBottom:20,fontSize:12,color:C.accent}}>
+        <div style={{background:C.accent+"10",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"12px 14px",marginBottom:20,fontSize:12,color:C.accent}}>
           📋 정보를 입력하면 관리자가 검토 후 승인합니다.
         </div>
         <div style={{marginBottom:14}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>이름 *</div><input value={name} onChange={e=>setName(e.target.value)} placeholder="실명 입력" style={inp}/></div>
@@ -748,7 +678,7 @@ function AccessRequest({onSubmit,onBack}){
           <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:10}}>접속 유형</div>
           <div style={{display:"flex",gap:10}}>
             {[{k:"viewer",i:"👁️",l:"조회",d:"현황 확인"},{k:"staff",i:"👷",l:"출하팀",d:"출하 실행"}].map(r=>{
-              const rc={viewer:C.done,staff:C.general}[r.k];
+              const rc=r.k==="viewer"?C.done:C.general;
               const sel=role===r.k;
               return(
                 <Card key={r.k} onClick={()=>setRole(r.k)}
@@ -777,193 +707,57 @@ function AccessRequest({onSubmit,onBack}){
 }
 
 /* ══ 관리자 대시보드 ══ */
-function AdminDash({posts,routes,members,pending,user,requests,onOpen,onNew,onRoute,onLocation,onStats,onUserMgmt,onZoneMgmt,onReqReview,onLogout}){
+function AdminDash({posts,routes,members,pending,requests,onOpen,onNew,onNewInternalShip,onReqReview,onUserMgmt,onZoneMgmt,onRoute,onLocation,onStats,onLogout}){
   const [tab,setTab]=useState("오늘");
   const [clientSearch,setClientSearch]=useState("");
   const today=todayStr();
   const todayPs=posts.filter(p=>p.date===today);
-  const shownBase=tab==="오늘"?todayPs:tab==="전체"?posts:posts.filter(p=>p.category===tab||( tab==="사내출하"&&p.category==="사내출하"));
-  const shown=clientSearch.trim()
-    ?shownBase.filter(p=>(p.client||"").includes(clientSearch)||(p.requester||"").includes(clientSearch)||(p.groups||[]).some(g=>(g.region||"").includes(clientSearch)))
-    :shownBase;
-
-  const getKm=route=>{ let k=0; for(let i=1;i<route.stops.length;i++){ const a=route.stops[i-1],b=route.stops[i]; if(a.lat&&b.lat) k+=haversine(a.lat,a.lng,b.lat,b.lng); } return k; };
-
+  const tabs=["오늘","전체","양산출하","일반출하","사내출하","사내방문"];
+  const shownBase=tab==="오늘"?todayPs:tab==="전체"?posts:posts.filter(p=>p.category===tab);
+  const shown=clientSearch?shownBase.filter(p=>(p.client||"").includes(clientSearch)||(p.requester||"").includes(clientSearch)):shownBase;
   const yangItems=todayPs.filter(p=>p.category==="양산출하").flatMap(p=>p.groups.flatMap(g=>g.items));
   const genItems=todayPs.filter(p=>p.category==="일반출하").flatMap(p=>p.groups.flatMap(g=>g.items));
   const yangPct=yangItems.length?Math.round(yangItems.filter(i=>i.done||i.stage==="회수").length/yangItems.length*100):0;
   const genPct=genItems.length?Math.round(genItems.filter(i=>i.done||i.stage==="회수").length/genItems.length*100):0;
-  const visitCnt=todayPs.filter(p=>p.category==="사내방문").reduce((a,p)=>a+(p.visits||[]).length,0);
-  const todayKm=routes.filter(r=>r.date===today).reduce((a,r)=>a+getKm(r),0);
-  const incompleteReqs=todayPs.filter(p=>p.category!=="사내방문"&&!checkQuality(p).ok).length;
-  const unconfLoc=posts.filter(p=>p.category!=="사내방문").flatMap(p=>p.groups.flatMap(g=>g.items)).filter(i=>!i.done&&i.stage!=="회수"&&!i.loc?.confirmed).length;
-
-  const staffStats=members.filter(u=>u.role==="staff").map(u=>{
-    const its=todayPs.filter(p=>p.category!=="사내방문").flatMap(p=>p.groups.filter(g=>g.assignee===u.id).flatMap(g=>g.items));
-    const done=its.filter(i=>i.done||i.stage==="회수").length;
-    return{...u,total:its.length,done,pct:its.length?Math.round(done/its.length*100):0};
-  });
-
+  const getKm=route=>{let k=0;for(let i=1;i<route.stops.length;i++){const a=route.stops[i-1],b=route.stops[i];if(a.lat&&b.lat)k+=haversine(a.lat,a.lng,b.lat,b.lng);}return k;};
+  const todayKm=routes.filter(r=>r.date===today).reduce((s,r)=>s+getKm(r),0);
+  const pendingCount=(pending||[]).length;
+  const reqPending=(requests||[]).filter(r=>r.status==="대기").length;
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="지용금속 출하관리" sub="👑 관리자"
-        right={
-          <div style={{display:"flex",gap:6}}>
-            <button onClick={onReqReview} style={{position:"relative",background:C.muted,color:C.accent,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer",fontWeight:700}} title="출하 요청 검토">
-              📬{(requests||[]).filter(r=>r.status==="대기").length>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 5px"}}>{(requests||[]).filter(r=>r.status==="대기").length}</span>}
-            </button>
-            <button onClick={onZoneMgmt} style={{background:C.muted,color:C.general,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer",fontWeight:700}} title="창고 구역 관리">🏢</button>
-            <button onClick={onLocation} style={{position:"relative",background:C.muted,color:C.loc,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer"}}>
-              📍{unconfLoc>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.warn,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 5px"}}>{unconfLoc}</span>}
-            </button>
-            <button onClick={onRoute} style={{background:C.muted,color:C.route,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer"}}>🗺️</button>
-            <button onClick={onStats} style={{background:C.muted,color:C.accent,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer"}}>📊</button>
-            {(user.role==="admin"||user.permissions?.canRegister)&&(
-              {(user.role==="admin"||user.permissions?.canRegister)&&(
-                <button onClick={onNew} style={{background:`linear-gradient(135deg,${C.accentL},${C.accent})`,color:"#fff",border:"none",borderRadius:9,padding:"7px 12px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 12px rgba(18,89,195,0.35)"}}>+ 등록</button>
-              )}
-            )}
-            <button onClick={onUserMgmt} style={{position:"relative",background:C.muted,color:C.sub,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:13,cursor:"pointer"}}>
-              👥{pending.length>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 5px"}}>{pending.length}</span>}
-            </button>
-            <button onClick={onLogout} style={{background:C.muted,color:C.sub,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>나가기</button>
-          </div>
-        }/>
-
-      <div style={{padding:"14px 14px 100px"}}>
-        {/* 알림 배너 */}
-        {/* 출하 요청 대기 배너 */}
-        {(requests||[]).filter(r=>r.status==="대기").length>0&&(
-          <div onClick={onReqReview} style={{background:`${C.accent}08`,border:`1px solid ${C.accent}33`,borderRadius:12,padding:"11px 14px",marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:18}}>📬</span>
-            <div style={{flex:1}}>
-              <div style={{fontSize:13,fontWeight:700,color:C.accent}}>출하 요청 대기 {(requests||[]).filter(r=>r.status==="대기").length}건</div>
-              <div style={{fontSize:11,color:C.sub,marginTop:1}}>탭하여 검토 및 일정 확정</div>
-            </div>
-            <span style={{color:C.accent,fontSize:18}}>›</span>
-          </div>
-        )}
-        {incompleteReqs>0&&(
-          <div onClick={onNew} style={{background:`${C.danger}08`,border:`1px solid ${C.danger}33`,borderRadius:12,padding:"11px 14px",marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:18}}>⚠️</span>
-            <div style={{flex:1}}>
-              <div style={{fontSize:13,fontWeight:700,color:C.danger}}>불완전 의뢰서 {incompleteReqs}건</div>
-              <div style={{fontSize:11,color:C.sub}}>정보 부족으로 출하 지연 가능</div>
-            </div>
-            <span style={{color:C.danger,fontSize:18}}>›</span>
-          </div>
-        )}
-        {unconfLoc>0&&(
-          <div onClick={onLocation} style={{background:`${C.loc}08`,border:`1px solid ${C.loc}33`,borderRadius:12,padding:"11px 14px",marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:18}}>📍</span>
-            <div style={{flex:1}}>
-              <div style={{fontSize:13,fontWeight:700,color:C.loc}}>위치 미확인 품목 {unconfLoc}건</div>
-              <div style={{fontSize:11,color:C.sub}}>완제품 위치 확인 필요</div>
-            </div>
-            <span style={{color:C.loc,fontSize:18}}>›</span>
-          </div>
-        )}
-        {pending.length>0&&(
-          <div onClick={onUserMgmt} style={{background:`#AF52DE10`,border:`1px solid #AF52DE44`,borderRadius:12,padding:"11px 14px",marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:18}}>⏳</span>
-            <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:C.text}}>접속 승인 대기 {pending.length}건</div></div>
-            <span style={{color:C.sub,fontSize:18}}>›</span>
-          </div>
-        )}
-
-        {/* KPI */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-          {[
-            {label:"양산출하",val:`${yangPct}%`,sub:`${yangItems.filter(i=>i.done||i.stage==="회수").length}/${yangItems.length}건`,color:C.yangsan,icon:"🏭"},
-            {label:"일반출하",val:`${genPct}%`,sub:`${genItems.filter(i=>i.done||i.stage==="회수").length}/${genItems.length}건`,color:C.general,icon:"📦"},
-            {label:"오늘 운행",val:`${todayKm.toFixed(0)}km`,sub:`${routes.filter(r=>r.date===today).length}명 운행`,color:C.route,icon:"🚗"},
-            {label:"사내방문",val:`${visitCnt}건`,sub:"오늘 방문",color:C.visit,icon:"🚶"},
-            {label:"사내출하",val:`${todayPs.filter(p=>p.category==="사내출하").length}건`,sub:"오늘 사내",color:C.process,icon:"🏢"},
-          ].map(k=>(
-            <Card key={k.label} style={{padding:"14px",position:"relative",overflow:"hidden"}}>
-              <div style={{position:"absolute",top:-6,right:-4,fontSize:40,opacity:0.07}}>{k.icon}</div>
-              <div style={{fontSize:10,color:C.sub,fontWeight:700,marginBottom:5}}>{k.label}</div>
-              <div style={{fontSize:28,fontWeight:900,fontFamily:"monospace",color:k.color,lineHeight:1}}>{k.val}</div>
-              <div style={{fontSize:11,color:C.sub,marginTop:3}}>{k.sub}</div>
-            </Card>
-          ))}
+      <Hdr title="지용금속 출하관리" sub="관리자" right={
+        <div style={{display:"flex",gap:6}}>
+          <button onClick={onReqReview} style={{position:"relative",background:C.muted,color:C.accent,border:"1px solid "+C.border,borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+            요청{reqPending>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{reqPending}</span>}
+          </button>
+          <button onClick={onZoneMgmt} style={{background:C.muted,color:C.general,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>창고</button>
+          <button onClick={onStats} style={{background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>통계</button>
+          <button onClick={onNew} style={{background:C.accent,color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:800,cursor:"pointer"}}>+등록</button>
+          <button onClick={onUserMgmt} style={{position:"relative",background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>
+            팀원{pendingCount>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{pendingCount}</span>}
+          </button>
+          <button onClick={onLogout} style={{background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>나가기</button>
         </div>
-
-        {/* 출하 현황 */}
-        <Card style={{padding:"16px",marginBottom:14}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-            <span style={{fontSize:14,fontWeight:800,color:C.text}}>오늘 출하 현황</span>
-            <button onClick={onStats} style={{background:`${C.accent}12`,color:C.accent,border:"none",borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:700,cursor:"pointer"}}>통계 →</button>
-          </div>
-          {[{label:"🏭 양산출하",color:C.yangsan,items:yangItems},{label:"📦 일반출하",color:C.general,items:genItems}].map(({label,color,items})=>{
-            const d=items.filter(i=>i.done||i.stage==="회수").length;
-            const pct=items.length?Math.round(d/items.length*100):0;
-            return(
-              <div key={label} style={{marginBottom:12}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                  <span style={{fontSize:13,fontWeight:700,color}}>{label}</span>
-                  <span style={{fontSize:13,fontWeight:700,color}}>{pct}% <span style={{color:C.sub,fontSize:11}}>({d}/{items.length})</span></span>
-                </div>
-                <PBar pct={pct} color={color} h={10}/>
-              </div>
-            );
-          })}
-        </Card>
-
-        {/* 직원별 현황 */}
-        <Card style={{padding:"16px",marginBottom:14}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <span style={{fontSize:14,fontWeight:800,color:C.text}}>직원별 오늘 현황</span>
-            <button onClick={onUserMgmt} style={{background:C.muted,color:C.sub,border:`1px solid ${C.border}`,borderRadius:8,padding:"5px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>팀원관리</button>
-          </div>
-          {staffStats.map(u=>(
-            <div key={u.id} style={{background:C.card2,borderRadius:12,padding:"11px 13px",marginBottom:8,border:`1px solid ${C.border}`}}>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:u.total>0?7:0}}>
-                <Avatar name={u.name} color={u.specialty==="양산"?C.yangsan:C.general} size={32}/>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between"}}>
-                    <div>
-                      <span style={{fontSize:14,fontWeight:700,color:C.text}}>{u.name}</span>
-                      <span style={{fontSize:9,fontWeight:700,marginLeft:6,padding:"1px 5px",borderRadius:6,
-                        background:u.specialty==="양산"?(C.yangsan+"15"):(C.general+"15"),
-                        color:u.specialty==="양산"?C.yangsan:C.general}}>
-                        {u.specialty==="양산"?"🏭":"📦"} {u.specialty}
-                      </span>
-                    </div>
-                    <span style={{fontSize:12,fontFamily:"monospace",fontWeight:700,
-                      color:u.pct===100?C.done:u.pct>50?C.warn:C.accent}}>
-                      {u.total?`${u.done}/${u.total}건`:"미배정"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              {u.total>0&&<PBar pct={u.pct} color={u.pct===100?C.done:u.specialty==="양산"?C.yangsan:C.general} h={5}/>}
-            </div>
-          ))}
-        </Card>
-
-        {/* 업체 검색 */}
+      }/>
+      <div style={{display:"flex",gap:10,padding:"12px 14px",overflowX:"auto"}}>
+        {[{label:"양산출하",val:yangPct+"%",color:C.yangsan},{label:"일반출하",val:genPct+"%",color:C.general},{label:"오늘운행",val:todayKm.toFixed(0)+"km",color:C.route}].map(x=>(
+          <Card key={x.label} style={{flex:"0 0 auto",padding:"12px 14px",minWidth:90,textAlign:"center"}}>
+            <div style={{fontSize:11,color:x.color,fontWeight:800}}>{x.label}</div>
+            <div style={{fontSize:22,fontWeight:900,color:x.color,fontFamily:"monospace"}}>{x.val}</div>
+          </Card>
+        ))}
+      </div>
+      <div style={{background:C.surface,borderBottom:"1px solid "+C.border,display:"flex",overflowX:"auto"}}>
+        {tabs.map(t=>(
+          <button key={t} onClick={()=>setTab(t)} style={{padding:"12px 14px",background:"none",border:"none",borderBottom:"3px solid "+(tab===t?C.accent:"transparent"),color:tab===t?C.accent:C.sub,fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>{t}</button>
+        ))}
+      </div>
+      <div style={{padding:"12px 14px 100px"}}>
         <div style={{position:"relative",marginBottom:12}}>
           <input value={clientSearch} onChange={e=>setClientSearch(e.target.value)}
-            placeholder="🔍 업체명 / 거래처 검색"
-            style={{width:"100%",background:C.card,border:`1.5px solid ${clientSearch?C.accent:C.border}`,borderRadius:12,padding:"11px 42px 11px 16px",fontSize:14,outline:"none",color:C.text,boxSizing:"border-box",boxShadow:C.shadow,transition:"border-color 0.2s"}}/>
-          {clientSearch&&<button onClick={()=>setClientSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.sub,fontSize:16,cursor:"pointer",lineHeight:1}}>✕</button>}
-        </div>
-
-        {/* 탭 필터 */}
-        <div style={{display:"flex",gap:0,marginBottom:12,background:C.card,borderRadius:12,padding:4,boxShadow:C.shadow}}>
-          {["오늘","전체","양산출하","일반출하","사내출하","사내방문"].map(t=>{
-            const sl=tab===t; const cc=CAT[t];
-            return(
-              <button key={t} onClick={()=>setTab(t)}
-                style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:10,fontWeight:700,border:"none",
-                  background:sl?(cc?cc.color:C.accent):"transparent",
-                  color:sl?"#fff":C.sub,cursor:"pointer",transition:"all 0.15s"}}>
-                {cc?cc.icon:t==="오늘"?"📅":"📋"}<br/>
-                {t==="양산출하"?"양산":t==="일반출하"?"일반":t==="사내출하"?"사내":t==="사내방문"?"방문":t}
-              </button>
-            );
-          })}
+            placeholder="🔍 업체명 검색"
+            style={{width:"100%",background:C.card,border:"1.5px solid "+(clientSearch?C.accent:C.border),borderRadius:12,padding:"11px 40px 11px 16px",fontSize:14,outline:"none",color:C.text,boxSizing:"border-box"}}/>
+          {clientSearch&&<button onClick={()=>setClientSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.sub,fontSize:16,cursor:"pointer"}}>✕</button>}
         </div>
         {shown.map(p=><PostCard key={p.id} post={p} onClick={()=>onOpen(p.id)}/>)}
       </div>
@@ -998,7 +792,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="지용금속 출하관리"
-        sub={isStaff?(user.name+" · "+(user.specialty==="양산"?"🏭 양산전담":"📦 일반담당")):(user.name+" · "+user.dept)}
+        sub={isStaff?`${user.name} · ${user.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}`:`${user.name} · ${user.dept}`}
         right={
           <div style={{display:"flex",gap:7}}>
             {isStaff&&<button onClick={onLocation} style={{background:C.muted,color:C.loc,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 9px",fontSize:13,cursor:"pointer"}}>📍</button>}
@@ -1010,15 +804,15 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
               <button onClick={onNewInternalShip} style={{background:`linear-gradient(135deg,${C.process},#0F7A56)`,color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>🏢사내</button>
             )}
             {(user.permissions?.canRegister)&&(
-              <button onClick={onNew} style={{background:`linear-gradient(135deg,${C.accentL},${C.accent})`,color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ 등록</button>
+              <button onClick={onNew} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ 등록</button>
             )}
-            <button onClick={onNewRequest} style={{background:`linear-gradient(135deg,${C.accentL},${C.accent})`,color:"#fff",border:"none",borderRadius:9,padding:"7px 11px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+요청</button>
+            <button onClick={onNewRequest} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:9,padding:"7px 11px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+요청</button>
             <button onClick={onLogout} style={{background:C.muted,color:C.sub,border:`1px solid ${C.border}`,borderRadius:9,padding:"7px 10px",fontSize:12,cursor:"pointer"}}>나가기</button>
           </div>
         }/>
 
       {isStaff&&(
-        <div style={{background:`${C.route}08`,borderBottom:`1px solid ${C.route}22`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{background:C.route+"08",borderBottom:`1px solid ${C.route}22`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <span style={{fontSize:12,color:C.route,fontWeight:700}}>🚗 오늘 운행: <strong style={{fontFamily:"monospace"}}>{myKm.toFixed(1)}km</strong> · {myRoute?.stops.length||0}개 정류장</span>
           <button onClick={onRoute} style={{background:C.route,color:"#fff",border:"none",borderRadius:8,padding:"5px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}}>기록</button>
         </div>
@@ -1057,7 +851,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
                   <div key={post.id} onClick={()=>onOpen(post.id)}
                     style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
                     <div style={{width:40,height:40,borderRadius:"50%",flexShrink:0,
-                      background:pct===100?`${C.done}15`:pct>50?`${C.warn}10`:C.muted,
+                      background:pct===100?C.done+"15":pct>50?C.warn+"10":C.muted,
                       border:`2px solid ${pct===100?C.done:pct>50?C.warn:C.border}`,
                       display:"flex",alignItems:"center",justifyContent:"center"}}>
                       <span style={{fontSize:pct===100?16:11,fontWeight:900,color:pct===100?C.done:pct>50?C.warn:C.sub}}>{pct===100?"✓":pct+"%"}</span>
@@ -1097,7 +891,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
                       </div>
                       <div style={{fontSize:26,fontWeight:900,fontFamily:"monospace",color:pct===100?C.done:pct>50?C.warn:C.accent}}>{pct}%</div>
                     </div>
-                    {unconf>0&&<div style={{background:`${C.loc}10`,borderRadius:8,padding:"6px 10px",marginBottom:8,fontSize:11,color:C.loc,fontWeight:700}}>📍 위치 미확인 {unconf}건 — 창고 확인 후 출발하세요</div>}
+                    {unconf>0&&<div style={{background:C.loc+"10",borderRadius:8,padding:"6px 10px",marginBottom:8,fontSize:11,color:C.loc,fontWeight:700}}>📍 위치 미확인 {unconf}건 — 창고 확인 후 출발하세요</div>}
                     <PBar pct={pct} color={cc.color} h={6}/>
                     {group.items.slice(0,2).map(i=>i.loc?.zone&&(
                       <div key={i.id} style={{fontSize:10,color:C.sub,marginTop:4}}>
@@ -1161,12 +955,12 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
       <Hdr title={post.category} onBack={onBack}
         right={
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <span style={{background:pct===100?(C.done+"15"):(C.warn+"15"),color:pct===100?C.done:C.warn,border:`1px solid ${pct===100?C.done:C.warn}55`,borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
+            <span style={{background:pct===100?C.done+"15":C.warn+"15",color:pct===100?C.done:C.warn,border:`1px solid ${pct===100?C.done:C.warn}55`,borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
             {isAdmin&&<Btn onClick={()=>setConfirmDel(true)} color={C.danger} outline small>삭제</Btn>}
           </div>
         }/>
 
-      {!canEdit&&<div style={{background:`${C.accent}08`,borderBottom:`1px solid ${C.accent}22`,padding:"9px 16px",fontSize:11,color:C.accent}}>👁️ 조회 전용 화면</div>}
+      {!canEdit&&<div style={{background:C.accent+"08",borderBottom:`1px solid ${C.accent}22`,padding:"9px 16px",fontSize:11,color:C.accent}}>👁️ 조회 전용 화면</div>}
 
       <div style={{padding:"14px 14px 80px"}}>
         {/* 헤더 카드 */}
@@ -1184,15 +978,2373 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
               {[
                 {l:"의뢰자",v:post.requester||"–"},
                 {l:"포장형태",v:post.packaging||"–"},
+                {l:"운송방법",v:`${TRANS_ICON[post.transport]||""} ${post.transport||"자차"}`},
+                {l:"날짜",v:`${post.date} ${post.time}`},
+              ].map(({l,v})=>(
+                <div key={l}>
+                  <div style={{fontSize:10,color:C.sub,fontWeight:700,marginBottom:2}}>{l}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:C.text}}>{v}</div>
+                </div>
+              ))}
+            </div>
+            {post.note&&<div style={{marginTop:8,fontSize:12,color:C.sub,borderTop:`1px solid ${C.border}`,paddingTop:8}}>💬 {post.note}</div>}
+          </div>
 
+          {!ok&&canEdit&&(
+            <div style={{background:C.danger+"08",borderRadius:10,padding:"10px 12px",marginBottom:10,border:`1px solid ${C.danger}22`}}>
+              <div style={{fontSize:12,fontWeight:700,color:C.danger,marginBottom:4}}>⚠️ 불완전 의뢰서 — 의뢰자에게 확인 필요</div>
+              {missing.map(m=><div key={m} style={{fontSize:11,color:C.danger}}>· {m} 누락</div>)}
+            </div>
+          )}
 
-function App(){
-  return(
-    <div style={{padding:20,fontFamily:"sans-serif"}}>
-      <h1>✅ 첫 1062줄 OK</h1>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{flex:1}}><PBar pct={pct} color={cc.color} h={8}/></div>
+            <span style={{fontSize:15,fontWeight:700,minWidth:44,color:pct===100?C.done:cc.color}}>{pct}%</span>
+          </div>
+        </Card>
+
+        {/* 첨부사진 */}
+        <Card style={{padding:"14px",marginBottom:12}}>
+          <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10}}>📎 첨부사진</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {post.photos.map((src,i)=>(
+              <div key={i} onClick={()=>setViewImg(src)} style={{width:80,height:80,borderRadius:10,overflow:"hidden",cursor:"pointer",border:`1px solid ${C.border}`,flexShrink:0}}>
+                <img src={src} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+              </div>
+            ))}
+            {canEdit&&<PhotoUpBtn onAdd={url=>onAddPhoto(post.id,null,null,url)}/>}
+          </div>
+        </Card>
+
+        {/* 그룹별 항목 */}
+        {safeGroups.map(group=>{
+          const assignedUser=members.find(u=>u.id===group.assignee);
+          const canToggle=canEdit&&(isAdmin||(isStaff&&user.id===group.assignee));
+          return(
+            <Card key={group.id} style={{marginBottom:12}}>
+              <div style={{background:C.card2,padding:"12px 14px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:4,height:18,borderRadius:2,background:cc.color}}/>
+                <div>
+                  <div style={{fontSize:15,fontWeight:800,color:C.text}}>{group.region}</div>
+                  {assignedUser&&<div style={{fontSize:11,color:C.sub,marginTop:1}}>담당: <span style={{color:C.general,fontWeight:700}}>{assignedUser.name}</span></div>}
+                </div>
+              </div>
+              {group.items.map((item,idx)=>{
+                const isProc=item.hasProc&&item.stage!==null;
+                const dl=isProc?daysLeft(item.dueDate):null;
+                const over=isProc&&isOD(item.dueDate,item.stage);
+                const itemDone=item.stage?"회수"===item.stage:item.done;
+                const loc=item.loc;
+                return(
+                  <div key={item.id} style={{background:itemDone?C.done+"08":C.card,padding:"13px 14px",borderBottom:idx<group.items.length-1?`1px solid ${C.border}`:"none"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{flex:1}}>
+                        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:4}}>
+                          <span style={{fontSize:14,fontWeight:700,color:itemDone?C.sub:C.text,textDecoration:itemDone?"line-through":"none"}}>{item.text}</span>
+                          {item.extra&&<span style={{background:C.warn+"15",color:C.warn,fontSize:11,fontWeight:700,padding:"1px 6px",borderRadius:5}}>{item.extra}</span>}
+                          {item.hasProc&&<span style={{background:C.process+"12",color:C.process,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:5}}>⚙️{item.procType}</span>}
+                          <TransBadge transport={item.transport}/>
+                        </div>
+                        {item.detail&&<div style={{fontSize:11,color:C.sub,fontFamily:"monospace",marginBottom:3}}>{item.detail}</div>}
+                        {/* 위치 */}
+                        {loc&&(
+                          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4,flexWrap:"wrap"}}>
+                            <LocBadge loc={loc}/>
+                            {loc.memo&&<span style={{fontSize:10,color:C.sub}}>{loc.memo}</span>}
+                            {!loc.confirmed&&canToggle&&(
+                              <button onClick={()=>onUpdateLoc(post.id,item.id,{...loc,confirmed:true})}
+                                style={{background:C.done+"15",border:`1px solid ${C.done}44`,color:C.done,borderRadius:8,padding:"2px 8px",fontSize:10,fontWeight:700,cursor:"pointer"}}>
+                                위치확인 ✓
+                              </button>
+                            )}
+                            {loc.confirmed&&<span style={{fontSize:10,color:C.done,fontWeight:700}}>✓ 확인됨</span>}
+                          </div>
+                        )}
+                        {!isProc&&item.done&&<div style={{fontSize:11,color:C.done}}>✓ {item.doneBy} · {item.doneAt}</div>}
+                        {isProc&&(
+                          <div>
+                            <div style={{fontSize:11,color:over?C.danger:C.sub}}>
+                              📅 납기: {item.dueDate}
+                              {dl!==null&&item.stage!=="회수"&&<span style={{color:over?C.danger:dl<=2?C.warn:C.done,fontWeight:700,marginLeft:4}}>{over?`⚠️ ${Math.abs(dl)}일 초과`:`D-${dl}`}</span>}
+                            </div>
+                            <div style={{display:"flex",gap:4,marginTop:6}}>
+                              {STAGES.map((s,si)=>{
+                                const active=(item.stage?STAGES.indexOf(item.stage):0)>=si;
+                                return(
+                                  <div key={s} style={{flex:1,textAlign:"center"}}>
+                                    <div style={{height:4,background:active?STAGE_COLOR[s]:C.border,borderRadius:99,marginBottom:3,transition:"background 0.3s"}}/>
+                                    <div style={{fontSize:9,color:active?STAGE_COLOR[s]:C.dim,fontWeight:700}}>{s}</div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {isProc
+                        ?<StageBtn item={item} onAdvance={canToggle?()=>onAdvanceStage(post.id,group.id,item.id):null} canEdit={canToggle}/>
+                        :<CircleBtn done={item.done} onToggle={canToggle?()=>onToggle(post.id,group.id,item.id):null} size={44}/>
+                      }
+                    </div>
+                    {loc?.photo&&(
+                      <div style={{marginTop:8,width:80,height:80,borderRadius:9,overflow:"hidden",border:`1px solid ${C.border}`,cursor:"pointer"}} onClick={()=>setViewImg(loc.photo)}>
+                        <img src={loc.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                      </div>
+                    )}
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>
+                      {item.photos.map((src,i)=>(
+                        <div key={i} onClick={()=>setViewImg(src)} style={{width:58,height:58,borderRadius:8,overflow:"hidden",cursor:"pointer",border:`1px solid ${C.border}`,flexShrink:0}}>
+                          <img src={src} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                        </div>
+                      ))}
+                      {canEdit&&<PhotoUpBtn onAdd={url=>onAddPhoto(post.id,group.id,item.id,url)} small/>}
+                    </div>
+                  </div>
+                );
+              })}
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }
+
+/* ══ 3단계 출하 의뢰 등록 ══ */
+function NewPost({members,zones,onBack,onSave}){
+  const [step,setStep]=useState(1);
+  const [date,setDate]=useState(todayStr());
+  const [cat,setCat]=useState("양산출하");
+  const [client,setClient]=useState("");
+  const [requester,setRequester]=useState("");
+  const [urgency,setUrgency]=useState("일반");
+  const [packaging,setPackaging]=useState("");
+  const [note,setNote]=useState("");
+  const [transport,setTransport]=useState("자차");
+  const [carNum,setCarNum]=useState("");
+  const [photos,setPhotos]=useState([]);
+  const [groups,setGroups]=useState([{id:uid(),region:"",assignee:"",items:[newItem()]}]);
+  const cc=CAT[cat];
+  const inp={background:C.card,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"10px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+
+  const addGroup=()=>setGroups(g=>[...g,{id:uid(),region:"",assignee:"",items:[newItem()]}]);
+  const rmGroup=gid=>setGroups(g=>g.filter(x=>x.id!==gid));
+  const setReg=(gid,v)=>setGroups(g=>g.map(x=>x.id===gid?{...x,region:v}:x));
+  const setAsgn=(gid,v)=>setGroups(g=>g.map(x=>x.id===gid?{...x,assignee:x.assignee===v?"":v}:x));
+  const addItm=gid=>setGroups(g=>g.map(x=>x.id===gid?{...x,items:[...x.items,newItem()]}:x));
+  const rmItm=(gid,iid)=>setGroups(g=>g.map(x=>x.id===gid?{...x,items:x.items.filter(i=>i.id!==iid)}:x));
+  const setItm=(gid,iid,k,v)=>setGroups(g=>g.map(x=>x.id===gid?{...x,items:x.items.map(i=>i.id===iid?{...i,[k]:v}:i)}:x));
+  const setLoc=(gid,iid,k,v)=>setGroups(g=>g.map(x=>x.id===gid?{...x,items:x.items.map(i=>i.id===iid?{...i,loc:{...i.loc,[k]:v}}:i)}:x));
+
+  const step1Valid=client.trim()&&requester.trim()&&urgency&&packaging.trim();
+  const step2Valid=groups.some(g=>g.items.some(i=>i.text.trim()&&i.detail.trim()));
+  const tempPost={category:cat,client,requester,urgency,packaging,groups};
+  const {ok:finalOk,missing}=checkQuality(tempPost);
+
+  function save(){
+    onSave({
+      id:uid(), date, author:"이창용", time:nowTime(),
+      category:cat, client:client.trim(), requester:requester.trim(),
+      transport, carNum:transport!=="자차"?carNum:"",
+      urgency, packaging:packaging.trim(), note:note.trim(), photos, groups, visits:[]
+    });
+  }
+
+  const stepLabels=["기본 정보","품목 & 위치","최종 확인"];
+
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      <Hdr title="출하 의뢰 등록" onBack={onBack}/>
+
+      {/* 단계 바 */}
+      <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,padding:"14px 16px"}}>
+        <div style={{display:"flex",gap:0,marginBottom:10}}>
+          {[1,2,3].map(s=>(
+            <div key={s} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+              <div style={{width:28,height:28,borderRadius:"50%",
+                background:step>s?C.done:step===s?C.accent:C.border,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                fontSize:12,fontWeight:800,color:step>=s?"#fff":C.sub,transition:"all 0.2s"}}>
+                {step>s?"✓":s}
+              </div>
+              <div style={{fontSize:10,color:step>=s?C.accent:C.sub,fontWeight:step===s?800:400}}>{stepLabels[s-1]}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{height:4,background:C.border,borderRadius:99,overflow:"hidden"}}>
+          <div style={{width:`${((step-1)/2)*100}%`,height:"100%",background:C.accent,borderRadius:99,transition:"width 0.3s"}}/>
+        </div>
+      </div>
+
+      <div style={{padding:"16px 16px 100px"}}>
+        {/* ─ 단계 1: 기본 정보 ─ */}
+        {step===1&&(
+          <>
+            <div style={{background:C.accent+"08",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.accent,lineHeight:1.8}}>
+              📋 출하팀이 즉시 출발할 수 있도록 <strong>모든 필수 항목</strong>을 정확히 입력해 주세요
+            </div>
+            <Card style={{padding:"16px",marginBottom:14}}>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:7}}>날짜</div>
+                <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={inp}/>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>출하 구분</div>
+                <div style={{display:"flex",gap:8}}>
+                  {["양산출하","일반출하","사내출하"].map(c=>{ const ccc=CAT[c]||CAT["일반출하"]; const sel=cat===c; return(
+                    <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
+                      {ccc.icon}<br/>{c.replace("출하","")}
+                    </button>
+                  );})}
+                </div>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:7}}>거래처 *</div>
+                <input value={client} onChange={e=>setClient(e.target.value)} placeholder="예: 기아자동차 광주공장" style={inp}/>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:7}}>의뢰자 * <span style={{color:C.sub,fontWeight:400,fontSize:11}}>(이름+부서 명기)</span></div>
+                <input value={requester} onChange={e=>setRequester(e.target.value)} placeholder="예: 생산팀 한상훈" style={inp}/>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:8}}>긴급도 *</div>
+                <div style={{display:"flex",gap:8}}>
+                  {URGENCY.map(u=>{ const c=URG_COLOR[u]; const sel=urgency===u; return(
+                    <button key={u} onClick={()=>setUrgency(u)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:13,fontWeight:800,border:`2px solid ${sel?c:C.border}`,background:sel?`${c}15`:C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
+                      {URG_ICON[u]} {u}
+                    </button>
+                  );})}
+                </div>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:7}}>포장 형태 *</div>
+                <input value={packaging} onChange={e=>setPackaging(e.target.value)} placeholder="예: 파렛 랩핑 / 박스 포장 3개" style={inp}/>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>운송 방법</div>
+                <div style={{display:"flex",gap:6,marginBottom:transport!=="자차"&&transport!=="기타"?8:0}}>
+                  {TRANSPORT.map(t=>{ const tc=TRANS_COLOR[t]||C.dim; const sel=transport===t; return(
+                    <button key={t} onClick={()=>setTransport(t)} style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:11,fontWeight:700,border:`1.5px solid ${sel?tc:C.border}`,background:sel?`${tc}15`:C.card2,color:sel?tc:C.sub,cursor:"pointer"}}>
+                      {TRANS_ICON[t]}<br/>{t}
+                    </button>
+                  );})}
+                </div>
+                {transport!=="자차"&&transport!=="기타"&&<input value={carNum} onChange={e=>setCarNum(e.target.value)} placeholder={transport==="용차"?"차량번호":"퀵 업체명"} style={{...inp,marginTop:8}}/>}
+              </div>
+              <div>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:7}}>전달사항</div>
+                <input value={note} onChange={e=>setNote(e.target.value)} placeholder="출하팀에 전달할 특이사항" style={inp}/>
+              </div>
+            </Card>
+            <button onClick={()=>step1Valid&&setStep(2)} style={{width:"100%",padding:"14px",borderRadius:14,background:step1Valid?C.accent:C.muted,color:step1Valid?"#fff":C.dim,border:"none",fontSize:15,fontWeight:800,cursor:step1Valid?"pointer":"not-allowed"}}>
+              {step1Valid?"다음: 품목 & 위치 입력 →":"필수 항목을 모두 입력해 주세요"}
+            </button>
+          </>
+        )}
+
+        {/* ─ 단계 2: 품목 & 위치 ─ */}
+        {step===2&&(
+          <>
+            <div style={{background:C.loc+"10",border:`1px solid ${C.loc}30`,borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.loc,lineHeight:1.8}}>
+              📍 <strong>완제품 위치(구역·선반·파렛)를 반드시 입력</strong>해 주세요. 위치 불명확 시 출하가 지연됩니다.
+            </div>
+            {groups.map(group=>(
+              <Card key={group.id} style={{marginBottom:12}}>
+                <div style={{background:C.card2,padding:"12px 14px",borderBottom:`1px solid ${C.border}`}}>
+                  <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:12}}>
+                    <div style={{width:4,height:20,borderRadius:2,background:cc.color,flexShrink:0}}/>
+                    <input placeholder={cat==="양산출하"?"납품처·공장명":"지역·거래처명"} value={group.region} onChange={e=>setReg(group.id,e.target.value)} style={{...inp,fontWeight:700,fontSize:14}}/>
+                    {groups.length>1&&<button onClick={()=>rmGroup(group.id)} style={{background:C.danger+"10",border:`1px solid ${C.danger}33`,color:C.danger,borderRadius:8,padding:"7px 10px",cursor:"pointer",flexShrink:0}}>✕</button>}
+                  </div>
+                  <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:8}}>담당자 배정</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    {members.filter(u=>u.role==="staff").map(u=>(
+                      <button key={u.id} onClick={()=>setAsgn(group.id,u.id)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${group.assignee===u.id?C.general:C.border}`,background:group.assignee===u.id?C.general+"15":C.card,color:group.assignee===u.id?C.general:C.sub,cursor:"pointer"}}>
+                        {u.name} {u.specialty&&<span style={{fontSize:9}}>{u.specialty==="양산"?"🏭":"📦"}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{padding:"12px 14px"}}>
+                  {group.items.map(item=>(
+                    <div key={item.id} style={{background:C.card2,borderRadius:12,padding:"12px",marginBottom:12,border:`1px solid ${C.border}`}}>
+                      <div style={{display:"flex",gap:8,marginBottom:8}}>
+                        <input placeholder="품목명 *" value={item.text} onChange={e=>setItm(group.id,item.id,"text",e.target.value)} style={{...inp,flex:1,fontWeight:700}}/>
+                        <input placeholder="수량" value={item.extra} onChange={e=>setItm(group.id,item.id,"extra",e.target.value)} style={{...inp,width:68}}/>
+                        {group.items.length>1&&<button onClick={()=>rmItm(group.id,item.id)} style={{background:"none",border:"none",color:C.dim,fontSize:18,cursor:"pointer",flexShrink:0}}>✕</button>}
+                      </div>
+                      <input placeholder="LOT번호 / 규격 *" value={item.detail} onChange={e=>setItm(group.id,item.id,"detail",e.target.value)} style={{...inp,fontSize:12,fontFamily:"monospace",marginBottom:12}}/>
+                      {/* 위치 */}
+                      <div style={{background:C.loc+"08",borderRadius:10,padding:"12px",border:`1px solid ${C.loc}33`}}>
+                        <div style={{fontSize:12,color:C.loc,fontWeight:800,marginBottom:10}}>📍 완제품 위치 *</div>
+                        <div style={{marginBottom:8}}>
+                          <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:6}}>창고 구역</div>
+                          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                            {zones.map(z=>(
+                              <button key={z} onClick={()=>setLoc(group.id,item.id,"zone",z)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.loc?.zone===z?C.loc:C.border}`,background:item.loc?.zone===z?C.loc+"15":C.card,color:item.loc?.zone===z?C.loc:C.sub,cursor:"pointer"}}>{z}</button>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+                          <div><div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>선반 번호</div><input value={item.loc?.rack||""} onChange={e=>setLoc(group.id,item.id,"rack",e.target.value)} placeholder="예: 3-B" style={{...inp,fontSize:12}}/></div>
+                          <div><div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>파렛 번호</div><input value={item.loc?.pallet||""} onChange={e=>setLoc(group.id,item.id,"pallet",e.target.value)} placeholder="예: 2" style={{...inp,fontSize:12}}/></div>
+                        </div>
+                        <input value={item.loc?.memo||""} onChange={e=>setLoc(group.id,item.id,"memo",e.target.value)} placeholder="위치 메모 (예: 파렛 앞줄)" style={{...inp,fontSize:12,marginBottom:8}}/>
+                        <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>위치 사진</div>
+                        <div style={{display:"flex",gap:6}}>
+                          {item.loc?.photo&&<div style={{width:60,height:60,borderRadius:8,overflow:"hidden",border:`1px solid ${C.border}`}}><img src={item.loc.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div>}
+                          <PhotoUpBtn onAdd={url=>setLoc(group.id,item.id,"photo",url)} small/>
+                        </div>
+                      </div>
+                      {/* 공정 */}
+                      <div style={{marginTop:10,display:"flex",alignItems:"center",gap:8}}>
+                        <button onClick={()=>setItm(group.id,item.id,"hasProc",!item.hasProc)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${item.hasProc?C.process:C.border}`,background:item.hasProc?C.process+"12":C.card,color:item.hasProc?C.process:C.sub,cursor:"pointer"}}>⚙️ 공정 포함</button>
+                      </div>
+                      {item.hasProc&&(
+                        <div style={{marginTop:10,padding:"10px 12px",background:C.card,borderRadius:9,border:`1px solid ${C.border}`}}>
+                          <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:8}}>공정 종류</div>
+                          <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
+                            {PROC_TYPES.map(pt=>(
+                              <button key={pt} onClick={()=>setItm(group.id,item.id,"procType",pt)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.procType===pt?C.process:C.border}`,background:item.procType===pt?C.process+"12":C.card2,color:item.procType===pt?C.process:C.sub,cursor:"pointer"}}>{pt}</button>
+                            ))}
+                          </div>
+                          <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>납기일</div>
+                          <input type="date" value={item.dueDate} onChange={e=>setItm(group.id,item.id,"dueDate",e.target.value)} style={{...inp,fontSize:12}}/>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <button onClick={()=>addItm(group.id)} style={{width:"100%",padding:"10px",borderRadius:10,border:`1.5px dashed ${C.border}`,background:C.card2,color:C.sub,fontSize:13,cursor:"pointer"}}>+ 품목 추가</button>
+                </div>
+              </Card>
+            ))}
+            <button onClick={addGroup} style={{width:"100%",padding:"11px",borderRadius:12,border:`2px dashed ${cc.color}88`,background:`${cc.color}08`,color:cc.color,fontSize:14,fontWeight:700,cursor:"pointer",marginBottom:14}}>
+              + {cat==="양산출하"?"납품처":"지역"} 추가
+            </button>
+            <div style={{display:"flex",gap:10}}>
+              <Btn onClick={()=>setStep(1)} color={C.muted} outline style={{flex:1}}>← 이전</Btn>
+              <button onClick={()=>step2Valid&&setStep(3)} style={{flex:2,padding:"14px",borderRadius:14,background:step2Valid?C.accent:C.muted,color:step2Valid?"#fff":C.dim,border:"none",fontSize:14,fontWeight:800,cursor:step2Valid?"pointer":"not-allowed"}}>
+                {step2Valid?"다음: 최종 확인 →":"품목명·LOT 필수"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ─ 단계 3: 최종 확인 ─ */}
+        {step===3&&(
+          <>
+            <Card style={{padding:"16px",marginBottom:14,border:`2px solid ${finalOk?C.done:C.danger}44`}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:finalOk?0:12}}>
+                <div style={{fontSize:28}}>{finalOk?"✅":"⚠️"}</div>
+                <div>
+                  <div style={{fontSize:14,fontWeight:800,color:finalOk?C.done:C.danger}}>{finalOk?"의뢰서 완전 — 출하 진행 가능":"의뢰서 불완전"}</div>
+                  <div style={{fontSize:11,color:C.sub,marginTop:2}}>{finalOk?"출하팀이 즉시 업무를 시작할 수 있습니다":"아래 항목을 보완해 주세요"}</div>
+                </div>
+              </div>
+              {!finalOk&&missing.map(m=>(
+                <div key={m} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:C.danger+"08",borderRadius:8,marginTop:6}}>
+                  <span style={{color:C.danger}}>✗</span>
+                  <span style={{fontSize:12,color:C.danger,fontWeight:700}}>{m} 누락</span>
+                </div>
+              ))}
+            </Card>
+            <Card style={{padding:"16px",marginBottom:14}}>
+              <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>의뢰 요약</div>
+              {[
+                {l:"출하구분",v:`${cc.icon} ${cat}`},{l:"거래처",v:client},
+                {l:"의뢰자",v:requester},{l:"긴급도",v:`${URG_ICON[urgency]} ${urgency}`},
+                {l:"포장형태",v:packaging},{l:"운송",v:`${TRANS_ICON[transport]} ${transport}${carNum?` (${carNum})`:""}`},
+                {l:"날짜",v:date},
+              ].map(({l,v})=>(
+                <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
+                  <span style={{fontSize:12,color:C.sub,fontWeight:700}}>{l}</span>
+                  <span style={{fontSize:13,fontWeight:700,color:C.text}}>{v}</span>
+                </div>
+              ))}
+              {note&&<div style={{marginTop:8,fontSize:12,color:C.sub,background:C.card2,borderRadius:8,padding:"8px 10px"}}>💬 {note}</div>}
+            </Card>
+            <Card style={{padding:"14px",marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10}}>품목 & 위치</div>
+              {groups.flatMap(g=>g.items.filter(i=>i.text)).map(item=>(
+                <div key={item.id} style={{background:C.card2,borderRadius:10,padding:"10px 12px",marginBottom:8,border:`1px solid ${C.border}`}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4,flexWrap:"wrap"}}>
+                    <span style={{fontSize:13,fontWeight:700,color:C.text}}>{item.text}</span>
+                    {item.extra&&<span style={{background:C.warn+"15",color:C.warn,fontSize:11,fontWeight:700,padding:"1px 6px",borderRadius:5}}>{item.extra}</span>}
+                    {item.hasProc&&<span style={{background:C.process+"12",color:C.process,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:5}}>⚙️{item.procType}</span>}
+                  </div>
+                  {item.detail&&<div style={{fontSize:11,color:C.sub,fontFamily:"monospace"}}>{item.detail}</div>}
+                  <div style={{marginTop:4}}><LocBadge loc={item.loc}/></div>
+                </div>
+              ))}
+            </Card>
+            <div style={{background:C.accent+"08",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"14px",marginBottom:16}}>
+              <div style={{fontSize:13,fontWeight:800,color:C.accent,marginBottom:8}}>📌 의뢰자 확인 사항</div>
+              {["위 정보는 정확하며, 완제품이 해당 위치에 있음을 확인했습니다","출하 차질 시 즉시 출하팀에 연락하겠습니다","긴급 요청 시 추가 비용이 발생할 수 있음을 인지했습니다"].map((t,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:5}}>
+                  <span style={{color:C.done,flexShrink:0,marginTop:1}}>✓</span>
+                  <span style={{fontSize:12,color:C.sub,lineHeight:1.5}}>{t}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <Btn onClick={()=>setStep(2)} color={C.muted} outline style={{flex:1}}>← 이전</Btn>
+              <button onClick={save} style={{flex:2,padding:"14px",borderRadius:14,background:C.accent,border:"none",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:`0 4px 14px ${C.accent}55`}}>
+                의뢰 등록 완료
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══ 운행 거리 관리 ══ */
+function RouteScreen({routes,setRoutes,members,user,onBack}){
+  const [selId,setSelId]=useState(null);
+  const [showForm,setShowForm]=useState(false);
+  const [stopAddr,setStopAddr]=useState("");
+  const [stopNote,setStopNote]=useState("");
+  const [stopType,setStopType]=useState("경유");
+  const [gpsLoading,setGpsLoading]=useState(false);
+  const [gpsCoords,setGpsCoords]=useState(null);
+  const today=todayStr();
+  const inp={background:C.card2,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"9px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+
+  const getKm=route=>{ let k=0; for(let i=1;i<route.stops.length;i++){ const a=route.stops[i-1],b=route.stops[i]; if(a.lat&&b.lat) k+=haversine(a.lat,a.lng,b.lat,b.lng); } return k; };
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const myRoute=routes.find(r=>r.date===today&&r.staffId===user.id);
+
+  function getGPS(){
+    setGpsLoading(true);
+    if(!navigator.geolocation){ setGpsLoading(false); alert("이 브라우저는 GPS를 지원하지 않습니다"); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos=>{ setGpsCoords({lat:pos.coords.latitude,lng:pos.coords.longitude}); setGpsLoading(false); },
+      ()=>{ setGpsLoading(false); alert("위치 권한을 허용해 주세요"); }
+    );
+  }
+
+  function addStop(){
+    if(!stopAddr.trim()) return;
+    const stop={id:"rs"+uid(),time:nowTime(),address:stopAddr.trim(),lat:gpsCoords?.lat||null,lng:gpsCoords?.lng||null,type:stopType,note:stopNote.trim()};
+    if(!myRoute){
+      const nr={id:"rt"+uid(),date:today,staffId:user.id,staffName:user.name,status:"진행중",stops:[stop]};
+      setRoutes(rs=>[...rs,nr]);
+    } else {
+      setRoutes(rs=>rs.map(r=>r.id!==myRoute.id?r:{...r,stops:[...r.stops,stop]}));
+    }
+    setStopAddr(""); setStopNote(""); setGpsCoords(null); setShowForm(false);
+  }
+
+  function finishRoute(id){
+    setRoutes(rs=>rs.map(r=>r.id!==id?r:{...r,status:"완료"}));
+  }
+
+  const staffSummary=members.filter(u=>u.role==="staff").map(u=>{
+    const rs=routes.filter(r=>r.staffId===u.id&&r.date.startsWith(thisMonth));
+    const km=rs.reduce((a,r)=>a+getKm(r),0);
+    const days=new Set(rs.map(r=>r.date)).size;
+    return{...u,monthKm:parseFloat(km.toFixed(1)),days,cnt:rs.length};
+  });
+
+  const todayRoutes=routes.filter(r=>r.date===today);
+
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      <Hdr title="운행 거리 관리" sub="일일 출하 운행 기록" onBack={onBack}/>
+
+      {/* 직원용 오늘 운행 패널 */}
+      {user.role==="staff"&&(
+        <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,padding:"14px 16px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:C.text}}>오늘 내 운행</div>
+              <div style={{fontSize:26,fontWeight:900,fontFamily:"monospace",color:C.route,marginTop:2}}>
+                {myRoute?getKm(myRoute).toFixed(1):0}<span style={{fontSize:13}}> km</span>
+              </div>
+              <div style={{fontSize:11,color:C.sub,marginTop:1}}>{myRoute?`${myRoute.stops.length}개 정류장`:"-"}</div>
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              {myRoute?.status==="진행중"&&(
+                <button onClick={()=>finishRoute(myRoute.id)} style={{background:C.done+"15",color:C.done,border:`1px solid ${C.done}44`,borderRadius:9,padding:"8px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>✓ 완료</button>
+              )}
+              <button onClick={()=>setShowForm(s=>!s)} style={{background:showForm?C.muted:C.route,color:"#fff",border:"none",borderRadius:9,padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+                {showForm?"닫기":"+ 정류장"}
+              </button>
+            </div>
+          </div>
+
+          {showForm&&(
+            <div style={{background:C.card2,borderRadius:12,padding:"14px",border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:12,color:C.route,fontWeight:700,marginBottom:10}}>🗺️ 정류장 추가</div>
+              <div style={{display:"flex",gap:8,marginBottom:10}}>
+                {["출발","경유","복귀"].map(t=>(
+                  <button key={t} onClick={()=>setStopType(t)} style={{flex:1,padding:"7px 0",borderRadius:8,fontSize:12,fontWeight:700,border:`1.5px solid ${stopType===t?C.route:C.border}`,background:stopType===t?C.route+"15":C.card,color:stopType===t?C.route:C.sub,cursor:"pointer"}}>{t}</button>
+                ))}
+              </div>
+              <div style={{marginBottom:8}}><input value={stopAddr} onChange={e=>setStopAddr(e.target.value)} placeholder="목적지 주소 또는 거래처명" style={inp}/></div>
+              <div style={{marginBottom:10}}><input value={stopNote} onChange={e=>setStopNote(e.target.value)} placeholder="비고 (예: 브래킷 납품 완료)" style={inp}/></div>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={getGPS} style={{flex:1,padding:"9px",borderRadius:9,background:gpsCoords?C.done+"15":C.muted,border:`1px solid ${gpsCoords?C.done:C.border}`,color:gpsCoords?C.done:C.sub,fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                  {gpsLoading?"확인중...":`📍 ${gpsCoords?"GPS ✓":"GPS 받기"}`}
+                </button>
+                <button onClick={addStop} style={{flex:2,padding:"9px",borderRadius:9,background:C.route,border:"none",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>저장</button>
+              </div>
+              {!gpsCoords&&<div style={{fontSize:11,color:C.dim,marginTop:6,textAlign:"center"}}>GPS 없이 저장 시 거리가 0으로 기록됩니다</div>}
+            </div>
+          )}
+
+          {/* 오늘 정류장 목록 */}
+          {myRoute&&myRoute.stops.length>0&&(
+            <div style={{marginTop:12}}>
+              {myRoute.stops.map((stop,i)=>(
+                <div key={stop.id} style={{display:"flex",gap:10,marginBottom:i<myRoute.stops.length-1?6:0}}>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:28}}>
+                    <div style={{width:26,height:26,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:`2px solid ${C.route}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route,flexShrink:0}}>
+                      {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
+                    </div>
+                    {i<myRoute.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:10,marginTop:3}}/>}
+                  </div>
+                  <div style={{flex:1,paddingBottom:6}}>
+                    <div style={{display:"flex",justifyContent:"space-between"}}>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>{stop.address}</div>
+                      <div style={{fontSize:11,color:C.sub}}>{stop.time}</div>
+                    </div>
+                    {stop.note&&<div style={{fontSize:11,color:C.sub}}>{stop.note}</div>}
+                    {i>0&&stop.lat&&myRoute.stops[i-1].lat&&(
+                      <div style={{fontSize:11,color:C.route}}>📏 {haversine(myRoute.stops[i-1].lat,myRoute.stops[i-1].lng,stop.lat,stop.lng).toFixed(1)}km</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div style={{padding:"14px 14px 100px"}}>
+        {/* 이번달 누적 */}
+        <Card style={{padding:"16px",marginBottom:14}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:4}}>📊 이번달 운행 누적</div>
+          <div style={{fontSize:11,color:C.sub,marginBottom:14}}>{new Date().getFullYear()}년 {new Date().getMonth()+1}월</div>
+          {staffSummary.map(u=>(
+            <div key={u.id} style={{background:C.card2,borderRadius:12,padding:"12px 14px",marginBottom:8,border:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                <Avatar name={u.name} color={u.specialty==="양산"?C.yangsan:C.general} size={34}/>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <span style={{fontSize:14,fontWeight:700,color:C.text}}>{u.name}</span>
+                      <span style={{fontSize:9,marginLeft:6,color:u.specialty==="양산"?C.yangsan:C.general}}>{u.specialty==="양산"?"🏭":"📦"}</span>
+                    </div>
+                    <div>
+                      <span style={{fontSize:20,fontWeight:900,fontFamily:"monospace",color:C.route}}>{u.monthKm}</span>
+                      <span style={{fontSize:11,color:C.sub}}> km</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:8}}>
+                {[{l:"운행일수",v:`${u.days}일`,c:C.route},{l:"출하건수",v:`${u.cnt}건`,c:C.accent},{l:"일평균",v:u.days?`${(u.monthKm/u.days).toFixed(0)}km`:"–",c:C.general}].map(x=>(
+                  <div key={x.l} style={{flex:1,background:C.card,borderRadius:8,padding:"6px 0",textAlign:"center",border:`1px solid ${C.border}`}}>
+                    <div style={{fontSize:14,fontWeight:800,color:x.c}}>{x.v}</div>
+                    <div style={{fontSize:10,color:C.sub,marginTop:1}}>{x.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </Card>
+
+        {/* 오늘 운행 목록 */}
+        <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:10}}>오늘 운행 기록</div>
+        {todayRoutes.length===0&&<Card style={{padding:"40px 20px",textAlign:"center"}}><div style={{fontSize:36,marginBottom:10}}>🚗</div><div style={{color:C.sub}}>오늘 운행 기록이 없습니다</div></Card>}
+        {todayRoutes.map(route=>{
+          const km=getKm(route); const sel=selId===route.id;
+          return(
+            <Card key={route.id} onClick={()=>setSelId(sel?null:route.id)} style={{marginBottom:10,cursor:"pointer"}}>
+              <div style={{height:3,background:C.route}}/>
+              <div style={{padding:"13px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+                  <div>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{fontSize:14,fontWeight:700,color:C.text}}>{route.staffName}</span>
+                      <span style={{background:route.status==="완료"?C.done+"15":C.warn+"15",color:route.status==="완료"?C.done:C.warn,fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>{route.status==="완료"?"✓ 완료":"진행중"}</span>
+                    </div>
+                    <div style={{fontSize:11,color:C.sub,marginTop:2}}>{route.stops.length}개 정류장</div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:24,fontWeight:900,fontFamily:"monospace",color:C.route}}>{km.toFixed(1)}</div>
+                    <div style={{fontSize:10,color:C.sub}}>km</div>
+                  </div>
+                </div>
+                {sel&&(
+                  <div style={{borderTop:`1px solid ${C.border}`,paddingTop:10}}>
+                    {route.stops.map((stop,i)=>(
+                      <div key={stop.id} style={{display:"flex",gap:8,marginBottom:i<route.stops.length-1?6:0}}>
+                        <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:24}}>
+                          <div style={{width:22,height:22,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:`2px solid ${C.route}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route}}>
+                            {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
+                          </div>
+                          {i<route.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:8,marginTop:2}}/>}
+                        </div>
+                        <div style={{flex:1,paddingBottom:5}}>
+                          <div style={{display:"flex",justifyContent:"space-between"}}>
+                            <span style={{fontSize:12,fontWeight:700,color:C.text}}>{stop.address}</span>
+                            <span style={{fontSize:11,color:C.sub}}>{stop.time}</span>
+                          </div>
+                          {stop.note&&<div style={{fontSize:11,color:C.sub}}>{stop.note}</div>}
+                          {i>0&&stop.lat&&route.stops[i-1].lat&&<div style={{fontSize:11,color:C.route}}>📏 {haversine(route.stops[i-1].lat,route.stops[i-1].lng,stop.lat,stop.lng).toFixed(1)}km</div>}
+                        </div>
+                      </div>
+                    ))}
+                    {user.role==="admin"&&route.status==="진행중"&&(
+                      <button onClick={e=>{e.stopPropagation();finishRoute(route.id);}} style={{width:"100%",marginTop:8,padding:"9px",borderRadius:9,background:C.done+"15",border:`1px solid ${C.done}44`,color:C.done,fontWeight:700,cursor:"pointer",fontSize:12}}>✓ 운행 완료 처리</button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ══ 완제품 위치 현황 ══ */
+/* ══ 창고 구역 관리 (관리자 전용) ══ */
+function ZoneMgmtModal({zones,onSave,onClose}){
+  const [list,setList]=useState([...zones]);
+  const [newName,setNewName]=useState("");
+  const [editIdx,setEditIdx]=useState(null);
+  const [editVal,setEditVal]=useState("");
+  const inp={background:C.card,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"10px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+
+  function addZone(){
+    const n=newName.trim();
+    if(!n||list.includes(n)) return;
+    setList(l=>[...l,n]);
+    setNewName("");
+  }
+  function removeZone(i){ setList(l=>l.filter((_,idx)=>idx!==i)); }
+  function startEdit(i){ setEditIdx(i); setEditVal(list[i]); }
+  function saveEdit(){
+    if(!editVal.trim()) return;
+    setList(l=>l.map((z,i)=>i===editIdx?editVal.trim():z));
+    setEditIdx(null);
+  }
+  function moveUp(i){ if(i===0) return; setList(l=>{ const a=[...l]; [a[i-1],a[i]]=[a[i],a[i-1]]; return a; }); }
+  function moveDown(i){ setList(l=>{ if(i===l.length-1) return l; const a=[...l]; [a[i],a[i+1]]=[a[i+1],a[i]]; return a; }); }
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:C.card,borderRadius:18,width:"100%",maxWidth:380,maxHeight:"85vh",display:"flex",flexDirection:"column",boxShadow:"0 8px 32px rgba(0,0,0,0.2)"}}>
+        {/* 헤더 */}
+        <div style={{padding:"18px 20px 14px",borderBottom:`1px solid ${C.border}`}}>
+          <div style={{fontSize:17,fontWeight:800,color:C.text,marginBottom:4}}>🏢 창고 구역 관리</div>
+          <div style={{fontSize:12,color:C.sub}}>구역명을 추가·수정·삭제·순서 변경할 수 있습니다</div>
+        </div>
+
+        {/* 구역 목록 */}
+        <div style={{flex:1,overflowY:"auto",padding:"14px 16px"}}>
+          {list.map((zone,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",marginBottom:8,background:C.card2,borderRadius:10,border:`1px solid ${C.border}`}}>
+              {/* 순서 이동 */}
+              <div style={{display:"flex",flexDirection:"column",gap:2}}>
+                <button onClick={()=>moveUp(i)} disabled={i===0}
+                  style={{background:"none",border:"none",color:i===0?C.dim:C.sub,fontSize:12,cursor:i===0?"default":"pointer",padding:"0 4px",lineHeight:1}}>▲</button>
+                <button onClick={()=>moveDown(i)} disabled={i===list.length-1}
+                  style={{background:"none",border:"none",color:i===list.length-1?C.dim:C.sub,fontSize:12,cursor:i===list.length-1?"default":"pointer",padding:"0 4px",lineHeight:1}}>▼</button>
+              </div>
+
+              {/* 구역명 — 편집 중이면 input, 아니면 텍스트 */}
+              {editIdx===i ? (
+                <input value={editVal} onChange={e=>setEditVal(e.target.value)}
+                  onKeyDown={e=>e.key==="Enter"&&saveEdit()}
+                  autoFocus
+                  style={{...inp,flex:1,padding:"6px 10px",fontSize:13}}/>
+              ) : (
+                <div style={{flex:1,fontSize:14,fontWeight:700,color:C.text}}>{zone}</div>
+              )}
+
+              {/* 버튼 */}
+              <div style={{display:"flex",gap:5,flexShrink:0}}>
+                {editIdx===i ? (
+                  <>
+                    <button onClick={saveEdit}
+                      style={{background:C.done,border:"none",color:"#fff",borderRadius:7,padding:"5px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>✓</button>
+                    <button onClick={()=>setEditIdx(null)}
+                      style={{background:C.muted,border:"none",color:C.sub,borderRadius:7,padding:"5px 8px",fontSize:12,cursor:"pointer"}}>✕</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={()=>startEdit(i)}
+                      style={{background:C.accent+"15",border:`1px solid ${C.accent}33`,color:C.accent,borderRadius:7,padding:"5px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>수정</button>
+                    <button onClick={()=>removeZone(i)}
+                      style={{background:C.danger+"10",border:`1px solid ${C.danger}33`,color:C.danger,borderRadius:7,padding:"5px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>삭제</button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* 새 구역 추가 */}
+          <div style={{display:"flex",gap:8,marginTop:12}}>
+            <input value={newName} onChange={e=>setNewName(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&addZone()}
+              placeholder="새 구역명 입력 (예: 완제품창고)"
+              style={{...inp,flex:1}}/>
+            <button onClick={addZone}
+              style={{background:C.accent,border:"none",color:"#fff",borderRadius:9,padding:"10px 16px",fontSize:14,fontWeight:700,cursor:"pointer",flexShrink:0}}>추가</button>
+          </div>
+
+          <div style={{marginTop:10,fontSize:11,color:C.sub,lineHeight:1.6}}>
+            💡 구역명 변경 시 기존 등록된 품목의 위치 표시도 함께 변경됩니다.
+          </div>
+        </div>
+
+        {/* 하단 버튼 */}
+        <div style={{padding:"14px 16px",borderTop:`1px solid ${C.border}`,display:"flex",gap:10}}>
+          <button onClick={onClose}
+            style={{flex:1,padding:"12px",borderRadius:10,background:C.muted,border:"none",color:C.sub,fontWeight:700,cursor:"pointer",fontSize:14}}>취소</button>
+          <button onClick={()=>{ onSave(list); onClose(); }}
+            style={{flex:2,padding:"12px",borderRadius:10,background:C.accent,border:"none",color:"#fff",fontWeight:800,cursor:"pointer",fontSize:14,boxShadow:`0 3px 12px ${C.accent}44`}}>
+            저장
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LocationScreen({posts,user,zones,onUpdateLoc,onUpdateItemText,onBack}){
+  const [selZone,setSelZone]=useState("전체");
+  const [search,setSearch]=useState("");
+  const [editing,setEditing]=useState(null);
+  const [eZone,setEZone]=useState("A창고");
+  const [eRack,setERack]=useState("");
+  const [ePallet,setEPallet]=useState("");
+  const [eMemo,setEMemo]=useState("");
+  const [eConfirmed,setEConfirmed]=useState(false);
+
+  const inp={background:C.card,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"10px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+
+  function openEdit(item){
+    const loc=item.loc||{};
+    setEditing({postId:item.postId,itemId:item.id,itemName:item.text,detail:item.detail});
+    setEZone(loc.zone||"A창고");
+    setERack(loc.rack||"");
+    setEPallet(loc.pallet||"");
+    setEMemo(loc.memo||"");
+    setEConfirmed(loc.confirmed||false);
+  }
+
+  function saveEdit(){
+    if(!editing) return;
+    // 위치 저장
+    onUpdateLoc(editing.postId,editing.itemId,{
+      zone:eZone, rack:eRack.trim(), pallet:ePallet.trim(),
+      memo:eMemo.trim(), confirmed:eConfirmed, photo:null
+    });
+    // 관리자는 품목명도 저장
+    if(user?.role==="admin"&&editing.itemName.trim()){
+      onUpdateItemText(editing.postId,editing.itemId,editing.itemName.trim());
+    }
+    setEditing(null);
+  }
+
+  const allItems=posts.filter(p=>p.category!=="사내방문").flatMap(p=>
+    p.groups.flatMap(g=>g.items.map(i=>({...i,postId:p.id,client:p.client,category:p.category,region:g.region})))
+  ).filter(i=>!i.done&&i.stage!=="회수");
+
+  const filtered=allItems.filter(i=>{
+    const zoneOk=selZone==="전체"||i.loc?.zone===selZone;
+    const searchOk=!search||(i.text+i.detail).toLowerCase().includes(search.toLowerCase());
+    return zoneOk&&searchOk;
+  });
+
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+
+      {/* 위치 편집 모달 */}
+      {editing&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <Card style={{padding:22,width:"100%",maxWidth:360}}>
+            <div style={{fontSize:17,fontWeight:800,color:C.text,marginBottom:4}}>📍 위치 수정</div>
+            <div style={{fontSize:12,color:C.sub,marginBottom:16}}>{editing.detail&&`LOT: ${editing.detail}`}</div>
+
+            {/* 관리자만 품목명 수정 가능 */}
+            {user?.role==="admin"&&(
+              <div style={{marginBottom:14}}>
+                <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:6}}>품목명 수정 <span style={{fontSize:10,color:C.sub,fontWeight:400}}>(관리자 전용)</span></div>
+                <input value={editing.itemName} onChange={e=>setEditing(ed=>({...ed,itemName:e.target.value}))} placeholder="품목명" style={{...inp,fontWeight:700}}/>
+              </div>
+            )}
+            {user?.role!=="admin"&&(
+              <div style={{background:C.card2,borderRadius:9,padding:"8px 12px",marginBottom:14,fontSize:14,fontWeight:700,color:C.text}}>{editing.itemName}</div>
+            )}
+
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>창고 구역</div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                {zones.map(z=>(
+                  <button key={z} onClick={()=>setEZone(z)} style={{padding:"6px 11px",borderRadius:9,fontSize:12,fontWeight:700,border:`1.5px solid ${eZone===z?C.loc:C.border}`,background:eZone===z?C.loc+"15":C.card2,color:eZone===z?C.loc:C.sub,cursor:"pointer"}}>
+                    {z}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+              <div>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>선반 번호</div>
+                <input value={eRack} onChange={e=>setERack(e.target.value)} placeholder="예: 3-B" style={inp}/>
+              </div>
+              <div>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>파렛 번호</div>
+                <input value={ePallet} onChange={e=>setEPallet(e.target.value)} placeholder="예: 2" style={inp}/>
+              </div>
+            </div>
+
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>위치 메모</div>
+              <input value={eMemo} onChange={e=>setEMemo(e.target.value)} placeholder="예: 파렛 앞줄, 노란 표시" style={inp}/>
+            </div>
+
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,padding:"10px 12px",
+              background:eConfirmed?C.done+"10":C.warn+"08",borderRadius:10,
+              border:`1px solid ${eConfirmed?C.done:C.warn}33`,cursor:"pointer"}}
+              onClick={()=>setEConfirmed(v=>!v)}>
+              <div style={{width:24,height:24,borderRadius:"50%",
+                background:eConfirmed?C.done:C.muted,border:`2px solid ${eConfirmed?C.done:C.border}`,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                fontSize:13,color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
+                {eConfirmed?"✓":""}
+              </div>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:eConfirmed?C.done:C.sub}}>
+                  {eConfirmed?"위치 확인 완료":"위치 미확인"}
+                </div>
+                <div style={{fontSize:11,color:C.sub,marginTop:1}}>탭하여 확인 여부 변경</div>
+              </div>
+            </div>
+
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={()=>setEditing(null)} style={{flex:1,padding:"12px",borderRadius:10,background:C.muted,border:"none",color:C.sub,fontWeight:700,cursor:"pointer",fontSize:14}}>취소</button>
+              <button onClick={saveEdit} style={{flex:2,padding:"12px",borderRadius:10,background:C.loc,border:"none",color:"#fff",fontWeight:800,cursor:"pointer",fontSize:14}}>저장</button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      <Hdr title="완제품 위치 현황" sub="조회·수정·확인" onBack={onBack}/>
+      <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,padding:"12px 16px"}}>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="품목명, LOT번호 검색"
+          style={{width:"100%",background:C.card2,border:`1px solid ${C.border}`,borderRadius:10,
+            padding:"9px 12px",fontSize:14,outline:"none",color:C.text,boxSizing:"border-box",marginBottom:10}}/>
+        <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:2}}>
+          {["전체",...zones].map(z=>(
+            <button key={z} onClick={()=>setSelZone(z)}
+              style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,
+                border:`1.5px solid ${selZone===z?C.loc:C.border}`,
+                background:selZone===z?C.loc+"15":C.card,
+                color:selZone===z?C.loc:C.sub,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+              {z}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{padding:"14px 14px 100px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}}>
+          {zones.slice(0,6).map(z=>{
+            const cnt=allItems.filter(i=>i.loc?.zone===z).length;
+            return(
+              <Card key={z} onClick={()=>setSelZone(z)}
+                style={{padding:"10px 8px",textAlign:"center",cursor:"pointer",
+                  border:`1.5px solid ${selZone===z?C.loc:C.border}`,
+                  background:selZone===z?C.loc+"08":C.card}}>
+                <div style={{fontSize:20,fontWeight:800,color:cnt>0?C.loc:C.dim}}>{cnt}</div>
+                <div style={{fontSize:10,color:C.sub,marginTop:2}}>{z}</div>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:10}}>출하 대기 품목 {filtered.length}건</div>
+        {filtered.length===0&&(
+          <Card style={{padding:"40px 20px",textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:10}}>📭</div>
+            <div style={{color:C.sub}}>해당 구역에 대기 품목이 없습니다</div>
+          </Card>
+        )}
+        {filtered.map(item=>{
+          const cc=CAT[item.category]||CAT["일반출하"];
+          const loc=item.loc;
+          const confirmed=loc?.confirmed;
+          return(
+            <Card key={item.id} style={{marginBottom:10}}>
+              <div style={{height:3,background:confirmed?C.done:C.loc}}/>
+              <div style={{padding:"13px 14px"}}>
+                {/* 상단: 품목명 + 수정 버튼 */}
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",flex:1}}>
+                    <span style={{fontSize:14,fontWeight:800,color:C.text}}>{item.text}</span>
+                    <span style={{background:cc.bg,color:cc.color,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:10}}>{cc.icon}</span>
+                    {confirmed
+                      ?<span style={{background:C.done+"15",color:C.done,fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>✓ 위치확인</span>
+                      :<span style={{background:C.warn+"15",color:C.warn,fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>⚠ 미확인</span>
+                    }
+                  </div>
+                  <button onClick={()=>openEdit(item)}
+                    style={{background:C.loc+"15",border:`1px solid ${C.loc}44`,color:C.loc,
+                      borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:700,
+                      cursor:"pointer",flexShrink:0,marginLeft:8}}>
+                    ✏️ 수정
+                  </button>
+                </div>
+
+                {item.detail&&<div style={{fontSize:11,color:C.sub,fontFamily:"monospace",marginBottom:4}}>{item.detail}</div>}
+                <div style={{fontSize:11,color:C.sub,marginBottom:8}}>거래처: {item.client} · {item.region}</div>
+
+                <div style={{background:C.loc+"08",borderRadius:10,padding:"10px 12px",border:`1px solid ${C.loc}33`}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                    <span style={{fontSize:18}}>📍</span>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:800,color:C.loc}}>
+                        {loc?.zone||"미지정"}
+                        {loc?.rack&&` · ${loc.rack}번 선반`}
+                        {loc?.pallet&&` · ${loc.pallet}번 파렛`}
+                      </div>
+                      {loc?.memo&&<div style={{fontSize:11,color:C.sub,marginTop:2}}>{loc.memo}</div>}
+                      {!loc?.zone&&<div style={{fontSize:11,color:C.warn,marginTop:2}}>위치가 지정되지 않았습니다</div>}
+                    </div>
+                  </div>
+                  {!confirmed&&(
+                    <button onClick={()=>onUpdateLoc(item.postId,item.id,{...loc,confirmed:true})}
+                      style={{width:"100%",padding:"8px",borderRadius:8,background:C.done,
+                        border:"none",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+                      위치 확인 완료 ✓
+                    </button>
+                  )}
+                  {confirmed&&(
+                    <button onClick={()=>onUpdateLoc(item.postId,item.id,{...loc,confirmed:false})}
+                      style={{width:"100%",padding:"7px",borderRadius:8,background:C.muted,
+                        border:`1px solid ${C.border}`,color:C.sub,fontSize:11,fontWeight:600,cursor:"pointer"}}>
+                      ↩ 확인 취소 (재확인 필요)
+                    </button>
+                  )}
+                </div>
+                {item.extra&&<div style={{marginTop:6,fontSize:11,color:C.warn,fontWeight:700}}>수량: {item.extra}</div>}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ══ 사내방문 기록 ══ */
+function VisitLog({post,user,onBack,onAddVisit,onAddVisitPhoto}){
+  const [show,setShow]=useState(false);
+  const [vName,setVName]=useState(""); const [vDept,setVDept]=useState("");
+  const [vItems,setVItems]=useState(""); const [vPurpose,setVPurpose]=useState("");
+  const [vTrans,setVTrans]=useState("직접"); const [vCar,setVCar]=useState("");
+  const [viewImg,setViewImg]=useState(null);
+  const canEdit=user.role==="admin"||user.role==="staff";
+  const inp={background:C.card2,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"9px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+
+  function submit(){
+    if(!vName.trim()||!vItems.trim()) return;
+    onAddVisit(post.id,{id:"v"+uid(),visitorName:vName.trim(),dept:vDept.trim(),items:vItems.trim(),purpose:vPurpose.trim(),transport:vTrans,carNum:vTrans==="용차"?vCar.trim():"",recordedBy:user.name,recordedAt:fmtDT(),photos:[]});
+    setVName(""); setVDept(""); setVItems(""); setVPurpose(""); setVTrans("직접"); setVCar(""); setShow(false);
+  }
+
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      {viewImg&&<ImgModal src={viewImg} onClose={()=>setViewImg(null)}/>}
+      <Hdr title="사내 방문 기록" sub={post.date} onBack={onBack}
+        right={canEdit&&<button onClick={()=>setShow(s=>!s)} style={{background:show?C.muted:C.visit,color:"#fff",border:"none",borderRadius:9,padding:"7px 13px",fontSize:13,fontWeight:700,cursor:"pointer"}}>{show?"닫기":"+ 기록"}</button>}/>
+      {show&&(
+        <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,padding:"16px"}}>
+          <div style={{fontSize:13,color:C.visit,fontWeight:800,marginBottom:12}}>🚶 방문 기록 추가</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+            <div><div style={{fontSize:11,color:C.sub,marginBottom:4,fontWeight:600}}>방문자 *</div><input value={vName} onChange={e=>setVName(e.target.value)} placeholder="홍길동" style={inp}/></div>
+            <div><div style={{fontSize:11,color:C.sub,marginBottom:4,fontWeight:600}}>소속</div><input value={vDept} onChange={e=>setVDept(e.target.value)} placeholder="생산1팀" style={inp}/></div>
+          </div>
+          <div style={{marginBottom:8}}><div style={{fontSize:11,color:C.sub,marginBottom:4,fontWeight:600}}>품목 *</div><input value={vItems} onChange={e=>setVItems(e.target.value)} placeholder="완제품 파렛 2EA" style={inp}/></div>
+          <div style={{marginBottom:10}}><div style={{fontSize:11,color:C.sub,marginBottom:4,fontWeight:600}}>목적</div><input value={vPurpose} onChange={e=>setVPurpose(e.target.value)} placeholder="라인 투입" style={inp}/></div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:11,color:C.sub,marginBottom:7,fontWeight:600}}>운송 방법</div>
+            <div style={{display:"flex",gap:8,marginBottom:vTrans==="용차"?8:0}}>
+              {["직접","용차","퀵"].map(t=>{ const tc=t==="용차"?C.warn:t==="퀵"?C.quick:C.done; const sl=vTrans===t; return(
+                <button key={t} onClick={()=>setVTrans(t)} style={{flex:1,padding:"8px 0",borderRadius:9,fontSize:12,fontWeight:800,border:`2px solid ${sl?tc:C.border}`,background:sl?`${tc}15`:C.card2,color:sl?tc:C.sub,cursor:"pointer"}}>
+                  {TRANS_ICON[t]||"🚶"} {t}
+                </button>
+              );})}
+            </div>
+            {vTrans==="용차"&&<input value={vCar} onChange={e=>setVCar(e.target.value)} placeholder="차량번호 (예: 경기 12가 3456)" style={inp}/>}
+          </div>
+          <button onClick={submit} style={{width:"100%",padding:"12px 0",borderRadius:10,background:C.visit,color:"#fff",border:"none",fontSize:14,fontWeight:700,cursor:"pointer"}}>기록 저장</button>
+        </div>
+      )}
+      <div style={{padding:"14px 14px 80px"}}>
+        <Card style={{padding:"16px 20px",marginBottom:14}}>
+          <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:4}}>🚶 {fmtDate(post.date)} 방문</div>
+          <div style={{fontSize:40,fontWeight:900,fontFamily:"monospace",color:C.visit,lineHeight:1}}>{(post.visits||[]).length}<span style={{fontSize:16}}>건</span></div>
+        </Card>
+        {(post.visits||[]).length===0&&<Card style={{padding:"40px 20px",textAlign:"center"}}><div style={{fontSize:36,marginBottom:10}}>📭</div><div style={{color:C.sub}}>방문 기록 없음</div></Card>}
+        {(post.visits||[]).map(v=>(
+          <Card key={v.id} style={{marginBottom:10}}>
+            <div style={{height:3,background:C.visit}}/>
+            <div style={{padding:"13px 14px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                <div style={{display:"flex",gap:10}}>
+                  <Avatar name={v.visitorName} color={C.visit} size={38}/>
+                  <div>
+                    <div style={{fontSize:15,fontWeight:800,color:C.text}}>{v.visitorName}</div>
+                    <div style={{fontSize:11,color:C.sub,marginTop:2}}>{v.dept}</div>
+                  </div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:11,color:C.sub}}>{v.recordedAt}</div>
+                  <div style={{fontSize:10,color:C.dim}}>기록: {v.recordedBy}</div>
+                </div>
+              </div>
+              <div style={{background:C.card2,borderRadius:10,padding:"10px 12px",marginBottom:v.purpose?8:0,border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:10,color:C.visit,fontWeight:700,marginBottom:3}}>📦 가져간 품목</div>
+                <div style={{fontSize:14,fontWeight:700,color:C.text}}>{v.items}</div>
+              </div>
+              {v.purpose&&<div style={{background:C.card2,borderRadius:10,padding:"8px 12px",marginTop:6,border:`1px solid ${C.border}`}}><div style={{fontSize:10,color:C.sub,fontWeight:700,marginBottom:2}}>목적</div><div style={{fontSize:13,color:C.text}}>{v.purpose}</div></div>}
+              <div style={{display:"flex",gap:8,marginTop:10,alignItems:"center"}}>
+                <span style={{background:v.transport==="용차"?C.warn+"15":v.transport==="퀵"?C.quick+"15":C.done+"10",color:v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done,border:`1px solid ${v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done}44`,fontSize:11,fontWeight:800,padding:"3px 10px",borderRadius:20}}>
+                  {TRANS_ICON[v.transport]||"🚶"} {v.transport==="직접"?"직접 수령":v.transport}
+                </span>
+                {v.carNum&&<span style={{fontSize:12,fontWeight:700,color:C.warn,fontFamily:"monospace"}}>{v.carNum}</span>}
+              </div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10}}>
+                {v.photos.map((src,i)=>(
+                  <div key={i} onClick={()=>setViewImg(src)} style={{width:58,height:58,borderRadius:8,overflow:"hidden",cursor:"pointer",border:`1px solid ${C.border}`,flexShrink:0}}>
+                    <img src={src} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                  </div>
+                ))}
+                {canEdit&&<PhotoUpBtn onAdd={url=>onAddVisitPhoto(post.id,v.id,url)} small/>}
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══ 팀원·승인 관리 ══ */
+function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
+  const [tab,setTab]=useState(pending.length>0?"승인":"팀원");
+  const [list,setList]=useState(members);
+  const [ed,setEd]=useState(null); const [isNew,setIsNew]=useState(false);
+  const [fName,setFName]=useState(""); const [fDept,setFDept]=useState("");
+  const [fRegion,setFRegion]=useState(""); const [fRole,setFRole]=useState("staff"); const [fSpec,setFSpec]=useState("일반");
+  const inp={background:C.card,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"10px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+  const ROLE_META2={admin:{label:"관리자",color:C.accent,icon:"👑"},staff:{label:"출하팀",color:C.general,icon:"👷"},viewer:{label:"조회",color:C.done,icon:"👁️"}};
+  const [fPw,setFPw]=useState("");
+  const [fPermReg,setFPermReg]=useState(false);
+  const [fPermShip,setFPermShip]=useState(false);
+  function openEd(u){
+    setEd(u); setIsNew(false); setFName(u.name); setFDept(u.dept||"");
+    setFRegion(u.region||""); setFRole(u.role); setFSpec(u.specialty||"일반");
+    setFPw(u.password||"");
+    setFPermReg(u.permissions?.canRegister||false);
+    setFPermShip(u.permissions?.canInternalShip||false);
+  }
+  function openNew(){
+    setEd({id:uidS()}); setIsNew(true); setFName(""); setFDept("");
+    setFRegion(""); setFRole("staff"); setFSpec("일반"); setFPw("");
+    setFPermReg(false); setFPermShip(false);
+  }
+  function saveEd(){
+    if(!fName.trim()) return;
+    const role=ed.role==="admin"?"admin":fRole;
+    const u={
+      ...ed,
+      name:fName.trim(), dept:fDept.trim(),
+      region:role==="viewer"?null:fRegion.trim()||null,
+      role, specialty:role==="staff"?fSpec:null,
+      password:fPw.trim(),
+      permissions:{
+        canRegister: role==="admin"?true:fPermReg,
+        canInternalShip: role==="admin"?true:fPermShip,
+      }
+    };
+    const newList=isNew?[...list,u]:list.map(x=>x.id===u.id?u:x);
+    setList(newList);
+    onSaveMbr(newList);
+    setEd(null);
+  }
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      <Hdr title="팀원 관리" onBack={()=>{ onSaveMbr(list); onBack(); }} right={<button onClick={openNew} style={{background:C.accent,color:"#fff",border:"none",borderRadius:9,padding:"7px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ 추가</button>}/>
+      <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,display:"flex"}}>
+        {["승인","팀원"].map(t=>(
+          <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"13px 0",background:"none",border:"none",borderBottom:`3px solid ${tab===t?C.accent:"transparent"}`,color:tab===t?C.accent:C.sub,fontSize:14,fontWeight:700,cursor:"pointer",position:"relative"}}>
+            {t}{t==="승인"&&pending.length>0&&<span style={{position:"absolute",top:8,right:"22%",background:C.danger,color:"#fff",fontSize:10,fontWeight:800,borderRadius:8,padding:"1px 5px"}}>{pending.length}</span>}
+          </button>
+        ))}
+      </div>
+      {ed&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <Card style={{padding:22,width:"100%",maxWidth:340}}>
+            <div style={{fontSize:17,fontWeight:800,color:C.text,marginBottom:18}}>{isNew?"팀원 추가":"팀원 수정"}</div>
+            {/* 관리자는 역할 고정, 나머지는 선택 가능 */}
+            {ed.role==="admin" ? (
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>역할</div>
+                <div style={{background:C.accent+"10",border:`1px solid ${C.accent}33`,borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:18}}>👑</span>
+                  <span style={{fontSize:14,fontWeight:700,color:C.accent}}>관리자 (역할 변경 불가)</span>
+                </div>
+              </div>
+            ) : (
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>역할</div>
+                <div style={{display:"flex",gap:8}}>{["staff","viewer"].map(r=>{ const rm=ROLE_META2[r]; const sl=fRole===r; return <button key={r} onClick={()=>setFRole(r)} style={{flex:1,padding:"10px 0",borderRadius:10,fontSize:13,fontWeight:700,border:`2px solid ${sl?rm.color:C.border}`,background:sl?`${rm.color}10`:C.card2,color:sl?rm.color:C.sub,cursor:"pointer"}}>{rm.icon} {rm.label}</button>; })}</div>
+              </div>
+            )}
+            {fRole==="staff"&&ed.role!=="admin"&&(
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>전담 분야</div>
+                <div style={{display:"flex",gap:8}}>{[{k:"양산",c:C.yangsan},{k:"일반",c:C.general}].map(s=>{ const sl=fSpec===s.k; return <button key={s.k} onClick={()=>setFSpec(s.k)} style={{flex:1,padding:"9px 0",borderRadius:10,fontSize:13,fontWeight:700,border:`2px solid ${sl?s.c:C.border}`,background:sl?`${s.c}10`:C.card2,color:sl?s.c:C.sub,cursor:"pointer"}}>{s.k==="양산"?"🏭":"📦"} {s.k}출하</button>; })}</div>
+              </div>
+            )}
+            <div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>이름 *</div><input value={fName} onChange={e=>setFName(e.target.value)} style={inp}/></div>
+            <div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>부서</div><input value={fDept} onChange={e=>setFDept(e.target.value)} placeholder="출하팀" style={inp}/></div>
+            {fRole==="staff"&&<div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>담당 구역</div><input value={fRegion} onChange={e=>setFRegion(e.target.value)} style={inp}/></div>}
+
+            {/* 비밀번호 설정 */}
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>🔒 비밀번호 <span style={{fontWeight:400,fontSize:11}}>(비워두면 비밀번호 없이 접속)</span></div>
+              <input type="text" value={fPw} onChange={e=>setFPw(e.target.value)} placeholder="비밀번호 입력 (선택)" style={inp}/>
+            </div>
+
+            {/* 권한 설정 — 관리자가 아닌 경우만 */}
+            {ed.role!=="admin"&&(
+              <div style={{marginBottom:16}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>🛡️ 추가 권한 부여</div>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  {[
+                    {key:"reg",  label:"출하 의뢰 등록",  desc:"출하일정 직접 등록 가능", val:fPermReg,  set:setFPermReg},
+                    {key:"ship", label:"사내출하 등록",    desc:"사내출하 직접 등록 가능", val:fPermShip, set:setFPermShip},
+                  ].map(p=>(
+                    <div key={p.key} onClick={()=>p.set(v=>!v)}
+                      style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
+                        background:p.val?C.accent+"08":C.card2,
+                        border:`1.5px solid ${p.val?C.accent:C.border}`,
+                        borderRadius:10,cursor:"pointer",transition:"all 0.15s"}}>
+                      <div style={{width:22,height:22,borderRadius:"50%",
+                        background:p.val?C.accent:C.muted,border:`2px solid ${p.val?C.accent:C.border}`,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        fontSize:12,color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
+                        {p.val?"✓":""}
+                      </div>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:700,color:p.val?C.accent:C.text}}>{p.label}</div>
+                        <div style={{fontSize:11,color:C.sub}}>{p.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{display:"flex",gap:10}}>
+              <Btn onClick={()=>setEd(null)} color={C.muted} outline style={{flex:1}}>취소</Btn>
+              <Btn onClick={saveEd} style={{flex:1}}>{isNew?"추가":"저장"}</Btn>
+            </div>
+          </Card>
+        </div>
+      )}
+      <div style={{padding:"14px 14px 100px"}}>
+        {tab==="승인"&&(
+          pending.length===0
+            ?<Card style={{padding:"40px 20px",textAlign:"center"}}><div style={{fontSize:40,marginBottom:10}}>✅</div><div style={{color:C.sub,fontSize:14}}>대기 중인 신청이 없습니다</div></Card>
+            :pending.map(p=>(
+              <Card key={p.id} style={{padding:"16px",marginBottom:12,border:`2px solid #AF52DE33`}}>
+                <div style={{display:"flex",gap:12,marginBottom:14}}>
+                  <Avatar name={p.name} color="#AF52DE" size={46}/>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:16,fontWeight:800,color:C.text}}>{p.name}</div>
+                    <div style={{fontSize:12,color:C.accent,marginTop:2}}>{p.dept}</div>
+                    {p.purpose&&<div style={{fontSize:11,color:C.sub,marginTop:3}}>목적: {p.purpose}</div>}
+                    <div style={{fontSize:11,color:C.dim,marginTop:2}}>{p.requestedAt}</div>
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:10}}>
+                  <Btn onClick={()=>onReject(p.id)} color={C.danger} outline style={{flex:1}}>✕ 거부</Btn>
+                  <Btn onClick={()=>onApprove(p)} color={C.done} style={{flex:2}}>✓ 승인</Btn>
+                </div>
+              </Card>
+            ))
+        )}
+        {tab==="팀원"&&(
+          <>
+            {["admin","staff","viewer"].map(role=>{
+              const rm=ROLE_META2[role]; const users=list.filter(u=>u.role===role);
+              return(
+                <div key={role} style={{marginBottom:20}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                    <div style={{height:1,flex:1,background:C.border}}/>
+                    <span style={{fontSize:11,color:C.sub,fontWeight:700}}>{rm.icon} {rm.label} ({users.length})</span>
+                    <div style={{height:1,flex:1,background:C.border}}/>
+                  </div>
+                  {users.map(u=>(
+                    <Card key={u.id} style={{padding:"13px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:12}}>
+                      <Avatar name={u.name} color={rm.color} size={40}/>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:14,fontWeight:700,color:C.text}}>{u.name}</div>
+                        <div style={{fontSize:11,color:C.sub,marginTop:2}}>
+                          {u.dept}{u.region&&<span> · {u.region}</span>}
+                          {u.specialty&&<span style={{marginLeft:6,background:u.specialty==="양산"?C.yangsan+"15":C.general+"15",color:u.specialty==="양산"?C.yangsan:C.general,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:8}}>{u.specialty==="양산"?"🏭 양산":"📦 일반"}</span>}
+                        </div>
+                        <div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
+                          {u.password&&<span style={{background:C.done+"15",color:C.done,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>🔒 비밀번호설정</span>}
+                          {u.permissions?.canRegister&&<span style={{background:C.accent+"15",color:C.accent,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>✓ 의뢰등록</span>}
+                          {u.permissions?.canInternalShip&&<span style={{background:C.process+"15",color:C.process,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:6}}>✓ 사내출하</span>}
+                        </div>
+                      </div>
+                      <div style={{display:"flex",gap:8}}>
+                        <Btn onClick={()=>openEd(u)} outline small>수정</Btn>
+                        {u.role!=="admin"&&<Btn onClick={()=>setList(l=>l.filter(x=>x.id!==u.id))} color={C.danger} outline small>삭제</Btn>}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })}
+            <button onClick={()=>{ onSaveMbr(list); onBack(); }} style={{width:"100%",padding:"14px 0",borderRadius:14,background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 14px rgba(18,89,195,0.35)"}}>✓ 저장</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══ 통계 화면 ══ */
+function StatsScreen({posts,routes,members,onBack}){
+  const [period,setPeriod]=useState(7);
+  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-period);
+  const filtered=posts.filter(p=>new Date(p.date)>=cutoff);
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const allItems=filtered.filter(p=>p.category!=="사내방문").flatMap(p=>p.groups.flatMap(g=>g.items));
+  const allVisits=filtered.filter(p=>p.category==="사내방문").flatMap(p=>p.visits||[]);
+  const freq=(arr,key)=>{ const f={}; arr.forEach(x=>{ const k=key(x); if(k) f[k]=(f[k]||0)+1; }); return Object.entries(f).sort((a,b)=>b[1]-a[1]); };
+  const clientRank=freq(filtered.filter(p=>p.client),p=>p.client);
+  const procRank=freq(allItems.filter(i=>i.hasProc&&i.procType),i=>i.procType);
+  const transRank=freq(allItems,i=>i.transport||"자차");
+  const transFreq=Object.fromEntries(transRank);
+  const totalTrans=allItems.length||1;
+
+  const getKm=route=>{ let k=0; for(let i=1;i<route.stops.length;i++){ const a=route.stops[i-1],b=route.stops[i]; if(a.lat&&b.lat) k+=haversine(a.lat,a.lng,b.lat,b.lng); } return k; };
+
+  const staffStats=members.filter(u=>u.role==="staff").map(u=>{
+    const its=filtered.filter(p=>p.category!=="사내방문").flatMap(p=>p.groups.filter(g=>g.assignee===u.id).flatMap(g=>g.items));
+    const vts=filtered.filter(p=>p.category==="사내방문").flatMap(p=>(p.visits||[]).filter(v=>v.recordedBy===u.name));
+    const mRoutes=routes.filter(r=>r.staffId===u.id&&r.date.startsWith(thisMonth));
+    const km=mRoutes.reduce((a,r)=>a+getKm(r),0);
+    return{...u,itemCnt:its.length,visitCnt:vts.length,monthKm:parseFloat(km.toFixed(1)),total:its.length+vts.length};
+  }).sort((a,b)=>b.total-a.total);
+  const maxLoad=Math.max(...staffStats.map(s=>s.total),1);
+
+  const catFreq={양산출하:filtered.filter(p=>p.category==="양산출하").length,일반출하:filtered.filter(p=>p.category==="일반출하").length,사내방문:allVisits.length};
+  const totalPosts=filtered.length||1;
+
+  const days7=Array.from({length:7},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-6+i); return d.toISOString().slice(0,10); });
+  const dayData=days7.map(d=>({
+    date:d.slice(5).replace("-","/"),
+    yangsan:posts.filter(p=>p.date===d&&p.category==="양산출하").length,
+    general:posts.filter(p=>p.date===d&&p.category==="일반출하").length,
+    visit:posts.filter(p=>p.date===d&&p.category==="사내방문").reduce((a,p)=>a+(p.visits||[]).length,0),
+    isToday:d===todayStr(),
+  }));
+
+  function RR({rank,name,cnt,max,color}){
+    return(
+      <div style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:`1px solid ${C.border}`}}>
+        <div style={{width:26,height:26,borderRadius:8,background:rank===1?C.accent:rank===2?C.accent+"70":C.muted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:rank<=2?"#fff":C.sub,flexShrink:0}}>{rank}</div>
+        <div style={{flex:1,fontSize:13,fontWeight:600,color:C.text}}>{name}</div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <div style={{width:70,height:6,background:C.border,borderRadius:99,overflow:"hidden"}}>
+            <div style={{width:`${Math.round(cnt/max*100)}%`,height:"100%",background:color,borderRadius:99}}/>
+          </div>
+          <span style={{fontSize:13,fontWeight:800,color,minWidth:28,textAlign:"right"}}>{cnt}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      <Hdr title="업무 분석 통계" sub="업무 재분배 의사결정 도구" onBack={onBack}/>
+      <div style={{padding:"14px 14px 100px"}}>
+        <div style={{display:"flex",gap:6,marginBottom:16,background:C.card,borderRadius:12,padding:4,boxShadow:C.shadow}}>
+          {[7,14,30].map(d=><button key={d} onClick={()=>setPeriod(d)} style={{flex:1,padding:"9px 0",borderRadius:9,fontSize:13,fontWeight:700,border:"none",background:period===d?C.accent:C.card,color:period===d?"#fff":C.sub,cursor:"pointer",transition:"all 0.15s"}}>최근 {d}일</button>)}
+        </div>
+
+        {/* 유형 비중 */}
+        <Card style={{padding:"16px",marginBottom:14}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>📊 출하 유형 비중</div>
+          {[{l:"양산출하",c:C.yangsan,cnt:catFreq["양산출하"]},{l:"일반출하",c:C.general,cnt:catFreq["일반출하"]},{l:"사내방문",c:C.visit,cnt:allVisits.length}].map(({l,c,cnt})=>{
+            const pct=Math.round(cnt/totalPosts*100);
+            return(<div key={l} style={{marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:13,fontWeight:700,color:c}}>{l}</span><span style={{fontSize:13,fontWeight:700,color:c}}>{cnt}건 <span style={{color:C.sub,fontSize:11}}>({pct}%)</span></span></div><PBar pct={pct} color={c} h={10}/></div>);
+          })}
+        </Card>
+
+        {/* 일별 트렌드 */}
+        <Card style={{padding:"16px",marginBottom:14}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>📈 일별 출하 트렌드</div>
+          <div style={{display:"flex",gap:5,alignItems:"flex-end",height:100}}>
+            {dayData.map(d=>{
+              const mx=Math.max(...dayData.map(x=>x.yangsan+x.general+x.visit),1);
+              const tot=d.yangsan+d.general+d.visit;
+              const h=Math.max(Math.round(tot/mx*80),tot>0?4:2);
+              const yh=tot?Math.round(d.yangsan/tot*h):0;
+              const gh=tot?Math.round(d.general/tot*h):0;
+              const vh=h-yh-gh;
+              return(
+                <div key={d.date} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                  <div style={{fontSize:10,color:tot>0?C.text:C.dim,fontWeight:700}}>{tot||""}</div>
+                  <div style={{width:"75%",display:"flex",flexDirection:"column",justifyContent:"flex-end",height:80,borderRadius:"4px 4px 0 0",overflow:"hidden"}}>
+                    {d.visit>0&&<div style={{width:"100%",height:`${vh}px`,background:C.visit}}/>}
+                    {d.general>0&&<div style={{width:"100%",height:`${gh}px`,background:C.general}}/>}
+                    {d.yangsan>0&&<div style={{width:"100%",height:`${yh}px`,background:C.yangsan}}/>}
+                    {tot===0&&<div style={{width:"100%",height:"3px",background:C.border}}/>}
+                  </div>
+                  <div style={{fontSize:9,color:d.isToday?C.accent:C.sub,fontWeight:d.isToday?800:400}}>{d.date}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{display:"flex",gap:14,marginTop:10,justifyContent:"center"}}>
+            {[{c:C.yangsan,l:"양산"},{c:C.general,l:"일반"},{c:C.visit,l:"방문"}].map(x=>(
+              <div key={x.l} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:10,height:10,borderRadius:2,background:x.c}}/><span style={{fontSize:11,color:C.sub}}>{x.l}</span></div>
+            ))}
+          </div>
+        </Card>
+
+        {/* 직원 업무 부하 */}
+        <Card style={{padding:"16px",marginBottom:14}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:4}}>⚖️ 직원별 업무 부하</div>
+          <div style={{fontSize:12,color:C.sub,marginBottom:14}}>업무 재분배 판단 기준 · 이번달 운행 포함</div>
+          {staffStats.map((u,i)=>(
+            <div key={u.id} style={{background:C.card2,borderRadius:12,padding:"12px 14px",marginBottom:8,border:i===0&&u.total>5?`1px solid ${C.danger}44`:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                <Avatar name={u.name} color={u.specialty==="양산"?C.yangsan:C.general} size={34}/>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <span style={{fontSize:14,fontWeight:700,color:C.text}}>{u.name}</span>
+                      <span style={{fontSize:9,marginLeft:6,color:u.specialty==="양산"?C.yangsan:C.general,fontWeight:700,padding:"1px 5px",borderRadius:5,background:u.specialty==="양산"?C.yangsan+"15":C.general+"15"}}>{u.specialty==="양산"?"🏭":"📦"}</span>
+                    </div>
+                    <span style={{fontSize:14,fontWeight:800,color:u.total>5?C.danger:u.total>3?C.warn:C.done}}>{u.total}건</span>
+                  </div>
+                </div>
+              </div>
+              <PBar pct={Math.round(u.total/maxLoad*100)} color={u.total>5?C.danger:u.total>3?C.warn:C.done} h={6}/>
+              <div style={{display:"flex",gap:8,marginTop:10}}>
+                {[{l:"출하",v:u.itemCnt,c:C.accent},{l:"방문기록",v:u.visitCnt,c:C.visit},{l:"이번달운행",v:`${u.monthKm}km`,c:C.route}].map(x=>(
+                  <div key={x.l} style={{flex:1,background:C.card,borderRadius:8,padding:"6px 0",textAlign:"center",border:`1px solid ${C.border}`}}>
+                    <div style={{fontSize:12,fontWeight:800,color:x.c}}>{x.v}</div>
+                    <div style={{fontSize:10,color:C.sub,marginTop:1}}>{x.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </Card>
+
+        <Card style={{padding:"16px",marginBottom:14}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>🏢 거래처 출하 빈도</div>
+          {clientRank.length===0?<div style={{color:C.sub,fontSize:13}}>데이터 없음</div>:clientRank.map(([n,c],i)=><RR key={n} rank={i+1} name={n} cnt={c} max={clientRank[0][1]} color={C.accent}/>)}
+        </Card>
+
+        <Card style={{padding:"16px",marginBottom:14}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>⚙️ 공정 의뢰 빈도</div>
+          {procRank.length===0?<div style={{color:C.sub,fontSize:13}}>공정 의뢰 없음</div>:procRank.map(([n,c],i)=><RR key={n} rank={i+1} name={n} cnt={c} max={procRank[0][1]} color={C.process}/>)}
+        </Card>
+
+        <Card style={{padding:"16px",marginBottom:14}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>🚐 외부자원 활용 현황</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            {transRank.map(([t,cnt])=>{ const color=TRANS_COLOR[t]||C.dim; return(
+              <div key={t} style={{background:C.card2,border:`1px solid ${color}33`,borderRadius:12,padding:"14px",textAlign:"center"}}>
+                <div style={{fontSize:26}}>{TRANS_ICON[t]||"📦"}</div>
+                <div style={{fontSize:22,fontWeight:900,fontFamily:"monospace",color,marginTop:4}}>{cnt}</div>
+                <div style={{fontSize:11,color,fontWeight:700,marginTop:2}}>{t}</div>
+                <div style={{fontSize:10,color:C.sub}}>{Math.round(cnt/totalTrans*100)}%</div>
+              </div>
+            );})}
+          </div>
+        </Card>
+
+        <Card style={{padding:"16px"}}>
+          <div style={{fontSize:14,fontWeight:800,color:C.accent,marginBottom:12}}>💡 업무 재분배 시사점</div>
+          {staffStats[0]?.total>staffStats[staffStats.length-1]?.total*1.5&&(
+            <div style={{background:C.danger+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:`1px solid ${C.danger}22`}}>
+              <span style={{fontSize:12,color:C.danger}}>⚠️ <strong>{staffStats[0]?.name}</strong>의 업무 부하가 집중되고 있습니다. 용차·퀵 대체 또는 업무 이관을 검토하세요.</span>
+            </div>
+          )}
+          {procRank[0]&&<div style={{background:C.process+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:`1px solid ${C.process}22`}}><span style={{fontSize:12,color:C.process}}>⚙️ <strong>{procRank[0][0]}</strong> 공정이 가장 많습니다 ({procRank[0][1]}회). 전담 협력업체 계약을 검토하세요.</span></div>}
+          {(transFreq["용차"]||0)+(transFreq["퀵"]||0)>(transFreq["자차"]||0)&&<div style={{background:C.warn+"08",borderRadius:10,padding:"11px 13px",marginBottom:8,border:`1px solid ${C.warn}22`}}><span style={{fontSize:12,color:C.warn}}>🚐 외부자원 활용이 자차를 초과했습니다. 비용 대비 효율 점검이 필요합니다.</span></div>}
+          {clientRank[0]&&<div style={{background:C.accent+"08",borderRadius:10,padding:"11px 13px",border:`1px solid ${C.accent}22`}}><span style={{fontSize:12,color:C.accent}}>🏢 <strong>{clientRank[0][0]}</strong>가 가장 빈번합니다 ({clientRank[0][1]}회). 전담 인력·루트 최적화를 고려하세요.</span></div>}
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+
+/* ══════════════════════════════════════════
+   📝 출하 요청 폼 (조회자·직원)
+   - 거래처/품목/위치/희망일 입력
+   - 제출 → requests state에 추가
+══════════════════════════════════════════ */
+function RequestForm({user,zones,members,onBack,onSubmit}){
+  const [step,setStep]=useState(1);
+  const [cat,setCat]=useState("양산출하");
+  const [client,setClient]=useState("");
+  const [requester,setRequester]=useState(user.name+" ("+user.dept+")");
+  const [urgency,setUrgency]=useState("일반");
+  const [packaging,setPackaging]=useState("");
+  const [transport,setTransport]=useState("자차");
+  const [carNum,setCarNum]=useState("");
+  const [desiredDate,setDesiredDate]=useState(todayStr());
+  const [note,setNote]=useState("");
+  const [items,setItems]=useState([{
+    id:uid(),text:"",detail:"",extra:"",
+    hasProc:false,procType:"도금",dueDate:"",
+    loc:{zone:zones[0]||"A창고",rack:"",pallet:"",memo:""}
+  }]);
+  const [done,setDone]=useState(false);
+
+  const inp={background:C.card,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"10px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+  const cc=CAT[cat];
+  const s1OK=client.trim()&&requester.trim()&&desiredDate&&packaging.trim();
+  const s2OK=items.some(i=>i.text.trim()&&i.detail.trim());
+
+  const setItm=(id,k,v)=>setItems(its=>its.map(i=>i.id===id?{...i,[k]:v}:i));
+  const setLoc=(id,k,v)=>setItems(its=>its.map(i=>i.id===id?{...i,loc:{...i.loc,[k]:v}}:i));
+
+  function doSubmit(){
+    const req={
+      id:uid(),
+      requestedBy:user.id, requestedByName:user.name, requestedByDept:user.dept,
+      requestedAt:fmtDT(),
+      category:cat, client:client.trim(), requester:requester.trim(),
+      desiredDate, urgency,
+      packaging:packaging.trim(), transport, carNum:transport!=="자차"?carNum:"",
+      note:note.trim(), items,
+      status:"대기", confirmedDate:"", confirmedAssignee:"", reviewNote:"",
+    };
+    onSubmit(req);
+    setDone(true);
+  }
+
+  if(done) return(
+    <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,textAlign:"center"}}>
+      <div style={{fontSize:60,marginBottom:14}}>🎉</div>
+      <div style={{fontSize:22,fontWeight:800,color:C.text,marginBottom:8}}>요청 제출 완료!</div>
+      <div style={{fontSize:13,color:C.sub,lineHeight:1.9,marginBottom:28}}>
+        관리자가 검토 후 출하 일정을 확정합니다.<br/>
+        <strong style={{color:C.accent}}>"요청 현황"</strong> 탭에서 처리 상태를 확인하세요.
+      </div>
+      <button onClick={onBack} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:14,padding:"13px 32px",fontSize:15,fontWeight:800,cursor:"pointer"}}>확인</button>
+    </div>
+  );
+
+  const stepLabels=["기본 정보","품목 & 위치","최종 확인"];
+
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      <Hdr title="출하 요청" sub="관리자 검토 후 일정 확정" onBack={onBack}/>
+      {/* 단계 바 */}
+      <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,padding:"14px 16px"}}>
+        <div style={{display:"flex",marginBottom:10}}>
+          {[1,2,3].map(s=>(
+            <div key={s} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+              <div style={{width:28,height:28,borderRadius:"50%",
+                background:step>s?C.done:step===s?C.accent:C.border,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                fontSize:12,fontWeight:800,color:step>=s?"#fff":C.sub,transition:"all 0.2s"}}>
+                {step>s?"✓":s}
+              </div>
+              <div style={{fontSize:10,color:step>=s?C.accent:C.sub,fontWeight:step===s?800:400}}>{stepLabels[s-1]}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{height:4,background:C.muted,borderRadius:99,overflow:"hidden"}}>
+          <div style={{width:`${((step-1)/2)*100}%`,height:"100%",background:C.accent,borderRadius:99,transition:"width 0.3s"}}/>
+        </div>
+      </div>
+
+      <div style={{padding:"16px 16px 100px"}}>
+        {/* ─ 단계 1 ─ */}
+        {step===1&&(<>
+          <div style={{background:C.accent+"08",border:`1px solid ${C.accent}25`,borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.accent,lineHeight:1.8}}>
+            📋 출하 요청을 작성하면 관리자가 검토 후 출하 계획에 반영합니다
+          </div>
+          <Card style={{padding:"16px",marginBottom:14}}>
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>출하 구분</div>
+              <div style={{display:"flex",gap:8}}>
+                {["양산출하","일반출하","사내출하"].map(c=>{ const ccc=CAT[c]||CAT["일반출하"],sel=cat===c; return(
+                  <button key={c} onClick={()=>setCat(c)} style={{flex:1,padding:"10px 2px",borderRadius:12,fontSize:12,fontWeight:800,border:`2px solid ${sel?ccc.color:C.border}`,background:sel?ccc.bg:C.card2,color:sel?ccc.color:C.sub,cursor:"pointer"}}>
+                    {ccc.icon}<br/>{c.replace("출하","")}
+                  </button>
+                );})}
+              </div>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:6}}>거래처 *</div>
+              <input value={client} onChange={e=>setClient(e.target.value)} placeholder="예: 기아자동차 광주공장" style={inp}/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:6}}>의뢰자 * <span style={{color:C.sub,fontWeight:400,fontSize:11}}>(이름+부서)</span></div>
+              <input value={requester} onChange={e=>setRequester(e.target.value)} placeholder="예: 생산팀 홍길동" style={inp}/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:6}}>희망 출하일 *</div>
+              <input type="date" value={desiredDate} onChange={e=>setDesiredDate(e.target.value)} style={inp} min={todayStr()}/>
+              <div style={{fontSize:11,color:C.sub,marginTop:4}}>※ 최종 출하일은 관리자 검토 후 확정됩니다</div>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:8}}>긴급도 *</div>
+              <div style={{display:"flex",gap:8}}>
+                {URGENCY.map(u=>{ const c=URG_COLOR[u],sel=urgency===u; return(
+                  <button key={u} onClick={()=>setUrgency(u)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:13,fontWeight:800,border:`2px solid ${sel?c:C.border}`,background:sel?`${c}15`:C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
+                    {URG_ICON[u]} {u}
+                  </button>
+                );})}
+              </div>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.danger,fontWeight:700,marginBottom:6}}>포장 형태 *</div>
+              <input value={packaging} onChange={e=>setPackaging(e.target.value)} placeholder="예: 파렛 랩핑 / 박스 포장" style={inp}/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>운송 방법</div>
+              <div style={{display:"flex",gap:6,marginBottom:transport!=="자차"&&transport!=="기타"?8:0}}>
+                {TRANSPORT.map(t=>{ const tc=TRANS_COLOR[t]||C.dim,sel=transport===t; return(
+                  <button key={t} onClick={()=>setTransport(t)} style={{flex:1,padding:"8px 2px",borderRadius:9,fontSize:11,fontWeight:700,border:`1.5px solid ${sel?tc:C.border}`,background:sel?`${tc}15`:C.card2,color:sel?tc:C.sub,cursor:"pointer"}}>
+                    {TRANS_ICON[t]}<br/>{t}
+                  </button>
+                );})}
+              </div>
+              {transport!=="자차"&&transport!=="기타"&&<input value={carNum} onChange={e=>setCarNum(e.target.value)} placeholder={transport==="용차"?"차량번호":"퀵 업체명"} style={{...inp,marginTop:4}}/>}
+            </div>
+            <div>
+              <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>전달사항</div>
+              <input value={note} onChange={e=>setNote(e.target.value)} placeholder="출하팀에 전달할 내용" style={inp}/>
+            </div>
+          </Card>
+          <button onClick={()=>s1OK&&setStep(2)} style={{width:"100%",padding:"14px",borderRadius:14,background:s1OK?"linear-gradient(135deg,"+C.accentL+","+C.accent+")":C.muted,color:s1OK?"#fff":C.dim,border:"none",fontSize:15,fontWeight:800,cursor:s1OK?"pointer":"not-allowed"}}>
+            {s1OK?"다음: 품목 & 위치 →":"필수 항목을 모두 입력하세요"}
+          </button>
+        </>)}
+
+        {/* ─ 단계 2 ─ */}
+        {step===2&&(<>
+          <div style={{background:C.loc+"10",border:`1px solid ${C.loc}30`,borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.loc,lineHeight:1.8}}>
+            📍 <strong>완제품 위치(구역·선반·파렛)를 정확히 입력</strong>하면 출하팀이 빠르게 찾을 수 있습니다
+          </div>
+          <Card style={{padding:"14px",marginBottom:12}}>
+            {items.map((item,idx)=>(
+              <div key={item.id} style={{background:C.card2,borderRadius:12,padding:"12px",marginBottom:10,border:`1px solid ${C.border}`}}>
+                <div style={{display:"flex",gap:8,marginBottom:8}}>
+                  <input placeholder="품목명 *" value={item.text} onChange={e=>setItm(item.id,"text",e.target.value)} style={{...inp,flex:1,fontWeight:700}}/>
+                  <input placeholder="수량" value={item.extra} onChange={e=>setItm(item.id,"extra",e.target.value)} style={{...inp,width:68}}/>
+                  {items.length>1&&<button onClick={()=>setItems(its=>its.filter(i=>i.id!==item.id))} style={{background:"none",border:"none",color:C.dim,fontSize:18,cursor:"pointer",flexShrink:0}}>✕</button>}
+                </div>
+                <input placeholder="LOT번호 / 규격 *" value={item.detail} onChange={e=>setItm(item.id,"detail",e.target.value)} style={{...inp,fontSize:12,fontFamily:"monospace",marginBottom:12}}/>
+                <div style={{background:C.loc+"08",borderRadius:10,padding:"12px",border:`1px solid ${C.loc}33`}}>
+                  <div style={{fontSize:12,color:C.loc,fontWeight:800,marginBottom:10}}>📍 완제품 위치</div>
+                  <div style={{marginBottom:8}}>
+                    <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:6}}>창고 구역</div>
+                    <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                      {zones.map(z=><button key={z} onClick={()=>setLoc(item.id,"zone",z)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.loc?.zone===z?C.loc:C.border}`,background:item.loc?.zone===z?C.loc+"15":C.card,color:item.loc?.zone===z?C.loc:C.sub,cursor:"pointer"}}>{z}</button>)}
+                    </div>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+                    <div><div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>선반 번호</div><input value={item.loc?.rack||""} onChange={e=>setLoc(item.id,"rack",e.target.value)} placeholder="예: 3-B" style={{...inp,fontSize:12}}/></div>
+                    <div><div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>파렛 번호</div><input value={item.loc?.pallet||""} onChange={e=>setLoc(item.id,"pallet",e.target.value)} placeholder="예: 2" style={{...inp,fontSize:12}}/></div>
+                  </div>
+                  <input value={item.loc?.memo||""} onChange={e=>setLoc(item.id,"memo",e.target.value)} placeholder="위치 메모 (예: 파렛 앞줄)" style={{...inp,fontSize:12}}/>
+                </div>
+                <div style={{marginTop:10}}>
+                  <button onClick={()=>setItm(item.id,"hasProc",!item.hasProc)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${item.hasProc?C.process:C.border}`,background:item.hasProc?C.process+"12":C.card,color:item.hasProc?C.process:C.sub,cursor:"pointer"}}>⚙️ 공정 포함</button>
+                </div>
+                {item.hasProc&&(<div style={{marginTop:10,padding:"10px 12px",background:C.card,borderRadius:9,border:`1px solid ${C.border}`}}>
+                  <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:7}}>공정 종류</div>
+                  <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:8}}>
+                    {PROC_TYPES.map(pt=><button key={pt} onClick={()=>setItm(item.id,"procType",pt)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.procType===pt?C.process:C.border}`,background:item.procType===pt?C.process+"12":C.card2,color:item.procType===pt?C.process:C.sub,cursor:"pointer"}}>{pt}</button>)}
+                  </div>
+                  <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>납기일</div>
+                  <input type="date" value={item.dueDate} onChange={e=>setItm(item.id,"dueDate",e.target.value)} style={{...inp,fontSize:12}}/>
+                </div>)}
+              </div>
+            ))}
+            <button onClick={()=>setItems(its=>[...its,{id:uid(),text:"",detail:"",extra:"",hasProc:false,procType:"도금",dueDate:"",loc:{zone:zones[0]||"A창고",rack:"",pallet:"",memo:""}}])}
+              style={{width:"100%",padding:"10px",borderRadius:10,border:`1.5px dashed ${C.border}`,background:C.card2,color:C.sub,fontSize:13,cursor:"pointer"}}>
+              + 품목 추가
+            </button>
+          </Card>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={()=>setStep(1)} style={{flex:1,padding:"14px",borderRadius:14,background:C.muted,border:"none",color:C.sub,fontSize:14,fontWeight:700,cursor:"pointer"}}>← 이전</button>
+            <button onClick={()=>s2OK&&setStep(3)} style={{flex:2,padding:"14px",borderRadius:14,background:s2OK?"linear-gradient(135deg,"+C.accentL+","+C.accent+")":C.muted,color:s2OK?"#fff":C.dim,border:"none",fontSize:14,fontWeight:800,cursor:s2OK?"pointer":"not-allowed"}}>
+              {s2OK?"다음: 최종 확인 →":"품목명·LOT 필수"}
+            </button>
+          </div>
+        </>)}
+
+        {/* ─ 단계 3 ─ */}
+        {step===3&&(<>
+          <Card style={{padding:"16px",marginBottom:14,border:`2px solid ${C.done}44`}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{fontSize:32}}>📋</div>
+              <div>
+                <div style={{fontSize:15,fontWeight:800,color:C.done}}>요청서 작성 완료</div>
+                <div style={{fontSize:11,color:C.sub,marginTop:2}}>관리자 검토 후 출하 일정이 확정됩니다</div>
+              </div>
+            </div>
+          </Card>
+          <Card style={{padding:"16px",marginBottom:14}}>
+            <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>요청 요약</div>
+            {[
+              {l:"출하구분",v:`${cc.icon} ${cat}`},
+              {l:"거래처",  v:client},
+              {l:"의뢰자",  v:requester},
+              {l:"희망 출하일",v:desiredDate},
+              {l:"긴급도",  v:`${URG_ICON[urgency]} ${urgency}`},
+              {l:"포장형태",v:packaging},
+              {l:"운송",    v:`${TRANS_ICON[transport]} ${transport}${carNum?" ("+carNum+")":""}`},
+            ].map(({l,v})=>(
+              <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
+                <span style={{fontSize:12,color:C.sub,fontWeight:700}}>{l}</span>
+                <span style={{fontSize:13,fontWeight:700,color:C.text}}>{v}</span>
+              </div>
+            ))}
+            {note&&<div style={{marginTop:8,fontSize:12,color:C.sub,background:C.card2,borderRadius:8,padding:"8px 10px"}}>💬 {note}</div>}
+          </Card>
+          <Card style={{padding:"14px",marginBottom:14}}>
+            <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10}}>품목 & 위치</div>
+            {items.filter(i=>i.text).map(item=>(
+              <div key={item.id} style={{background:C.card2,borderRadius:10,padding:"10px 12px",marginBottom:8,border:`1px solid ${C.border}`}}>
+                <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3,flexWrap:"wrap"}}>
+                  <span style={{fontSize:13,fontWeight:700,color:C.text}}>{item.text}</span>
+                  {item.extra&&<span style={{background:C.warn+"15",color:C.warn,fontSize:11,fontWeight:700,padding:"1px 6px",borderRadius:5}}>{item.extra}</span>}
+                  {item.hasProc&&<span style={{background:C.process+"12",color:C.process,fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:5}}>⚙️{item.procType}</span>}
+                </div>
+                {item.detail&&<div style={{fontSize:11,color:C.sub,fontFamily:"monospace"}}>{item.detail}</div>}
+                <div style={{marginTop:4}}><LocBadge loc={item.loc}/></div>
+              </div>
+            ))}
+          </Card>
+          <div style={{background:C.accent+"08",border:`1px solid ${C.accent}30`,borderRadius:12,padding:"12px 14px",marginBottom:16,fontSize:12,color:C.sub,lineHeight:1.8}}>
+            ✅ 제출 후 <strong style={{color:C.accent}}>"요청 현황"</strong> 탭에서 처리 상태를 확인할 수 있습니다
+          </div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={()=>setStep(2)} style={{flex:1,padding:"14px",borderRadius:14,background:C.muted,border:"none",color:C.sub,fontSize:14,fontWeight:700,cursor:"pointer"}}>← 이전</button>
+            <button onClick={doSubmit} style={{flex:2,padding:"14px",borderRadius:14,background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",border:"none",color:"#fff",fontSize:14,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 14px rgba(18,89,195,0.35)"}}>
+              출하 요청 제출 →
+            </button>
+          </div>
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   📋 내 요청 현황 (조회자·직원)
+══════════════════════════════════════════ */
+function MyRequests({requests,user,onBack,onNewRequest}){
+  const mine=requests.filter(r=>r.requestedBy===user.id).sort((a,b)=>b.requestedAt.localeCompare(a.requestedAt));
+  const S_COLOR={대기:C.warn,승인:C.done,수정됨:C.accent,거부:C.danger};
+  const S_ICON={대기:"⏳",승인:"✅",수정됨:"✏️",거부:"❌"};
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      <Hdr title="출하 요청 현황" sub="내가 제출한 요청 목록" onBack={onBack}
+        right={<button onClick={onNewRequest} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:9,padding:"7px 13px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ 새 요청</button>}/>
+      <div style={{padding:"14px 14px 100px"}}>
+        {/* 상태 요약 */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:14}}>
+          {Object.entries(S_ICON).map(([s,ic])=>{ const cnt=mine.filter(r=>r.status===s).length; const c=S_COLOR[s]; return(
+            <Card key={s} style={{padding:"10px 6px",textAlign:"center"}}>
+              <div style={{fontSize:18}}>{ic}</div>
+              <div style={{fontSize:20,fontWeight:900,color:cnt>0?c:C.dim,fontFamily:"monospace"}}>{cnt}</div>
+              <div style={{fontSize:10,color:C.sub,marginTop:1}}>{s}</div>
+            </Card>
+          );})}
+        </div>
+
+        {mine.length===0&&(
+          <Card style={{padding:"40px 20px",textAlign:"center"}}>
+            <div style={{fontSize:40,marginBottom:10}}>📋</div>
+            <div style={{color:C.sub,fontSize:14,marginBottom:16}}>제출한 요청이 없습니다</div>
+            <button onClick={onNewRequest} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:12,padding:"11px 24px",fontSize:14,fontWeight:700,cursor:"pointer"}}>+ 출하 요청하기</button>
+          </Card>
+        )}
+
+        {mine.map(req=>{
+          const cc=CAT[req.category]||CAT["일반출하"]; const sc=S_COLOR[req.status];
+          return(
+            <Card key={req.id} style={{marginBottom:10}}>
+              <div style={{height:4,background:cc.color}}/>
+              <div style={{padding:"13px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5,flexWrap:"wrap"}}>
+                      <span style={{background:cc.bg,color:cc.color,fontSize:11,fontWeight:800,padding:"3px 9px",borderRadius:20}}>{cc.icon} {req.category}</span>
+                      <UrgBadge urgency={req.urgency}/>
+                    </div>
+                    <div style={{fontSize:15,fontWeight:800,color:C.text}}>{req.client}</div>
+                    <div style={{fontSize:11,color:C.sub,marginTop:2}}>
+                      희망일: <strong style={{color:C.accent}}>{req.desiredDate}</strong>
+                      {req.confirmedDate&&req.confirmedDate!==req.desiredDate&&
+                        <span style={{color:C.done,marginLeft:6}}>→ 확정: <strong>{req.confirmedDate}</strong></span>}
+                    </div>
+                    <div style={{fontSize:11,color:C.sub}}>제출: {req.requestedAt}</div>
+                    <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:5}}>
+                      {req.items.filter(i=>i.text).map(item=>(
+                        <span key={item.id} style={{background:C.muted,color:C.sub,fontSize:10,padding:"2px 7px",borderRadius:6}}>{item.text}{item.extra?" "+item.extra:""}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{textAlign:"center",flexShrink:0,marginLeft:12}}>
+                    <div style={{fontSize:26}}>{S_ICON[req.status]}</div>
+                    <div style={{fontSize:11,fontWeight:800,color:sc,marginTop:2}}>{req.status}</div>
+                  </div>
+                </div>
+                {/* 관리자 검토 메모 */}
+                {req.reviewNote&&(
+                  <div style={{background:req.status==="거부"?C.danger+"08":C.done+"08",borderRadius:9,padding:"8px 11px",border:`1px solid ${req.status==="거부"?C.danger:C.done}33`,fontSize:12,color:req.status==="거부"?C.danger:C.done}}>
+                    💬 관리자: {req.reviewNote}
+                  </div>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════
+   🗓️ 관리자 — 요청 검토 & 일별 출하 계획
+══════════════════════════════════════════ */
+function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan}){
+  const [tab,setTab]=useState("대기");
+  const [selReq,setSelReq]=useState(null);
+  const [eDate,setEDate]=useState("");
+  const [eAssignee,setEAssignee]=useState("");
+  const [eNote,setENote]=useState("");
+  const [eStatus,setEStatus]=useState("승인");
+
+  const S_COLOR={대기:C.warn,승인:C.done,수정됨:C.accent,거부:C.danger};
+  const S_ICON={대기:"⏳",승인:"✅",수정됨:"✏️",거부:"❌"};
+  const staffList=members.filter(u=>u.role==="staff");
+  const inp={background:C.card,border:`1px solid ${C.border}`,borderRadius:9,color:C.text,fontSize:14,padding:"10px 12px",outline:"none",width:"100%",boxSizing:"border-box"};
+
+  const filtered=(tab==="전체"?requests:requests.filter(r=>r.status===tab))
+    .sort((a,b)=>a.desiredDate.localeCompare(b.desiredDate));
+
+  // 일별 계획 — 승인/수정됨 요청을 날짜별로 그룹
+  const byDate={};
+  requests.filter(r=>r.status==="승인"||r.status==="수정됨").forEach(r=>{
+    const d=r.confirmedDate||r.desiredDate;
+    if(!byDate[d]) byDate[d]=[];
+    byDate[d].push(r);
+  });
+
+  function openReview(req){
+    setSelReq(req);
+    setEDate(req.confirmedDate||req.desiredDate);
+    setEAssignee(req.confirmedAssignee||"");
+    setENote(req.reviewNote||"");
+    setEStatus(req.status==="대기"?"승인":req.status);
+  }
+
+  function saveReview(){
+    const updated={...selReq,status:eStatus,confirmedDate:eDate,confirmedAssignee:eAssignee,reviewNote:eNote.trim()};
+    updRequests(rs=>rs.map(r=>r.id!==selReq.id?r:updated));
+    if(eStatus==="승인"||eStatus==="수정됨") onCreatePlan(updated);
+    setSelReq(null);
+  }
+
+  return(
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      {/* 검토 모달 */}
+      {selReq&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <div style={{background:C.card,borderRadius:18,width:"100%",maxWidth:400,maxHeight:"88vh",overflowY:"auto",boxShadow:"0 8px 32px rgba(18,89,195,0.2)"}}>
+            {/* 모달 헤더 */}
+            <div style={{padding:"18px 20px 14px",borderBottom:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"sticky",top:0,background:C.card,zIndex:10}}>
+              <div>
+                <div style={{fontSize:17,fontWeight:800,color:C.text}}>📋 요청 검토</div>
+                <div style={{fontSize:12,color:C.sub,marginTop:2}}>{selReq.requestedByName}({selReq.requestedByDept}) 제출</div>
+              </div>
+              <button onClick={()=>setSelReq(null)} style={{background:"none",border:"none",fontSize:22,cursor:"pointer",color:C.sub,padding:"0 0 0 10px"}}>✕</button>
+            </div>
+            <div style={{padding:"16px 20px"}}>
+              {/* 요청 요약 */}
+              <div style={{background:C.card2,borderRadius:12,padding:"12px",marginBottom:16,border:`1px solid ${C.border}`}}>
+                <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:8}}>
+                  <span style={{background:CAT[selReq.category]?.bg,color:CAT[selReq.category]?.color,fontSize:11,fontWeight:800,padding:"3px 9px",borderRadius:20}}>{CAT[selReq.category]?.icon} {selReq.category}</span>
+                  <UrgBadge urgency={selReq.urgency}/>
+                  <TransBadge transport={selReq.transport}/>
+                </div>
+                <div style={{fontSize:15,fontWeight:800,color:C.text,marginBottom:3}}>{selReq.client}</div>
+                <div style={{fontSize:11,color:C.sub}}>의뢰자: {selReq.requester}</div>
+                <div style={{fontSize:12,color:C.accent,fontWeight:700,marginTop:2}}>희망 출하일: {selReq.desiredDate}</div>
+                <div style={{fontSize:11,color:C.sub}}>포장: {selReq.packaging} · {TRANS_ICON[selReq.transport]} {selReq.transport}{selReq.carNum?" "+selReq.carNum:""}</div>
+                {selReq.note&&<div style={{fontSize:11,color:C.sub,marginTop:3}}>💬 {selReq.note}</div>}
+              </div>
+
+              {/* 품목 목록 */}
+              <div style={{marginBottom:16}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>품목 ({selReq.items.filter(i=>i.text).length}건)</div>
+                {selReq.items.filter(i=>i.text).map(item=>(
+                  <div key={item.id} style={{background:C.card2,borderRadius:9,padding:"8px 10px",marginBottom:6,border:`1px solid ${C.border}`}}>
+                    <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap",marginBottom:2}}>
+                      <span style={{fontSize:13,fontWeight:700,color:C.text}}>{item.text}</span>
+                      {item.extra&&<span style={{background:C.warn+"15",color:C.warn,fontSize:11,fontWeight:700,padding:"1px 5px",borderRadius:5}}>{item.extra}</span>}
+                      {item.hasProc&&<span style={{background:C.process+"12",color:C.process,fontSize:10,fontWeight:700,padding:"1px 5px",borderRadius:5}}>⚙️{item.procType}</span>}
+                    </div>
+                    {item.detail&&<div style={{fontSize:11,color:C.sub,fontFamily:"monospace"}}>{item.detail}</div>}
+                    <LocBadge loc={item.loc}/>
+                  </div>
+                ))}
+              </div>
+
+              {/* 관리자 검토 */}
+              <div style={{background:C.accent+"06",borderRadius:12,padding:"14px",border:`1px solid ${C.accent}25`,marginBottom:16}}>
+                <div style={{fontSize:13,fontWeight:800,color:C.accent,marginBottom:12}}>✏️ 검토 · 수정</div>
+                <div style={{marginBottom:12}}>
+                  <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>확정 출하일 <span style={{color:C.sub,fontWeight:400,fontSize:11}}>(수정 가능)</span></div>
+                  <input type="date" value={eDate} onChange={e=>setEDate(e.target.value)} style={inp}/>
+                </div>
+                <div style={{marginBottom:12}}>
+                  <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>담당자 배정</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    {staffList.map(u=>(
+                      <button key={u.id} onClick={()=>setEAssignee(u.id===eAssignee?"":u.id)}
+                        style={{padding:"6px 12px",borderRadius:20,fontSize:12,fontWeight:700,
+                          border:`1.5px solid ${eAssignee===u.id?C.general:C.border}`,
+                          background:eAssignee===u.id?C.general+"15":C.card,
+                          color:eAssignee===u.id?C.general:C.sub,cursor:"pointer"}}>
+                        {u.name}{u.specialty&&<span style={{fontSize:9,marginLeft:3}}>{u.specialty==="양산"?"🏭":"📦"}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{marginBottom:12}}>
+                  <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>검토 메모 <span style={{fontWeight:400,fontSize:11}}>(요청자에게 표시)</span></div>
+                  <input value={eNote} onChange={e=>setENote(e.target.value)} placeholder="예: 출하일 변경 / 담당자 조정 등" style={inp}/>
+                </div>
+                <div>
+                  <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>처리 결과 선택</div>
+                  <div style={{display:"flex",gap:8}}>
+                    {["승인","수정됨","거부"].map(s=>{ const c=S_COLOR[s],sel=eStatus===s; return(
+                      <button key={s} onClick={()=>setEStatus(s)} style={{flex:1,padding:"10px 4px",borderRadius:10,fontSize:12,fontWeight:800,border:`2px solid ${sel?c:C.border}`,background:sel?`${c}15`:C.card2,color:sel?c:C.sub,cursor:"pointer"}}>
+                        {S_ICON[s]} {s}
+                      </button>
+                    );})}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{display:"flex",gap:10}}>
+                <button onClick={()=>setSelReq(null)} style={{flex:1,padding:"12px",borderRadius:10,background:C.muted,border:"none",color:C.sub,fontWeight:700,cursor:"pointer",fontSize:14}}>취소</button>
+                <button onClick={saveReview} style={{flex:2,padding:"12px",borderRadius:10,background:eStatus==="거부"?C.danger:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",border:"none",color:"#fff",fontWeight:800,cursor:"pointer",fontSize:14}}>
+                  {eStatus==="거부"?"거부 처리":"검토 완료 · 계획 반영"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Hdr title="출하 요청 검토" sub="요청 확인·수정·일정 확정" onBack={onBack}/>
+      {/* 탭 */}
+      <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,display:"flex",overflowX:"auto"}}>
+        {["대기","일별계획","승인","수정됨","거부","전체"].map(t=>{
+          const cnt=t==="일별계획"?Object.keys(byDate).length:t==="전체"?requests.length:requests.filter(r=>r.status===t).length;
+          return(
+            <button key={t} onClick={()=>setTab(t)} style={{padding:"13px 12px",background:"none",border:"none",borderBottom:`3px solid ${tab===t?C.accent:"transparent"}`,color:tab===t?C.accent:C.sub,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",position:"relative"}}>
+              {t}{cnt>0&&<span style={{marginLeft:4,background:t==="대기"?C.danger:t==="일별계획"?C.accent:C.muted,color:t==="대기"||t==="일별계획"?"#fff":C.sub,fontSize:10,fontWeight:800,borderRadius:8,padding:"1px 6px"}}>{cnt}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{padding:"14px 14px 100px"}}>
+        {/* ── 일별 계획 탭 ── */}
+        {tab==="일별계획"&&(<>
+          <div style={{background:C.accent+"08",border:`1px solid ${C.accent}25`,borderRadius:12,padding:"12px 14px",marginBottom:14,fontSize:12,color:C.accent,lineHeight:1.8}}>
+            🗓️ 승인된 요청이 날짜별로 자동 정리된 출하 계획입니다. 수정하려면 각 항목의 <strong>수정</strong> 버튼을 탭하세요.
+          </div>
+          {Object.keys(byDate).sort().length===0&&(
+            <Card style={{padding:"40px 20px",textAlign:"center"}}><div style={{fontSize:40,marginBottom:10}}>🗓️</div><div style={{color:C.sub}}>승인된 요청이 없습니다</div></Card>
+          )}
+          {Object.keys(byDate).sort().map(date=>{
+            const reqs=byDate[date];
+            const isToday=date===todayStr(); const isPast=date<todayStr();
+            return(
+              <Card key={date} style={{marginBottom:14,border:isToday?`2px solid ${C.accent}55`:""}}>
+                <div style={{background:isToday?C.accent+"08":C.card2,padding:"12px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div>
+                    <div style={{fontSize:16,fontWeight:800,color:isToday?C.accent:isPast?C.sub:C.text}}>
+                      {fmtDate(date)}
+                      {isToday&&<span style={{marginLeft:8,background:C.accent,color:"#fff",fontSize:10,fontWeight:800,borderRadius:8,padding:"2px 7px"}}>오늘</span>}
+                      {isPast&&<span style={{marginLeft:8,background:C.muted,color:C.sub,fontSize:10,borderRadius:8,padding:"2px 7px"}}>지난일</span>}
+                    </div>
+                    <div style={{fontSize:11,color:C.sub,marginTop:2}}>확정 출하 {reqs.length}건</div>
+                  </div>
+                  <div style={{fontSize:26,fontWeight:900,fontFamily:"monospace",color:isToday?C.accent:C.sub}}>{reqs.length}<span style={{fontSize:12}}>건</span></div>
+                </div>
+                {reqs.map(req=>{
+                  const cc=CAT[req.category]||CAT["일반출하"];
+                  const asgn=members.find(u=>u.id===req.confirmedAssignee);
+                  return(
+                    <div key={req.id} style={{padding:"11px 16px",borderBottom:`1px solid ${C.border}`,display:"flex",gap:10,alignItems:"center"}}>
+                      <div style={{flex:1}}>
+                        <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4,flexWrap:"wrap"}}>
+                          <span style={{background:cc.bg,color:cc.color,fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>{cc.icon} {req.category}</span>
+                          <UrgBadge urgency={req.urgency}/>
+                          <TransBadge transport={req.transport}/>
+                          <span style={{background:`${S_COLOR[req.status]}15`,color:S_COLOR[req.status],fontSize:10,fontWeight:800,padding:"2px 6px",borderRadius:8}}>{S_ICON[req.status]} {req.status}</span>
+                        </div>
+                        <div style={{fontSize:14,fontWeight:700,color:C.text}}>{req.client}</div>
+                        <div style={{fontSize:11,color:C.sub}}>의뢰: {req.requester}</div>
+                        {asgn&&<div style={{fontSize:11,color:C.general,fontWeight:700}}>👷 담당: {asgn.name}</div>}
+                        {req.reviewNote&&<div style={{fontSize:11,color:C.accent,marginTop:2}}>💬 {req.reviewNote}</div>}
+                        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:5}}>
+                          {req.items.filter(i=>i.text).map(item=>(
+                            <span key={item.id} style={{background:C.muted,color:C.sub,fontSize:10,padding:"2px 7px",borderRadius:6}}>{item.text}{item.extra?" "+item.extra:""}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <button onClick={()=>openReview(req)} style={{background:C.accent+"15",border:`1px solid ${C.accent}33`,color:C.accent,borderRadius:9,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>수정</button>
+                    </div>
+                  );
+                })}
+              </Card>
+            );
+          })}
+        </>)}
+
+        {/* ── 요청 목록 탭 ── */}
+        {tab!=="일별계획"&&(<>
+          {filtered.length===0&&(
+            <Card style={{padding:"40px 20px",textAlign:"center"}}>
+              <div style={{fontSize:40,marginBottom:10}}>{tab==="대기"?"📭":"✅"}</div>
+              <div style={{color:C.sub,fontSize:14}}>{tab} 상태의 요청이 없습니다</div>
+            </Card>
+          )}
+          {filtered.map(req=>{
+            const cc=CAT[req.category]||CAT["일반출하"]; const sc=S_COLOR[req.status];
+            const asgn=members.find(u=>u.id===req.confirmedAssignee);
+            return(
+              <Card key={req.id} style={{marginBottom:10}}>
+                <div style={{height:4,background:cc.color}}/>
+                <div style={{padding:"13px 14px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",gap:10}}>
+                    <div style={{flex:1}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5,flexWrap:"wrap"}}>
+                        <span style={{background:cc.bg,color:cc.color,fontSize:11,fontWeight:800,padding:"3px 9px",borderRadius:20}}>{cc.icon} {req.category}</span>
+                        <UrgBadge urgency={req.urgency}/>
+                        <span style={{background:`${sc}15`,color:sc,border:`1px solid ${sc}44`,fontSize:10,fontWeight:800,padding:"2px 7px",borderRadius:10}}>{S_ICON[req.status]} {req.status}</span>
+                      </div>
+                      <div style={{fontSize:15,fontWeight:800,color:C.text}}>{req.client}</div>
+                      <div style={{fontSize:11,color:C.sub,marginTop:2}}>의뢰: {req.requester} · 제출: {req.requestedAt.slice(0,10)}</div>
+                      <div style={{fontSize:12,fontWeight:700,color:C.accent,marginTop:2}}>
+                        희망일: {req.desiredDate}
+                        {req.confirmedDate&&req.confirmedDate!==req.desiredDate&&<span style={{color:C.done,marginLeft:8}}>→ 확정: {req.confirmedDate}</span>}
+                      </div>
+                      {asgn&&<div style={{fontSize:11,color:C.general,fontWeight:700}}>👷 담당: {asgn.name}</div>}
+                      {req.reviewNote&&<div style={{fontSize:11,color:sc,marginTop:2}}>💬 {req.reviewNote}</div>}
+                      <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:5}}>
+                        {req.items.filter(i=>i.text).map(item=>(
+                          <span key={item.id} style={{background:C.muted,color:C.sub,fontSize:10,padding:"2px 7px",borderRadius:6}}>{item.text}{item.extra?" "+item.extra:""}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={()=>openReview(req)} style={{background:C.accent+"15",border:`1px solid ${C.accent}33`,color:C.accent,borderRadius:9,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0,alignSelf:"flex-start"}}>검토</button>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+/* ══ Firebase 실시간 DB 유틸 ══ */
+const DB_PATH = "jyexpress";  // Firebase DB 루트 경로
+let   _db     = null;         // firebase.database() 인스턴스
+
+function getDb(){
+  if(!_db && window.firebase?.apps?.length){
+    _db = window.firebase.database();
+  }
+  return _db;
+}
+
+// Firebase에 전체 컬렉션 저장 (덮어쓰기)
+function fbSet(collection, data){
+  const db = getDb();
+  if(!db) return;
+  // photos는 base64라 용량 크므로 저장 제외 옵션도 가능
+  try {
+    db.ref(`${DB_PATH}/${collection}`).set(data);
+  } catch(e){ console.warn("fbSet error:", e); }
+}
+
+// Firebase에서 한번 읽기
+function fbGet(collection, cb){
+  const db = getDb();
+  if(!db){ cb(null); return; }
+  db.ref(`${DB_PATH}/${collection}`).once("value")
+    .then(snap => cb(snap.val()))
+    .catch(()  => cb(null));
+}
+
+// Firebase 실시간 구독
+function fbOn(collection, cb){
+  const db = getDb();
+  if(!db) return ()=>{};
+  const ref = db.ref(`${DB_PATH}/${collection}`);
+  ref.on("value", snap => cb(snap.val()));
+  return ()=> ref.off("value");
+}
+
+/* ══ ROOT APP ══ */
+function App(){
+  const [user,    setUser]   =useState(null);
+  const [posts,   setPosts]  =useState(INIT_POSTS);
+  const [members, setMembers]=useState(INIT_MEMBERS);
+  const [pending, setPending]=useState(INIT_PENDING);
+  const [routes,  setRoutes] =useState(INIT_ROUTES);
+  const [zones,   setZones]  =useState(["A창고","B창고","C창고","생산라인","검사실","임시보관","기타"]);
+  const [requests,setRequests]=useState([]);
+  const [fbReady, setFbReady]=useState(false);  // Firebase 연결 상태
+  const [syncing, setSyncing]=useState(false);  // 저장 중 표시
+  const [showZoneMgmt,setShowZoneMgmt]=useState(false);
+  const [screen,  setScreen] =useState("main");
+  const [postId,  setPostId] =useState(null);
+
+  // ── Firebase 실시간 구독 ──
+  useEffect(()=>{
+    const db = getDb();
+    if(!db){
+      // Firebase 미설정 → localStorage 폴백
+      try{
+        const raw=localStorage.getItem("jyexpress_v3");
+        if(raw){ const d=JSON.parse(raw); if(d.posts) setPosts(d.posts); if(d.members) setMembers(d.members); if(d.pending) setPending(d.pending); if(d.routes) setRoutes(d.routes); if(d.zones) setZones(d.zones); if(d.requests) setRequests(d.requests); }
+      }catch(e){}
+      return;
+    }
+    // Firebase 연결됨 → 실시간 구독
+    const unsubs = [
+      fbOn("posts",    v=>{ if(v) setPosts(Array.isArray(v)?v:Object.values(v));    setFbReady(true); }),
+      fbOn("members",  v=>{ if(v) setMembers(Array.isArray(v)?v:Object.values(v)); }),
+      fbOn("pending",  v=>{ setPending(v?( Array.isArray(v)?v:Object.values(v)):[]); }),
+      fbOn("routes",   v=>{ setRoutes(v?(Array.isArray(v)?v:Object.values(v)):[]); }),
+      fbOn("zones",    v=>{ if(v) setZones(Array.isArray(v)?v:Object.values(v));   }),
+      fbOn("requests", v=>{ setRequests(v?(Array.isArray(v)?v:Object.values(v)):[]); }),
+    ];
+    setFbReady(true);
+    return ()=>{ unsubs.forEach(u=>u&&u()); };
+  }, []);
+
+  // ── Firebase에 저장하는 래퍼 ──
+  function fbSave(col, data){
+    fbSet(col, data);
+    // 인디케이터 표시
+    if(typeof window!=="undefined"&&window.showSyncing) window.showSyncing();
+    // localStorage 폴백도 동시 저장
+    try{ localStorage.setItem("jyexpress_v3", JSON.stringify({posts,members,pending,routes,zones,requests,[col]:data})); }catch(e){}
+  }
+
+  /* ── 데이터 업데이트 함수 (Firebase 동기화 포함) ── */
+
+  function updPosts(fn){
+    setPosts(prev=>{
+      const next=fn(prev);
+      fbSave("posts", next);
+      return next;
+    });
+  }
+  function updMembers(fn){
+    setMembers(prev=>{ const next=fn(prev); fbSave("members",next); return next; });
+  }
+  function updPending(fn){
+    setPending(prev=>{ const next=fn(prev); fbSave("pending",next); return next; });
+  }
+  function updRoutes(fn){
+    setRoutes(prev=>{ const next=fn(prev); fbSave("routes",next); return next; });
+  }
+  function updZones(val){
+    setZones(val); fbSave("zones",val);
+  }
+  function updRequests(fn){
+    setRequests(prev=>{ const next=fn(prev); fbSave("requests",next); return next; });
+  }
+
+  const toggleItem=(pid,gid,iid)=>updPosts(ps=>ps.map(p=>p.id!==pid?p:{...p,groups:p.groups.map(g=>g.id!==gid?g:{...g,items:g.items.map(i=>i.id!==iid?i:{...i,done:!i.done,doneBy:!i.done?user.name:null,doneAt:!i.done?nowTime():null})})}));
+
+  const advanceStage=(pid,gid,iid)=>updPosts(ps=>ps.map(p=>p.id!==pid?p:{...p,groups:p.groups.map(g=>g.id!==gid?g:{...g,items:g.items.map(i=>{
+    if(i.id!==iid||i.stage==="회수") return i;
+    const ns=nextStage(i.stage);
+    return{...i,stage:ns,stageAt:{...i.stageAt,[ns]:nowTime()},stageBy:{...i.stageBy,[ns]:user.name}};
+  })})}));
+
+  const addPhoto=(pid,gid,iid,url)=>updPosts(ps=>ps.map(p=>p.id!==pid?p:{
+    ...p,
+    photos:!gid?[...p.photos,url]:p.photos,
+    groups:p.groups.map(g=>g.id!==gid?g:{...g,items:g.items.map(i=>i.id!==iid?i:{...i,photos:[...i.photos,url]})})
+  }));
+
+  const addVisit=(pid,v)=>updPosts(ps=>ps.map(p=>p.id!==pid?p:{...p,visits:[...(p.visits||[]),v]}));
+  const addVisitPhoto=(pid,vid,url)=>updPosts(ps=>ps.map(p=>p.id!==pid?p:{...p,visits:(p.visits||[]).map(v=>v.id!==vid?v:{...v,photos:[...v.photos,url]})}));
+  const deletePost=id=>updPosts(ps=>ps.filter(p=>p.id!==id));
+  const savePost=p=>{ updPosts(ps=>[p,...ps]); setScreen("main"); };
+  const updateLoc=(pid,iid,loc)=>updPosts(ps=>ps.map(p=>p.id!==pid?p:{...p,groups:p.groups.map(g=>({...g,items:g.items.map(i=>i.id!==iid?i:{...i,loc})}))}));
+  const updateItemText=(pid,iid,text)=>updPosts(ps=>ps.map(p=>p.id!==pid?p:{...p,groups:p.groups.map(g=>({...g,items:g.items.map(i=>i.id!==iid?i:{...i,text})}))}));
+
+  /* 승인된 요청 → posts에 자동 반영 + Firebase 동기화 */
+  function createPlanFromRequest(req){
+    updPosts(ps=>{
+      const existing=ps.find(p=>p.date===(req.confirmedDate||req.desiredDate)&&p.category===req.category);
+      const newGroup={
+        id:uid(),
+        region:req.client,
+        assignee:req.confirmedAssignee||"",
+        items:req.items.filter(i=>i.text).map(i=>({
+          id:uid(), text:i.text, detail:i.detail, extra:i.extra||"",
+          done:false, doneBy:null, doneAt:null,
+          hasProc:i.hasProc||false, procType:i.procType||"도금",
+          dueDate:i.dueDate||"",
+          stage:null,
+          stageAt:{의뢰출하:null,완료:null,회수:null},
+          stageBy:{의뢰출하:null,완료:null,회수:null},
+          transport:req.transport, carNum:req.carNum||"",
+          loc:i.loc||{zone:"A창고",rack:"",pallet:"",memo:"",confirmed:false},
+          photos:[],
+        }))
+      };
+      if(existing){
+        return ps.map(p=>p.id!==existing.id?p:{...p,groups:[...p.groups,newGroup]});
+      } else {
+        const newPost={
+          id:uid(),
+          date:req.confirmedDate||req.desiredDate,
+          author:"이창용", time:nowTime(),
+          category:req.category,
+          client:req.client,
+          requester:req.requester,
+          transport:req.transport, carNum:req.carNum||"",
+          urgency:req.urgency,
+          packaging:req.packaging,
+          note:req.note||"",
+          photos:[], visits:[],
+          groups:[newGroup],
+          fromRequest:req.id,
+        };
+        return [newPost,...ps];
+      }
+    });
+  }
+
+  function openPost(id){
+    const post=posts.find(p=>p.id===id);
+    setPostId(id);
+    setScreen(post?.category==="사내방문"?"visitlog":"detail");
+  }
+
+  function getTodayVisitPost(){
+    const today=todayStr();
+    let vp=posts.find(p=>p.category==="사내방문"&&p.date===today);
+    if(!vp){
+      vp={id:uid(),date:today,author:"이창용",time:nowTime(),category:"사내방문",client:"",requester:"",transport:"",carNum:"",urgency:"일반",packaging:"",note:"",photos:[],groups:[],visits:[]};
+      setPosts(ps=>[vp,...ps]);
+    }
+    return vp;
+  }
+
+  function handleApprove(p){
+    updMembers(m=>[...m,{id:p.id,name:p.name,role:p.wantedRole,dept:p.dept,region:null,specialty:null}]);
+    updPending(ps=>ps.filter(x=>x.id!==p.id));
+  }
+
+  const activePost=posts.find(p=>p.id===postId);
+
+  /* ── 로그인 전 화면 ── */
+  if(!user){
+    if(screen==="request") return(
+      <AccessRequest
+        onSubmit={req=>{ updPending(ps=>[...ps,req]); setScreen("login"); }}
+        onBack={()=>setScreen("login")}/>
+    );
+    return(
+      <Login
+        members={members}
+        pendingCount={pending.length}
+        onLogin={u=>{ setUser(u); setScreen("main"); }}
+        onRequest={()=>setScreen("request")}/>
+    );
+  }
+
+  /* ── 로그인 후 화면 ── */
+  return(
+    <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue','Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif",maxWidth:430,margin:"0 auto",background:C.bg,minHeight:"100vh"}}>
+      {showZoneMgmt&&<ZoneMgmtModal zones={zones} onSave={updZones} onClose={()=>setShowZoneMgmt(false)}/>}
+      {/* Firebase 연결 상태 토스트 */}
+      {syncing&&typeof window!=="undefined"&&window.showSyncing&&window.showSyncing()}
+
+      {/* 관리자 대시보드 */}
+      {screen==="main"&&user.role==="admin"&&(
+        <AdminDash
+          posts={posts} routes={routes} members={members} pending={pending}
+          user={user} requests={requests}
+          onOpen={openPost} onNew={()=>setScreen("new")}
+          onRoute={()=>setScreen("route")}
+          onLocation={()=>setScreen("location")}
+          onStats={()=>setScreen("stats")}
+          onUserMgmt={()=>setScreen("usermgmt")}
+          onZoneMgmt={()=>setShowZoneMgmt(true)}
+          onReqReview={()=>setScreen("reqreview")}
+          onLogout={()=>{ setUser(null); setScreen("main"); }}/>
+      )}
+
+      {/* 직원·조회 대시보드 */}
+      {screen==="main"&&user.role!=="admin"&&(
+        <ViewerDash
+          posts={posts} routes={routes} members={members}
+          user={user} requests={requests}
+          onOpen={openPost}
+          onNew={()=>setScreen("new")}
+          onRoute={()=>setScreen("route")}
+          onLocation={()=>setScreen("location")}
+          onNewRequest={()=>setScreen("reqform")}
+          onMyRequests={()=>setScreen("myreqs")}
+          onNewInternalShip={()=>setScreen("new")}
+          onLogout={()=>{ setUser(null); setScreen("main"); }}/>
+      )}
+
+      {/* 게시글 상세 */}
+      {screen==="detail"&&(
+        activePost
+          ? <PostDetail
+              post={activePost} members={members} user={user}
+              onBack={()=>setScreen("main")}
+              onToggle={toggleItem}
+              onAdvanceStage={advanceStage}
+              onAddPhoto={addPhoto}
+              onDelete={deletePost}
+              onUpdateLoc={updateLoc}/>
+          : <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+              <div style={{fontSize:40,marginBottom:14}}>📭</div>
+              <div style={{fontSize:16,color:C.sub,marginBottom:20}}>게시글을 찾을 수 없습니다</div>
+              <button onClick={()=>setScreen("main")} style={{background:C.accent,color:"#fff",border:"none",borderRadius:12,padding:"11px 24px",fontSize:14,fontWeight:700,cursor:"pointer"}}>← 돌아가기</button>
+            </div>
+      )}
+
+      {/* 사내방문 기록 */}
+      {screen==="visitlog"&&activePost&&(
+        <VisitLog
+          post={activePost} user={user}
+          onBack={()=>setScreen("main")}
+          onAddVisit={addVisit}
+          onAddVisitPhoto={addVisitPhoto}/>
+      )}
+
+      {/* 출하 의뢰 등록 (관리자) */}
+      {screen==="new"&&(
+        <NewPost
+          members={members} zones={zones}
+          onBack={()=>setScreen("main")}
+          onSave={savePost}/>
+      )}
+
+      {/* 출하 요청 폼 (조회자·직원) */}
+      {screen==="reqform"&&(
+        <RequestForm
+          user={user} zones={zones} members={members}
+          onBack={()=>setScreen("main")}
+          onSubmit={req=>{ updRequests(rs=>[...rs,req]); setScreen("myreqs"); }}/>
+      )}
+
+      {/* 내 요청 현황 (조회자·직원) */}
+      {screen==="myreqs"&&(
+        <MyRequests
+          requests={requests} user={user}
+          onBack={()=>setScreen("main")}
+          onNewRequest={()=>setScreen("reqform")}/>
+      )}
+
+      {/* 요청 검토 & 일별 계획 (관리자) */}
+      {screen==="reqreview"&&(
+        <RequestReview
+          requests={requests} updRequests={updRequests}
+          members={members} zones={zones}
+          onBack={()=>setScreen("main")}
+          onCreatePlan={createPlanFromRequest}/>
+      )}
+
+      {/* 운행 거리 관리 */}
+      {screen==="route"&&(
+        <RouteScreen
+          routes={routes} setRoutes={(fn)=>updRoutes(typeof fn==="function"?fn:()=>fn)}
+          members={members} user={user}
+          onBack={()=>setScreen("main")}/>
+      )}
+
+      {/* 완제품 위치 현황 */}
+      {screen==="location"&&(
+        <LocationScreen
+          posts={posts} user={user} zones={zones}
+          onUpdateLoc={updateLoc}
+          onUpdateItemText={updateItemText}
+          onBack={()=>setScreen("main")}/>
+      )}
+
+      {/* 통계 */}
+      {screen==="stats"&&(
+        <StatsScreen
+          posts={posts} routes={routes} members={members}
+          onBack={()=>setScreen("main")}/>
+      )}
+
+      {/* 팀원 관리 */}
+      {screen==="usermgmt"&&(
+        <UserMgmt
+          members={members} pending={pending}
+          onBack={()=>setScreen("main")}
+          onSaveMbr={newList=>{
+            updMembers(()=>newList);
+            const updated=newList.find(u=>u.id===user?.id);
+            if(updated) setUser(updated);
+          }}
+          onApprove={handleApprove}
+          onReject={id=>setPending(ps=>ps.filter(p=>p.id!==id))}/>
+      )}
+    </div>
+  );
+}
+
 
 
     // 앱 렌더링
