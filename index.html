@@ -2678,12 +2678,37 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
 ══════════════════════════════════════════ */
 function MyRequests({requests,user,onBack,onNewRequest}){
   const mine=requests.filter(r=>r.requestedBy===user.id).sort((a,b)=>b.requestedAt.localeCompare(a.requestedAt));
+  const [notis,setNotis]=useState(()=>{
+    try{return JSON.parse(localStorage.getItem("jy_noti_"+user.id)||"[]");}catch(e){return [];}
+  });
+  const unread=notis.filter(n=>!n.read).length;
+  function markRead(){
+    const r=notis.map(n=>({...n,read:true}));
+    setNotis(r);
+    try{localStorage.setItem("jy_noti_"+user.id,JSON.stringify(r));}catch(e){}
+  }
   const S_COLOR={대기:C.warn,승인:C.done,수정됨:C.accent,거부:C.danger};
   const S_ICON={대기:"⏳",승인:"✅",수정됨:"✏️",거부:"❌"};
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="출하 요청 현황" sub="내가 제출한 요청 목록" onBack={onBack}
         right={<button onClick={onNewRequest} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:9,padding:"7px 13px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ 새 요청</button>}/>
+      {notis.length>0&&(
+        <div style={{background:unread>0?C.done+"10":"#F5F5F5",borderBottom:"1px solid "+(unread>0?C.done+"30":C.border),padding:"12px 16px",cursor:"pointer"}} onClick={markRead}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:unread>0?6:0}}>
+            <div style={{fontSize:13,fontWeight:700,color:unread>0?C.done:C.sub}}>
+              🔔 {unread>0?unread+"개의 새 알림":"알림 내역"}
+            </div>
+            {unread>0&&<span style={{background:C.done,color:"#fff",fontSize:11,fontWeight:800,borderRadius:10,padding:"2px 8px"}}>탭해서 읽기</span>}
+          </div>
+          {notis.slice(0,3).map((n,i)=>(
+            <div key={i} style={{fontSize:12,color:n.read?C.sub:C.text,fontWeight:n.read?400:700,marginBottom:4,paddingLeft:4,borderLeft:"3px solid "+(n.type==="승인"?C.done:n.type==="거부"?C.danger:C.accent),paddingLeft:8}}>
+              {n.type==="승인"?"✅ 승인":n.type==="거부"?"❌ 거부":"✏️ 수정"} — {n.title||"출하의뢰"}{n.confirmedDate?" → "+n.confirmedDate:""}
+              {n.note&&<span style={{color:C.sub,fontWeight:400}}> / {n.note}</span>}
+            </div>
+          ))}
+        </div>
+      )}
       <div style={{padding:"14px 14px 100px"}}>
         {/* 상태 요약 */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:14}}>
@@ -2759,6 +2784,7 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
   const [eAssignee,setEAssignee]=useState("");
   const [eNote,setENote]=useState("");
   const [eStatus,setEStatus]=useState("승인");
+  const [saved,setSaved]=useState(false);
 
   const S_COLOR={대기:C.warn,승인:C.done,수정됨:C.accent,거부:C.danger};
   const S_ICON={대기:"⏳",승인:"✅",수정됨:"✏️",거부:"❌"};
@@ -2785,14 +2811,24 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
   }
 
   function saveReview(){
-    const updated={...selReq,status:eStatus,confirmedDate:eDate,confirmedAssignee:eAssignee,reviewNote:eNote.trim()};
+    const updated={...selReq,status:eStatus,confirmedDate:eDate,confirmedAssignee:eAssignee,reviewNote:eNote.trim(),reviewedAt:nowTime()};
     updRequests(rs=>rs.map(r=>r.id!==selReq.id?r:updated));
     if(eStatus==="승인"||eStatus==="수정됨") onCreatePlan(updated);
+    // 알림: localStorage에 저장 (의뢰자가 다음 접속 시 확인)
+    try {
+      const notiKey="jy_noti_"+selReq.requestedBy;
+      const existing=JSON.parse(localStorage.getItem(notiKey)||"[]");
+      existing.push({id:uid(),type:eStatus,title:selReq.title||selReq.category||"출하 의뢰",date:todayStr(),note:eNote.trim(),confirmedDate:eDate,read:false});
+      localStorage.setItem(notiKey,JSON.stringify(existing));
+    } catch(e){}
     setSelReq(null);
+    setSaved(true);
+    setTimeout(()=>setSaved(false),2000);
   }
 
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
+      {saved&&<div style={{position:"fixed",bottom:90,left:"50%",transform:"translateX(-50%)",background:C.done,color:"#fff",borderRadius:20,padding:"10px 22px",fontSize:14,fontWeight:700,zIndex:9999,boxShadow:"0 4px 16px rgba(0,168,107,0.4)",whiteSpace:"nowrap"}}>✅ 검토 완료 — 의뢰자에게 알림 전송됨</div>}
       {/* 검토 모달 */}
       {selReq&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
