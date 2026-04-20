@@ -6,9 +6,9 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-  <meta name="apple-mobile-web-app-title" content="지용금속"/>
+  <meta name="apple-mobile-web-app-title" content="JIYONG"/>
   <meta name="theme-color" content="#1259C3"/>
-  <title>지용금속 출하관리</title>
+  <title>JIYONG 출하관리</title>
 
   <!-- Firebase SDK (v9 compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -50,20 +50,20 @@
   <!-- PWA 매니페스트 -->
   <script>
     const manifestData = {
-      name:"지용금속 출하관리", short_name:"지용금속",
+      name:"JIYONG 출하관리", short_name:"JIYONG",
       start_url:"./", display:"standalone",
       background_color:"#F2F4F8", theme_color:"#1259C3",
       orientation:"portrait",
       icons:[
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%231259C3'/><text x='96' y='130' font-size='100' text-anchor='middle'>🏭</text></svg>",sizes:"192x192",type:"image/svg+xml"},
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%231259C3'/><text x='256' y='340' font-size='260' text-anchor='middle'>🏭</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%23FFFFFF'/><text x='96' y='105' font-family='Impact,Arial Black,sans-serif' font-size='52' font-weight='900' font-style='italic' text-anchor='middle'><tspan fill='%231C1C1E'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%231C1C1E'>NG</tspan></text><text x='96' y='135' font-family='Arial,sans-serif' font-size='14' font-weight='500' fill='%23888888' text-anchor='middle' letter-spacing='2'>METAL</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%23FFFFFF'/><text x='256' y='290' font-family='Impact,Arial Black,sans-serif' font-size='140' font-weight='900' font-style='italic' text-anchor='middle'><tspan fill='%231C1C1E'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%231C1C1E'>NG</tspan></text><text x='256' y='360' font-family='Arial,sans-serif' font-size='38' font-weight='500' fill='%23888888' text-anchor='middle' letter-spacing='4'>METAL</text></svg>",sizes:"512x512",type:"image/svg+xml"}
       ]
     };
     const blob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
     const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
     document.head.appendChild(link);
   </script>
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231259C3'/><text x='90' y='122' font-size='90' text-anchor='middle'>🏭</text></svg>"/>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23FFFFFF'/><text x='90' y='122' font-family='Impact,Arial Black,sans-serif' font-size='68' font-style='italic' font-weight='900' text-anchor='middle'><tspan fill='%23111111'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%23111111'>NG</tspan></text></svg>"/>
 
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -233,7 +233,14 @@ const mkI=(id,text,detail,extra,done,doneBy,doneAt,hasProc,pType,dueDate,stage,t
   photos:[],
 });
 
-const INIT_MEMBERS=[];
+const INIT_MEMBERS=[
+  {id:"admin",name:"이창용",role:"admin",dept:"관리자",region:"전체",specialty:null,password:"",permissions:{canRegister:true,canInternalShip:true}},
+  {id:"s1",name:"김철수",role:"staff",dept:"출하팀",region:"양산전담",specialty:"양산",password:"",permissions:{canRegister:false,canInternalShip:false}},
+  {id:"s2",name:"이영희",role:"staff",dept:"출하팀",region:"일반출하",specialty:"일반",password:"",permissions:{canRegister:false,canInternalShip:false}},
+  {id:"s3",name:"박민준",role:"staff",dept:"출하팀",region:"일반출하",specialty:"일반",password:"",permissions:{canRegister:false,canInternalShip:false}},
+  {id:"r1",name:"한상훈",role:"viewer",dept:"생산팀",region:null,specialty:null,password:"",permissions:{canRegister:false,canInternalShip:false}},
+  {id:"r2",name:"윤지혜",role:"viewer",dept:"영업팀",region:null,specialty:null,password:"",permissions:{canRegister:false,canInternalShip:false}},
+];
 
 
 const INIT_PENDING=[
@@ -547,10 +554,13 @@ function Login({members,pendingCount,onLogin,onRequest}){
   return(
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"36px 20px"}}>
       <div style={{textAlign:"center",marginBottom:28}}>
-        <div style={{width:72,height:72,borderRadius:20,background:C.accent,margin:"0 auto 14px",
-          display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,boxShadow:C.shadowM}}>🏭</div>
-        <div style={{fontSize:22,fontWeight:900,color:C.text}}>지용금속 출하관리</div>
-        <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름을 선택해 접속하세요</div>
+        <svg width="200" height="55" viewBox="0 0 440 110" xmlns="http://www.w3.org/2000/svg" style={{display:"block",margin:"0 auto"}}>
+            <text x="220" y="90" fontFamily="Impact,Arial Black,sans-serif" fontSize="108" fontStyle="italic" fontWeight="900" textAnchor="middle">
+              <tspan fill="#111111">JIY</tspan><tspan fill="#D4521A">O</tspan><tspan fill="#111111">NG</tspan>
+            </text>
+          </svg>
+          <div style={{fontSize:11,letterSpacing:"3px",color:"#888",fontWeight:500,marginTop:2}}>Your One-Stop Partner</div>
+        <div style={{fontSize:13,color:C.sub,marginTop:4}}>이름을 선택해 접속하세요</div>
       </div>
       <div style={{width:"100%",maxWidth:360}}>
         {roles.map(({key,label,color,icon,users})=>{
@@ -725,7 +735,7 @@ function AdminDash({posts,routes,members,pending,requests,onOpen,onNew,onNewInte
   const reqPending=(requests||[]).filter(r=>r.status==="대기").length;
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="지용금속 출하관리" sub="관리자" right={
+      <Hdr title="JIYONG 출하관리" sub="관리자" right={
         <div style={{display:"flex",gap:6}}>
           <button onClick={onReqReview} style={{position:"relative",background:C.muted,color:C.accent,border:"1px solid "+C.border,borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
             요청{reqPending>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{reqPending}</span>}
@@ -791,7 +801,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
 
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="지용금속 출하관리"
+      <Hdr title="JIYONG 출하관리"
         sub={isStaff?`${user.name} · ${user.specialty==="양산"?"🏭 양산전담":"📦 일반담당"}`:`${user.name} · ${user.dept}`}
         right={
           <div style={{display:"flex",gap:7}}>
