@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-  <meta name="apple-mobile-web-app-title" content="지용금속"/>
+  <meta name="apple-mobile-web-app-title" content="JIYONG"/>
   <meta name="theme-color" content="#1259C3"/>
   <title>JIYONG 출하관리</title>
 
@@ -50,20 +50,20 @@
   <!-- PWA 매니페스트 -->
   <script>
     const manifestData = {
-      name:"지용금속 출하관리", short_name:"지용금속",
+      name:"JIYONG 출하관리", short_name:"JIYONG",
       start_url:"./", display:"standalone",
       background_color:"#F2F4F8", theme_color:"#1259C3",
       orientation:"portrait",
       icons:[
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%231259C3'/><text x='96' y='130' font-size='100' text-anchor='middle'>🏭</text></svg>",sizes:"192x192",type:"image/svg+xml"},
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%231259C3'/><text x='256' y='340' font-size='260' text-anchor='middle'>🏭</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%23FFFFFF'/><text x='96' y='105' font-family='Impact,Arial Black,sans-serif' font-size='52' font-weight='900' font-style='italic' text-anchor='middle'><tspan fill='%231C1C1E'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%231C1C1E'>NG</tspan></text><text x='96' y='135' font-family='Arial,sans-serif' font-size='14' font-weight='500' fill='%23888888' text-anchor='middle' letter-spacing='2'>METAL</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%23FFFFFF'/><text x='256' y='290' font-family='Impact,Arial Black,sans-serif' font-size='140' font-weight='900' font-style='italic' text-anchor='middle'><tspan fill='%231C1C1E'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%231C1C1E'>NG</tspan></text><text x='256' y='360' font-family='Arial,sans-serif' font-size='38' font-weight='500' fill='%23888888' text-anchor='middle' letter-spacing='4'>METAL</text></svg>",sizes:"512x512",type:"image/svg+xml"}
       ]
     };
     const blob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
     const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
     document.head.appendChild(link);
   </script>
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231259C3'/><text x='90' y='122' font-size='90' text-anchor='middle'>🏭</text></svg>"/>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23FFFFFF'/><text x='90' y='122' font-family='Impact,Arial Black,sans-serif' font-size='68' font-style='italic' font-weight='900' text-anchor='middle'><tspan fill='%23111111'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%23111111'>NG</tspan></text></svg>"/>
 
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -241,6 +241,7 @@ const INIT_MEMBERS=[
   {id:"r1",name:"한상훈",role:"viewer",dept:"생산팀",region:null,specialty:null,password:"",permissions:{canRegister:false,canInternalShip:false}},
   {id:"r2",name:"윤지혜",role:"viewer",dept:"영업팀",region:null,specialty:null,password:"",permissions:{canRegister:false,canInternalShip:false}},
 ];
+
 
 const INIT_PENDING=[
   { id:"p1", name:"오현미", dept:"자재팀", purpose:"출하 현황 조회", requestedAt:"2026-04-14 08:30", wantedRole:"viewer" },
@@ -553,11 +554,13 @@ function Login({members,pendingCount,onLogin,onRequest}){
   return(
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"36px 20px"}}>
       <div style={{textAlign:"center",marginBottom:28}}>
-        <svg width="200" height="52" viewBox="0 0 440 108" xmlns="http://www.w3.org/2000/svg" style={{display:"block",margin:"0 auto 8px"}}>
-            <text x="220" y="88" fontFamily="Impact,Arial Black,sans-serif" fontSize="108" fontStyle="italic" fontWeight="900" textAnchor="middle"><tspan fill="#111111">JIY</tspan><tspan fill="#D4521A">O</tspan><tspan fill="#111111">NG</tspan></text>
+        <svg width="200" height="55" viewBox="0 0 440 110" xmlns="http://www.w3.org/2000/svg" style={{display:"block",margin:"0 auto"}}>
+            <text x="220" y="90" fontFamily="Impact,Arial Black,sans-serif" fontSize="108" fontStyle="italic" fontWeight="900" textAnchor="middle">
+              <tspan fill="#111111">JIY</tspan><tspan fill="#D4521A">O</tspan><tspan fill="#111111">NG</tspan>
+            </text>
           </svg>
-          <div style={{fontSize:11,letterSpacing:"3px",color:"#888",fontWeight:500}}>Your One-Stop Partner</div>
-        <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름을 선택해 접속하세요</div>
+          <div style={{fontSize:11,letterSpacing:"3px",color:"#888",fontWeight:500,marginTop:2}}>Your One-Stop Partner</div>
+        <div style={{fontSize:13,color:C.sub,marginTop:4}}>이름을 선택해 접속하세요</div>
       </div>
       <div style={{width:"100%",maxWidth:360}}>
         {roles.map(({key,label,color,icon,users})=>{
@@ -678,18 +681,9 @@ function AccessRequest({onSubmit,onBack}){
         <div style={{background:C.accent+"10",border:"1px solid "+C.accent+"30",borderRadius:12,padding:"12px 14px",marginBottom:20,fontSize:12,color:C.accent}}>
           📋 정보를 입력하면 관리자가 검토 후 승인합니다.
         </div>
-        <div style={{marginBottom:14}}>
-          <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>이름 *</div>
-          <input value={name} onChange={e=>setName(e.target.value)} placeholder="실명 입력" style={inp}/>
-        </div>
-        <div style={{marginBottom:14}}>
-          <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>소속 / 부서 *</div>
-          <input value={dept} onChange={e=>setDept(e.target.value)} placeholder="예: 생산팀" style={inp}/>
-        </div>
-        <div style={{marginBottom:20}}>
-          <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>사용 목적</div>
-          <input value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder="납기 확인" style={inp}/>
-        </div>
+        <div style={{marginBottom:14}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>이름 *</div><input value={name} onChange={e=>setName(e.target.value)} placeholder="실명 입력" style={inp}/></div>
+        <div style={{marginBottom:14}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>소속 / 부서 *</div><input value={dept} onChange={e=>setDept(e.target.value)} placeholder="예: 생산팀 / 외부 협력사" style={inp}/></div>
+        <div style={{marginBottom:20}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>사용 목적</div><input value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder="예: 납기 확인 / 출하현황 조회" style={inp}/></div>
         <div style={{marginBottom:28}}>
           <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:10}}>접속 유형</div>
           <div style={{display:"flex",gap:10}}>
@@ -741,16 +735,16 @@ function AdminDash({posts,routes,members,pending,requests,onOpen,onNew,onNewInte
   const reqPending=(requests||[]).filter(r=>r.status==="대기").length;
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="지용금속 출하관리" sub="관리자" right={
+      <Hdr title="JIYONG 출하관리" sub="관리자" right={
         <div style={{display:"flex",gap:6}}>
           <button onClick={onReqReview} style={{position:"relative",background:C.muted,color:C.accent,border:"1px solid "+C.border,borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-            요청{reqPending>0?<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{reqPending}</span>:null}
+            요청{reqPending>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{reqPending}</span>}
           </button>
           <button onClick={onZoneMgmt} style={{background:C.muted,color:C.general,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>창고</button>
           <button onClick={onStats} style={{background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>통계</button>
           <button onClick={onNew} style={{background:C.accent,color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:800,cursor:"pointer"}}>+등록</button>
           <button onClick={onUserMgmt} style={{position:"relative",background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>
-            팀원{pendingCount>0?<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{pendingCount}</span>:null}
+            팀원{pendingCount>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{pendingCount}</span>}
           </button>
           <button onClick={onLogout} style={{background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>나가기</button>
         </div>
@@ -773,7 +767,7 @@ function AdminDash({posts,routes,members,pending,requests,onOpen,onNew,onNewInte
           <input value={clientSearch} onChange={e=>setClientSearch(e.target.value)}
             placeholder="🔍 업체명 검색"
             style={{width:"100%",background:C.card,border:"1.5px solid "+(clientSearch?C.accent:C.border),borderRadius:12,padding:"11px 40px 11px 16px",fontSize:14,outline:"none",color:C.text,boxSizing:"border-box"}}/>
-          {clientSearch?<button onClick={()=>setClientSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.sub,fontSize:16,cursor:"pointer"}}>✕</button>:null}
+          {clientSearch&&<button onClick={()=>setClientSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.sub,fontSize:16,cursor:"pointer"}}>✕</button>}
         </div>
         {shown.map(p=><PostCard key={p.id} post={p} onClick={()=>onOpen(p.id)}/>)}
       </div>
@@ -807,7 +801,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
 
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="지용금속 출하관리"
+      <Hdr title="JIYONG 출하관리"
         sub={isStaff?user.name+" · "+(user.specialty==="양산"?"🏭 양산전담":"📦 일반담당"):user.name+" · "+user.dept}
         right={
           <div style={{display:"flex",gap:7}}>
@@ -971,7 +965,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
       <Hdr title={post.category} onBack={onBack}
         right={
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <span style={{background:pct===100?C.done+"15":C.warn+"15",color:pct===100?C.done:C.warn,border:"1px solid "+pct===100?C.done:C.warn+"55",borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
+            <span style={{background:pct===100?C.done+"15":C.warn+"15",color:pct===100?C.done:C.warn,border:"1px solid "+(pct===100?C.done:C.warn)+"55",borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
             {isAdmin&&<Btn onClick={()=>setConfirmDel(true)} color={C.danger} outline small>삭제</Btn>}
           </div>
         }/>
@@ -1275,8 +1269,7 @@ function NewPost({members,zones,onBack,onSave}){
                   <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:8}}>담당자 배정</div>
                   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                     {members.filter(u=>u.role==="staff").map(u=>(
-                      <button key={u.id} onClick={()=>setAsgn(group.id,u.id)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${group.assignee===u.id?C.general:C.border}`
-                        background:group.assignee===u.id?C.general+"15":C.card,color:group.assignee===u.id?C.general:C.sub,cursor:"pointer"}}>
+                      <button key={u.id} onClick={()=>setAsgn(group.id,u.id)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${group.assignee===u.id?C.general:C.border}`,background:group.assignee===u.id?C.general+"15":C.card,color:group.assignee===u.id?C.general:C.sub,cursor:"pointer"}}>
                         {u.name} {u.specialty&&<span style={{fontSize:9}}>{u.specialty==="양산"?"🏭":"📦"}</span>}
                       </button>
                     ))}
@@ -1298,8 +1291,7 @@ function NewPost({members,zones,onBack,onSave}){
                           <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:6}}>창고 구역</div>
                           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                             {zones.map(z=>(
-                              <button key={z} onClick={()=>setLoc(group.id,item.id,"zone",z)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.loc?.zone===z?C.loc:C.border}`
-                                background:item.loc?.zone===z?C.loc+"15":C.card,color:item.loc?.zone===z?C.loc:C.sub,cursor:"pointer"}}>{z}</button>
+                              <button key={z} onClick={()=>setLoc(group.id,item.id,"zone",z)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.loc?.zone===z?C.loc:C.border}`,background:item.loc?.zone===z?C.loc+"15":C.card,color:item.loc?.zone===z?C.loc:C.sub,cursor:"pointer"}}>{z}</button>
                             ))}
                           </div>
                         </div>
@@ -1316,16 +1308,14 @@ function NewPost({members,zones,onBack,onSave}){
                       </div>
                       {/* 공정 */}
                       <div style={{marginTop:10,display:"flex",alignItems:"center",gap:8}}>
-                        <button onClick={()=>setItm(group.id,item.id,"hasProc",!item.hasProc)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${item.hasProc?C.process:C.border}`
-                          background:item.hasProc?C.process+"12":C.card,color:item.hasProc?C.process:C.sub,cursor:"pointer"}}>⚙️ 공정 포함</button>
+                        <button onClick={()=>setItm(group.id,item.id,"hasProc",!item.hasProc)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${item.hasProc?C.process:C.border}`,background:item.hasProc?C.process+"12":C.card,color:item.hasProc?C.process:C.sub,cursor:"pointer"}}>⚙️ 공정 포함</button>
                       </div>
                       {item.hasProc&&(
                         <div style={{marginTop:10,padding:"10px 12px",background:C.card,borderRadius:9,border:`1px solid ${C.border}`}}>
                           <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:8}}>공정 종류</div>
                           <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
                             {PROC_TYPES.map(pt=>(
-                              <button key={pt} onClick={()=>setItm(group.id,item.id,"procType",pt)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.procType===pt?C.process:C.border}`
-                                background:item.procType===pt?C.process+"12":C.card2,color:item.procType===pt?C.process:C.sub,cursor:"pointer"}}>{pt}</button>
+                              <button key={pt} onClick={()=>setItm(group.id,item.id,"procType",pt)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.procType===pt?C.process:C.border}`,background:item.procType===pt?C.process+"12":C.card2,color:item.procType===pt?C.process:C.sub,cursor:"pointer"}}>{pt}</button>
                             ))}
                           </div>
                           <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>납기일</div>
@@ -1520,8 +1510,7 @@ function RouteScreen({routes,setRoutes,members,user,onBack}){
               {myRoute.stops.map((stop,i)=>(
                 <div key={stop.id} style={{display:"flex",gap:10,marginBottom:i<myRoute.stops.length-1?6:0}}>
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:28}}>
-                    <div style={{width:26,height:26,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:"2px solid "+C.route,display:"flex",alignItems:"center",justifyContent:"center"
-                      fontSize:10,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route,flexShrink:0}}>
+                    <div style={{width:26,height:26,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:"2px solid "+C.route,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route,flexShrink:0}}>
                       {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
                     </div>
                     {i<myRoute.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:10,marginTop:3}}/>}
@@ -1604,8 +1593,7 @@ function RouteScreen({routes,setRoutes,members,user,onBack}){
                     {route.stops.map((stop,i)=>(
                       <div key={stop.id} style={{display:"flex",gap:8,marginBottom:i<route.stops.length-1?6:0}}>
                         <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:24}}>
-                          <div style={{width:22,height:22,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:"2px solid "+C.route,display:"flex",alignItems:"center",justifyContent:"center"
-                            fontSize:9,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route}}>
+                          <div style={{width:22,height:22,borderRadius:"50%",background:stop.type==="출발"||stop.type==="복귀"?C.route:C.route+"25",border:"2px solid "+C.route,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:stop.type==="출발"||stop.type==="복귀"?"#fff":C.route}}>
                             {stop.type==="출발"?"S":stop.type==="복귀"?"E":i}
                           </div>
                           {i<route.stops.length-1&&<div style={{width:2,flex:1,background:C.border,minHeight:8,marginTop:2}}/>}
@@ -2040,8 +2028,7 @@ function VisitLog({post,user,onBack,onAddVisit,onAddVisitPhoto}){
               </div>
               {v.purpose&&<div style={{background:C.card2,borderRadius:10,padding:"8px 12px",marginTop:6,border:`1px solid ${C.border}`}}><div style={{fontSize:10,color:C.sub,fontWeight:700,marginBottom:2}}>목적</div><div style={{fontSize:13,color:C.text}}>{v.purpose}</div></div>}
               <div style={{display:"flex",gap:8,marginTop:10,alignItems:"center"}}>
-                <span style={{background:v.transport==="용차"?C.warn+"15":v.transport==="퀵"?C.quick+"15":C.done+"10",color:v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done,border:"1px solid "+v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done+"44",fontSize:11,fontWeight:800,padding:"3px 10px"
-                  borderRadius:20}}>
+                <span style={{background:v.transport==="용차"?C.warn+"15":v.transport==="퀵"?C.quick+"15":C.done+"10",color:v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done,border:"1px solid "+v.transport==="용차"?C.warn:v.transport==="퀵"?C.quick:C.done+"44",fontSize:11,fontWeight:800,padding:"3px 10px",borderRadius:20}}>
                   {TRANS_ICON[v.transport]||"🚶"} {v.transport==="직접"?"직접 수령":v.transport}
                 </span>
                 {v.carNum&&<span style={{fontSize:12,fontWeight:700,color:C.warn,fontFamily:"monospace"}}>{v.carNum}</span>}
@@ -2131,15 +2118,13 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
             ) : (
               <div style={{marginBottom:12}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>역할</div>
-                <div style={{display:"flex",gap:8}}>{["staff","viewer"].map(r=>{ const rm=ROLE_META2[r]; const sl=fRole===r; return <button key={r} onClick={()=>setFRole(r)} style={{flex:1,padding:"10px 0"
-                  borderRadius:10,fontSize:13,fontWeight:700,border:"2px solid "+sl?rm.color:C.border,background:sl?rm.color+"10":C.card2,color:sl?rm.color:C.sub,cursor:"pointer"}}>{rm.icon} {rm.label}</button>; })}</div>
+                <div style={{display:"flex",gap:8}}>{["staff","viewer"].map(r=>{ const rm=ROLE_META2[r]; const sl=fRole===r; return <button key={r} onClick={()=>setFRole(r)} style={{flex:1,padding:"10px 0",borderRadius:10,fontSize:13,fontWeight:700,border:"2px solid "+sl?rm.color:C.border,background:sl?rm.color+"10":C.card2,color:sl?rm.color:C.sub,cursor:"pointer"}}>{rm.icon} {rm.label}</button>; })}</div>
               </div>
             )}
             {fRole==="staff"&&ed.role!=="admin"&&(
               <div style={{marginBottom:12}}>
                 <div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:8}}>전담 분야</div>
-                <div style={{display:"flex",gap:8}}>{[{k:"양산",c:C.yangsan},{k:"일반",c:C.general}].map(s=>{ const sl=fSpec===s.k; return <button key={s.k} onClick={()=>setFSpec(s.k)} style={{flex:1,padding:"9px 0"
-                  borderRadius:10,fontSize:13,fontWeight:700,border:"2px solid "+sl?s.c:C.border,background:sl?s.c+"10":C.card2,color:sl?s.c:C.sub,cursor:"pointer"}}>{s.k==="양산"?"🏭":"📦"} {s.k}출하</button>; })}</div>
+                <div style={{display:"flex",gap:8}}>{[{k:"양산",c:C.yangsan},{k:"일반",c:C.general}].map(s=>{ const sl=fSpec===s.k; return <button key={s.k} onClick={()=>setFSpec(s.k)} style={{flex:1,padding:"9px 0",borderRadius:10,fontSize:13,fontWeight:700,border:"2px solid "+sl?s.c:C.border,background:sl?s.c+"10":C.card2,color:sl?s.c:C.sub,cursor:"pointer"}}>{s.k==="양산"?"🏭":"📦"} {s.k}출하</button>; })}</div>
               </div>
             )}
             <div style={{marginBottom:12}}><div style={{fontSize:12,color:C.sub,fontWeight:700,marginBottom:6}}>이름 *</div><input value={fName} onChange={e=>setFName(e.target.value)} style={inp}/></div>
@@ -2246,8 +2231,7 @@ function UserMgmt({members,pending,onBack,onSaveMbr,onApprove,onReject}){
                 </div>
               );
             })}
-            <button onClick={()=>{ onSaveMbr(list); onBack(); }} style={{width:"100%",padding:"14px 0",borderRadius:14,background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none"
-              fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 14px rgba(18,89,195,0.35)"}}>✓ 저장</button>
+            <button onClick={()=>{ onSaveMbr(list); onBack(); }} style={{width:"100%",padding:"14px 0",borderRadius:14,background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",fontSize:16,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 14px rgba(18,89,195,0.35)"}}>✓ 저장</button>
           </>
         )}
       </div>
@@ -2321,8 +2305,7 @@ function StatsScreen({posts,routes,members,onBack}){
           <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:14}}>📊 출하 유형 비중</div>
           {[{l:"양산출하",c:C.yangsan,cnt:catFreq["양산출하"]},{l:"일반출하",c:C.general,cnt:catFreq["일반출하"]},{l:"사내방문",c:C.visit,cnt:allVisits.length}].map(({l,c,cnt})=>{
             const pct=Math.round(cnt/totalPosts*100);
-            return(<div key={l} style={{marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:13,fontWeight:700,color:c}}>{l}</span><span style={{fontSize:13,fontWeight:700,color:c}}>{cnt}건 <span style={{color:C.sub
-              fontSize:11}}>({pct}%)</span></span></div><PBar pct={pct} color={c} h={10}/></div>);
+            return(<div key={l} style={{marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:13,fontWeight:700,color:c}}>{l}</span><span style={{fontSize:13,fontWeight:700,color:c}}>{cnt}건 <span style={{color:C.sub,fontSize:11}}>({pct}%)</span></span></div><PBar pct={pct} color={c} h={10}/></div>);
           })}
         </Card>
 
@@ -2597,8 +2580,7 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
                   <div style={{marginBottom:8}}>
                     <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:6}}>창고 구역</div>
                     <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                      {zones.map(z=><button key={z} onClick={()=>setLoc(item.id,"zone",z)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.loc?.zone===z?C.loc:C.border}`
-                        background:item.loc?.zone===z?C.loc+"15":C.card,color:item.loc?.zone===z?C.loc:C.sub,cursor:"pointer"}}>{z}</button>)}
+                      {zones.map(z=><button key={z} onClick={()=>setLoc(item.id,"zone",z)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.loc?.zone===z?C.loc:C.border}`,background:item.loc?.zone===z?C.loc+"15":C.card,color:item.loc?.zone===z?C.loc:C.sub,cursor:"pointer"}}>{z}</button>)}
                     </div>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
@@ -2608,14 +2590,12 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
                   <input value={item.loc?.memo||""} onChange={e=>setLoc(item.id,"memo",e.target.value)} placeholder="위치 메모 (예: 파렛 앞줄)" style={{...inp,fontSize:12}}/>
                 </div>
                 <div style={{marginTop:10}}>
-                  <button onClick={()=>setItm(item.id,"hasProc",!item.hasProc)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${item.hasProc?C.process:C.border}`
-                    background:item.hasProc?C.process+"12":C.card,color:item.hasProc?C.process:C.sub,cursor:"pointer"}}>⚙️ 공정 포함</button>
+                  <button onClick={()=>setItm(item.id,"hasProc",!item.hasProc)} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:700,border:`1.5px solid ${item.hasProc?C.process:C.border}`,background:item.hasProc?C.process+"12":C.card,color:item.hasProc?C.process:C.sub,cursor:"pointer"}}>⚙️ 공정 포함</button>
                 </div>
                 {item.hasProc&&(<div style={{marginTop:10,padding:"10px 12px",background:C.card,borderRadius:9,border:`1px solid ${C.border}`}}>
                   <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:7}}>공정 종류</div>
                   <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:8}}>
-                    {PROC_TYPES.map(pt=><button key={pt} onClick={()=>setItm(item.id,"procType",pt)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.procType===pt?C.process:C.border}`
-                      background:item.procType===pt?C.process+"12":C.card2,color:item.procType===pt?C.process:C.sub,cursor:"pointer"}}>{pt}</button>)}
+                    {PROC_TYPES.map(pt=><button key={pt} onClick={()=>setItm(item.id,"procType",pt)} style={{padding:"5px 10px",borderRadius:8,fontSize:11,fontWeight:700,border:`1.5px solid ${item.procType===pt?C.process:C.border}`,background:item.procType===pt?C.process+"12":C.card2,color:item.procType===pt?C.process:C.sub,cursor:"pointer"}}>{pt}</button>)}
                   </div>
                   <div style={{fontSize:11,color:C.sub,fontWeight:700,marginBottom:5}}>납기일</div>
                   <input type="date" value={item.dueDate} onChange={e=>setItm(item.id,"dueDate",e.target.value)} style={{...inp,fontSize:12}}/>
@@ -2698,15 +2678,37 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
 ══════════════════════════════════════════ */
 function MyRequests({requests,user,onBack,onNewRequest}){
   const mine=requests.filter(r=>r.requestedBy===user.id).sort((a,b)=>b.requestedAt.localeCompare(a.requestedAt));
-  const [notis,setNotis]=useState(()=>{try{return JSON.parse(localStorage.getItem("jy_noti_"+user.id)||"[]");}catch(e){return [];}});
+  const [notis,setNotis]=useState(()=>{
+    try{return JSON.parse(localStorage.getItem("jy_noti_"+user.id)||"[]");}catch(e){return [];}
+  });
   const unread=notis.filter(n=>!n.read).length;
-  function markRead(){const r=notis.map(n=>({...n,read:true}));setNotis(r);try{localStorage.setItem("jy_noti_"+user.id,JSON.stringify(r));}catch(e){}}
+  function markRead(){
+    const r=notis.map(n=>({...n,read:true}));
+    setNotis(r);
+    try{localStorage.setItem("jy_noti_"+user.id,JSON.stringify(r));}catch(e){}
+  }
   const S_COLOR={대기:C.warn,승인:C.done,수정됨:C.accent,거부:C.danger};
   const S_ICON={대기:"⏳",승인:"✅",수정됨:"✏️",거부:"❌"};
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="출하 요청 현황" sub="내가 제출한 요청 목록" onBack={onBack}
         right={<button onClick={onNewRequest} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:9,padding:"7px 13px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ 새 요청</button>}/>
+      {notis.length>0&&(
+        <div style={{background:unread>0?C.done+"10":"#F5F5F5",borderBottom:"1px solid "+(unread>0?C.done+"30":C.border),padding:"12px 16px",cursor:"pointer"}} onClick={markRead}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:unread>0?6:0}}>
+            <div style={{fontSize:13,fontWeight:700,color:unread>0?C.done:C.sub}}>
+              🔔 {unread>0?unread+"개의 새 알림":"알림 내역"}
+            </div>
+            {unread>0&&<span style={{background:C.done,color:"#fff",fontSize:11,fontWeight:800,borderRadius:10,padding:"2px 8px"}}>탭해서 읽기</span>}
+          </div>
+          {notis.slice(0,3).map((n,i)=>(
+            <div key={i} style={{fontSize:12,color:n.read?C.sub:C.text,fontWeight:n.read?400:700,marginBottom:4,paddingLeft:4,borderLeft:"3px solid "+(n.type==="승인"?C.done:n.type==="거부"?C.danger:C.accent),paddingLeft:8}}>
+              {n.type==="승인"?"✅ 승인":n.type==="거부"?"❌ 거부":"✏️ 수정"} — {n.title||"출하의뢰"}{n.confirmedDate?" → "+n.confirmedDate:""}
+              {n.note&&<span style={{color:C.sub,fontWeight:400}}> / {n.note}</span>}
+            </div>
+          ))}
+        </div>
+      )}
       <div style={{padding:"14px 14px 100px"}}>
         {/* 상태 요약 */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:14}}>
@@ -2812,19 +2814,21 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
     const updated={...selReq,status:eStatus,confirmedDate:eDate,confirmedAssignee:eAssignee,reviewNote:eNote.trim(),reviewedAt:nowTime()};
     updRequests(rs=>rs.map(r=>r.id!==selReq.id?r:updated));
     if(eStatus==="승인"||eStatus==="수정됨") onCreatePlan(updated);
-    try{
+    // 알림: localStorage에 저장 (의뢰자가 다음 접속 시 확인)
+    try {
       const notiKey="jy_noti_"+selReq.requestedBy;
       const existing=JSON.parse(localStorage.getItem(notiKey)||"[]");
       existing.push({id:uid(),type:eStatus,title:selReq.title||selReq.category||"출하 의뢰",date:todayStr(),note:eNote.trim(),confirmedDate:eDate,read:false});
       localStorage.setItem(notiKey,JSON.stringify(existing));
-    }catch(e){}
+    } catch(e){}
     setSelReq(null);
     setSaved(true);
-    setTimeout(()=>setSaved(false),2500);
+    setTimeout(()=>setSaved(false),2000);
   }
 
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
+      {saved&&<div style={{position:"fixed",bottom:90,left:"50%",transform:"translateX(-50%)",background:C.done,color:"#fff",borderRadius:20,padding:"10px 22px",fontSize:14,fontWeight:700,zIndex:9999,boxShadow:"0 4px 16px rgba(0,168,107,0.4)",whiteSpace:"nowrap"}}>✅ 검토 완료 — 의뢰자에게 알림 전송됨</div>}
       {/* 검토 모달 */}
       {selReq&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
@@ -3465,7 +3469,7 @@ function App(){
 
   // ── 서비스워커 ──
   if('serviceWorker' in navigator){
-    const sw=`const C='jyexpress-v6';self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});`;
+    const sw=`const C='jyexpress-v4';self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});`;
     navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
   }
   </script>
