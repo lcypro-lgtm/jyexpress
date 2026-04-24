@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-  <meta name="apple-mobile-web-app-title" content="JIYONG"/>
+  <meta name="apple-mobile-web-app-title" content="지용금속"/>
   <meta name="theme-color" content="#1259C3"/>
   <title>JIYONG 출하관리</title>
 
@@ -50,20 +50,20 @@
   <!-- PWA 매니페스트 -->
   <script>
     const manifestData = {
-      name:"JIYONG 출하관리", short_name:"JIYONG",
+      name:"지용금속 출하관리", short_name:"지용금속",
       start_url:"./", display:"standalone",
       background_color:"#F2F4F8", theme_color:"#1259C3",
       orientation:"portrait",
       icons:[
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%23FFFFFF'/><text x='96' y='105' font-family='Impact,Arial Black,sans-serif' font-size='52' font-weight='900' font-style='italic' text-anchor='middle'><tspan fill='%231C1C1E'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%231C1C1E'>NG</tspan></text><text x='96' y='135' font-family='Arial,sans-serif' font-size='14' font-weight='500' fill='%23888888' text-anchor='middle' letter-spacing='2'>METAL</text></svg>",sizes:"192x192",type:"image/svg+xml"},
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%23FFFFFF'/><text x='256' y='290' font-family='Impact,Arial Black,sans-serif' font-size='140' font-weight='900' font-style='italic' text-anchor='middle'><tspan fill='%231C1C1E'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%231C1C1E'>NG</tspan></text><text x='256' y='360' font-family='Arial,sans-serif' font-size='38' font-weight='500' fill='%23888888' text-anchor='middle' letter-spacing='4'>METAL</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%231259C3'/><text x='96' y='130' font-size='100' text-anchor='middle'>🏭</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%231259C3'/><text x='256' y='340' font-size='260' text-anchor='middle'>🏭</text></svg>",sizes:"512x512",type:"image/svg+xml"}
       ]
     };
     const blob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
     const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
     document.head.appendChild(link);
   </script>
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23FFFFFF'/><text x='90' y='122' font-family='Impact,Arial Black,sans-serif' font-size='68' font-style='italic' font-weight='900' text-anchor='middle'><tspan fill='%23111111'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%23111111'>NG</tspan></text></svg>"/>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231259C3'/><text x='90' y='122' font-size='90' text-anchor='middle'>🏭</text></svg>"/>
 
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -241,7 +241,6 @@ const INIT_MEMBERS=[
   {id:"r1",name:"한상훈",role:"viewer",dept:"생산팀",region:null,specialty:null,password:"",permissions:{canRegister:false,canInternalShip:false}},
   {id:"r2",name:"윤지혜",role:"viewer",dept:"영업팀",region:null,specialty:null,password:"",permissions:{canRegister:false,canInternalShip:false}},
 ];
-
 
 const INIT_PENDING=[
   { id:"p1", name:"오현미", dept:"자재팀", purpose:"출하 현황 조회", requestedAt:"2026-04-14 08:30", wantedRole:"viewer" },
@@ -554,13 +553,11 @@ function Login({members,pendingCount,onLogin,onRequest}){
   return(
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column",alignItems:"center",padding:"36px 20px"}}>
       <div style={{textAlign:"center",marginBottom:28}}>
-        <svg width="200" height="55" viewBox="0 0 440 110" xmlns="http://www.w3.org/2000/svg" style={{display:"block",margin:"0 auto"}}>
-            <text x="220" y="90" fontFamily="Impact,Arial Black,sans-serif" fontSize="108" fontStyle="italic" fontWeight="900" textAnchor="middle">
-              <tspan fill="#111111">JIY</tspan><tspan fill="#D4521A">O</tspan><tspan fill="#111111">NG</tspan>
-            </text>
+        <svg width="200" height="52" viewBox="0 0 440 108" xmlns="http://www.w3.org/2000/svg" style={{display:"block",margin:"0 auto 8px"}}>
+            <text x="220" y="88" fontFamily="Impact,Arial Black,sans-serif" fontSize="108" fontStyle="italic" fontWeight="900" textAnchor="middle"><tspan fill="#111111">JIY</tspan><tspan fill="#D4521A">O</tspan><tspan fill="#111111">NG</tspan></text>
           </svg>
-          <div style={{fontSize:11,letterSpacing:"3px",color:"#888",fontWeight:500,marginTop:2}}>Your One-Stop Partner</div>
-        <div style={{fontSize:13,color:C.sub,marginTop:4}}>이름을 선택해 접속하세요</div>
+          <div style={{fontSize:11,letterSpacing:"3px",color:"#888",fontWeight:500}}>Your One-Stop Partner</div>
+        <div style={{fontSize:13,color:C.sub,marginTop:6}}>이름을 선택해 접속하세요</div>
       </div>
       <div style={{width:"100%",maxWidth:360}}>
         {roles.map(({key,label,color,icon,users})=>{
@@ -681,9 +678,18 @@ function AccessRequest({onSubmit,onBack}){
         <div style={{background:C.accent+"10",border:"1px solid "+C.accent+"30",borderRadius:12,padding:"12px 14px",marginBottom:20,fontSize:12,color:C.accent}}>
           📋 정보를 입력하면 관리자가 검토 후 승인합니다.
         </div>
-        <div style={{marginBottom:14}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>이름 *</div><input value={name} onChange={e=>setName(e.target.value)} placeholder="실명 입력" style={inp}/></div>
-        <div style={{marginBottom:14}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>소속 / 부서 *</div><input value={dept} onChange={e=>setDept(e.target.value)} placeholder="예: 생산팀 / 외부 협력사" style={inp}/></div>
-        <div style={{marginBottom:20}}><div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>사용 목적</div><input value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder="예: 납기 확인 / 출하현황 조회" style={inp}/></div>
+        <div style={{marginBottom:14}}>
+          <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>이름 *</div>
+          <input value={name} onChange={e=>setName(e.target.value)} placeholder="실명 입력" style={inp}/>
+        </div>
+        <div style={{marginBottom:14}}>
+          <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>소속 / 부서 *</div>
+          <input value={dept} onChange={e=>setDept(e.target.value)} placeholder="예: 생산팀" style={inp}/>
+        </div>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:7}}>사용 목적</div>
+          <input value={purpose} onChange={e=>setPurpose(e.target.value)} placeholder="납기 확인" style={inp}/>
+        </div>
         <div style={{marginBottom:28}}>
           <div style={{fontSize:13,color:C.text,fontWeight:700,marginBottom:10}}>접속 유형</div>
           <div style={{display:"flex",gap:10}}>
@@ -735,16 +741,16 @@ function AdminDash({posts,routes,members,pending,requests,onOpen,onNew,onNewInte
   const reqPending=(requests||[]).filter(r=>r.status==="대기").length;
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="JIYONG 출하관리" sub="관리자" right={
+      <Hdr title="지용금속 출하관리" sub="관리자" right={
         <div style={{display:"flex",gap:6}}>
           <button onClick={onReqReview} style={{position:"relative",background:C.muted,color:C.accent,border:"1px solid "+C.border,borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-            요청{reqPending>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{reqPending}</span>}
+            요청{reqPending>0?<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{reqPending}</span>:null}
           </button>
           <button onClick={onZoneMgmt} style={{background:C.muted,color:C.general,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>창고</button>
           <button onClick={onStats} style={{background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>통계</button>
           <button onClick={onNew} style={{background:C.accent,color:"#fff",border:"none",borderRadius:9,padding:"7px 10px",fontSize:12,fontWeight:800,cursor:"pointer"}}>+등록</button>
           <button onClick={onUserMgmt} style={{position:"relative",background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>
-            팀원{pendingCount>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{pendingCount}</span>}
+            팀원{pendingCount>0?<span style={{position:"absolute",top:-4,right:-4,background:C.danger,color:"#fff",fontSize:9,fontWeight:800,borderRadius:8,padding:"1px 4px"}}>{pendingCount}</span>:null}
           </button>
           <button onClick={onLogout} style={{background:C.muted,color:C.sub,border:"1px solid "+C.border,borderRadius:9,padding:"7px 9px",fontSize:12,cursor:"pointer"}}>나가기</button>
         </div>
@@ -764,17 +770,15 @@ function AdminDash({posts,routes,members,pending,requests,onOpen,onNew,onNewInte
       </div>
       <div style={{padding:"12px 14px 100px"}}>
         <div style={{position:"relative",marginBottom:12}}>
-          <input value={clientSearch} onChange={e=>setClientSearch(e.target.value)}
-            placeholder="🔍 업체명 검색"
+          <input value={clientSearch} onChange={e=>setClientSearch(e.target.value)} placeholder="🔍 업체명 검색"
             style={{width:"100%",background:C.card,border:"1.5px solid "+(clientSearch?C.accent:C.border),borderRadius:12,padding:"11px 40px 11px 16px",fontSize:14,outline:"none",color:C.text,boxSizing:"border-box"}}/>
-          {clientSearch&&<button onClick={()=>setClientSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.sub,fontSize:16,cursor:"pointer"}}>✕</button>}
+          {clientSearch?<button onClick={()=>setClientSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:C.sub,fontSize:16,cursor:"pointer"}}>✕</button>:null}
         </div>
         {shown.map(p=><PostCard key={p.id} post={p} onClick={()=>onOpen(p.id)}/>)}
       </div>
     </div>
   );
 }
-
 /* ══ 열람자·직원 대시보드 ══ */
 function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocation,onNew,onNewRequest,onMyRequests,onNewInternalShip,onLogout}){
   const [tab,setTab]=useState("출하현황");
@@ -801,7 +805,7 @@ function ViewerDash({posts,routes,members,user,requests,onOpen,onRoute,onLocatio
 
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      <Hdr title="JIYONG 출하관리"
+      <Hdr title="지용금속 출하관리"
         sub={isStaff?user.name+" · "+(user.specialty==="양산"?"🏭 양산전담":"📦 일반담당"):user.name+" · "+user.dept}
         right={
           <div style={{display:"flex",gap:7}}>
@@ -965,7 +969,7 @@ function PostDetail({post,members,user,onBack,onToggle,onAdvanceStage,onAddPhoto
       <Hdr title={post.category} onBack={onBack}
         right={
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <span style={{background:pct===100?C.done+"15":C.warn+"15",color:pct===100?C.done:C.warn,border:"1px solid "+(pct===100?C.done:C.warn)+"55",borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
+            <span style={{background:pct===100?C.done+"15":C.warn+"15",color:pct===100?C.done:C.warn,border:"1px solid "+pct===100?C.done:C.warn+"55",borderRadius:20,padding:"4px 11px",fontSize:12,fontWeight:700}}>{done}/{total}</span>
             {isAdmin&&<Btn onClick={()=>setConfirmDel(true)} color={C.danger} outline small>삭제</Btn>}
           </div>
         }/>
@@ -2678,37 +2682,15 @@ function RequestForm({user,zones,members,onBack,onSubmit}){
 ══════════════════════════════════════════ */
 function MyRequests({requests,user,onBack,onNewRequest}){
   const mine=requests.filter(r=>r.requestedBy===user.id).sort((a,b)=>b.requestedAt.localeCompare(a.requestedAt));
-  const [notis,setNotis]=useState(()=>{
-    try{return JSON.parse(localStorage.getItem("jy_noti_"+user.id)||"[]");}catch(e){return [];}
-  });
+  const [notis,setNotis]=useState(()=>{try{return JSON.parse(localStorage.getItem("jy_noti_"+user.id)||"[]");}catch(e){return [];}});
   const unread=notis.filter(n=>!n.read).length;
-  function markRead(){
-    const r=notis.map(n=>({...n,read:true}));
-    setNotis(r);
-    try{localStorage.setItem("jy_noti_"+user.id,JSON.stringify(r));}catch(e){}
-  }
+  function markRead(){const r=notis.map(n=>({...n,read:true}));setNotis(r);try{localStorage.setItem("jy_noti_"+user.id,JSON.stringify(r));}catch(e){}}
   const S_COLOR={대기:C.warn,승인:C.done,수정됨:C.accent,거부:C.danger};
   const S_ICON={대기:"⏳",승인:"✅",수정됨:"✏️",거부:"❌"};
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Hdr title="출하 요청 현황" sub="내가 제출한 요청 목록" onBack={onBack}
         right={<button onClick={onNewRequest} style={{background:"linear-gradient(135deg,"+C.accentL+","+C.accent+")",color:"#fff",border:"none",borderRadius:9,padding:"7px 13px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ 새 요청</button>}/>
-      {notis.length>0&&(
-        <div style={{background:unread>0?C.done+"10":"#F5F5F5",borderBottom:"1px solid "+(unread>0?C.done+"30":C.border),padding:"12px 16px",cursor:"pointer"}} onClick={markRead}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:unread>0?6:0}}>
-            <div style={{fontSize:13,fontWeight:700,color:unread>0?C.done:C.sub}}>
-              🔔 {unread>0?unread+"개의 새 알림":"알림 내역"}
-            </div>
-            {unread>0&&<span style={{background:C.done,color:"#fff",fontSize:11,fontWeight:800,borderRadius:10,padding:"2px 8px"}}>탭해서 읽기</span>}
-          </div>
-          {notis.slice(0,3).map((n,i)=>(
-            <div key={i} style={{fontSize:12,color:n.read?C.sub:C.text,fontWeight:n.read?400:700,marginBottom:4,paddingLeft:4,borderLeft:"3px solid "+(n.type==="승인"?C.done:n.type==="거부"?C.danger:C.accent),paddingLeft:8}}>
-              {n.type==="승인"?"✅ 승인":n.type==="거부"?"❌ 거부":"✏️ 수정"} — {n.title||"출하의뢰"}{n.confirmedDate?" → "+n.confirmedDate:""}
-              {n.note&&<span style={{color:C.sub,fontWeight:400}}> / {n.note}</span>}
-            </div>
-          ))}
-        </div>
-      )}
       <div style={{padding:"14px 14px 100px"}}>
         {/* 상태 요약 */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:14}}>
@@ -2784,7 +2766,6 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
   const [eAssignee,setEAssignee]=useState("");
   const [eNote,setENote]=useState("");
   const [eStatus,setEStatus]=useState("승인");
-  const [saved,setSaved]=useState(false);
 
   const S_COLOR={대기:C.warn,승인:C.done,수정됨:C.accent,거부:C.danger};
   const S_ICON={대기:"⏳",승인:"✅",수정됨:"✏️",거부:"❌"};
@@ -2811,24 +2792,15 @@ function RequestReview({requests,updRequests,members,zones,onBack,onCreatePlan})
   }
 
   function saveReview(){
-    const updated={...selReq,status:eStatus,confirmedDate:eDate,confirmedAssignee:eAssignee,reviewNote:eNote.trim(),reviewedAt:nowTime()};
+    const updated={...selReq,status:eStatus,confirmedDate:eDate,confirmedAssignee:eAssignee,reviewNote:eNote.trim()};
     updRequests(rs=>rs.map(r=>r.id!==selReq.id?r:updated));
     if(eStatus==="승인"||eStatus==="수정됨") onCreatePlan(updated);
-    // 알림: localStorage에 저장 (의뢰자가 다음 접속 시 확인)
-    try {
-      const notiKey="jy_noti_"+selReq.requestedBy;
-      const existing=JSON.parse(localStorage.getItem(notiKey)||"[]");
-      existing.push({id:uid(),type:eStatus,title:selReq.title||selReq.category||"출하 의뢰",date:todayStr(),note:eNote.trim(),confirmedDate:eDate,read:false});
-      localStorage.setItem(notiKey,JSON.stringify(existing));
-    } catch(e){}
+    try{const nk="jy_noti_"+selReq.requestedBy;const ex=JSON.parse(localStorage.getItem(nk)||"[]");ex.push({id:uid(),type:eStatus,title:selReq.category||"출하의뢰",date:todayStr(),note:eNote.trim(),confirmedDate:eDate,read:false});localStorage.setItem(nk,JSON.stringify(ex));}catch(e){}
     setSelReq(null);
-    setSaved(true);
-    setTimeout(()=>setSaved(false),2000);
   }
 
   return(
     <div style={{minHeight:"100vh",background:C.bg}}>
-      {saved&&<div style={{position:"fixed",bottom:90,left:"50%",transform:"translateX(-50%)",background:C.done,color:"#fff",borderRadius:20,padding:"10px 22px",fontSize:14,fontWeight:700,zIndex:9999,boxShadow:"0 4px 16px rgba(0,168,107,0.4)",whiteSpace:"nowrap"}}>✅ 검토 완료 — 의뢰자에게 알림 전송됨</div>}
       {/* 검토 모달 */}
       {selReq&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
@@ -3469,7 +3441,12 @@ function App(){
 
   // ── 서비스워커 ──
   if('serviceWorker' in navigator){
-    const sw=`const C='jyexpress-v4';self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});`;
+    const sw=[
+  "const C='jyexpress-v8';",
+  "self.addEventListener('install',e=>self.skipWaiting());",
+  "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});",
+  "self.addEventListener('fetch',e=>{if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(C).then(ca=>ca.put(e.request,c));return r;}).catch(()=>caches.match(e.request)));return;}e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request)));});"
+].join('\n');
     navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
   }
   </script>
