@@ -55,15 +55,15 @@
       background_color:"#F2F4F8", theme_color:"#1259C3",
       orientation:"portrait",
       icons:[
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%231259C3'/><text x='96' y='130' font-size='100' text-anchor='middle'>🏭</text></svg>",sizes:"192x192",type:"image/svg+xml"},
-        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%231259C3'/><text x='256' y='340' font-size='260' text-anchor='middle'>🏭</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23FFFFFF'/><text x='96' y='125' font-family='Impact,Arial Black,sans-serif' font-size='72' font-style='italic' font-weight='900' text-anchor='middle'><tspan fill='%23111111'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%23111111'>NG</tspan></text></svg>",sizes:"192x192",type:"image/svg+xml"},
+        {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='90' fill='%23FFFFFF'/><text x='256' y='330' font-family='Impact,Arial Black,sans-serif' font-size='190' font-style='italic' font-weight='900' text-anchor='middle'><tspan fill='%23111111'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%23111111'>NG</tspan></text></svg>",sizes:"512x512",type:"image/svg+xml"}
       ]
     };
     const blob=new Blob([JSON.stringify(manifestData)],{type:'application/json'});
     const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
     document.head.appendChild(link);
   </script>
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231259C3'/><text x='90' y='122' font-size='90' text-anchor='middle'>🏭</text></svg>"/>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23FFFFFF'/><text x='90' y='118' font-family='Impact,Arial Black,sans-serif' font-size='68' font-style='italic' font-weight='900' text-anchor='middle'><tspan fill='%23111111'>JIY</tspan><tspan fill='%23D4521A'>O</tspan><tspan fill='%23111111'>NG</tspan></text></svg>"/>
 
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -3439,15 +3439,28 @@ function App(){
     }, 3000);
   }
 
-  // ── 서비스워커 ──
+  // ── 서비스워커: 기존 캐시 완전 삭제 후 새 버전 등록 ──
   if('serviceWorker' in navigator){
-    const sw=[
-  "const C='jyexpress-v8';",
-  "self.addEventListener('install',e=>self.skipWaiting());",
-  "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});",
-  "self.addEventListener('fetch',e=>{if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(C).then(ca=>ca.put(e.request,c));return r;}).catch(()=>caches.match(e.request)));return;}e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request)));});"
-].join('\n');
-    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+    // 1. 기존 서비스워커 모두 unregister
+    navigator.serviceWorker.getRegistrations().then(regs=>{
+      regs.forEach(reg=>reg.unregister());
+    });
+    // 2. 모든 캐시 삭제
+    caches.keys().then(keys=>{
+      keys.forEach(key=>caches.delete(key));
+    });
+    // 3. 새 서비스워커 등록 (캐시 없이 네트워크 우선)
+    const swCode=[
+      "const V='jyexpress-v9';",
+      "self.addEventListener('install',e=>self.skipWaiting());",
+      "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});",
+      "self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>new Response('오프라인 상태입니다',{headers:{'Content-Type':'text/plain'}})));});"
+    ].join('\n');
+    navigator.serviceWorker.register(
+      URL.createObjectURL(new Blob([swCode],{type:'application/javascript'}))
+    ).then(()=>{
+      console.log('SW v9 등록 완료');
+    }).catch(()=>{});
   }
   </script>
 </body>
