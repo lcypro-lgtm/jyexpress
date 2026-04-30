@@ -3666,6 +3666,7 @@ function NewPost({
   const [date, setDate] = useState(todayStr());
   const [cat, setCat] = useState("양산출하");
   const [client, setClient] = useState("");
+  const [vendor, setVendor] = useState("");
   const [requester, setRequester] = useState("");
   const [urgency, setUrgency] = useState("일반");
   const [packaging, setPackaging] = useState("");
@@ -3753,6 +3754,7 @@ function NewPost({
       time: nowTime(),
       category: cat,
       client: client.trim(),
+      vendor: vendor.trim(),
       requester: requester.trim(),
       transport,
       carNum: transport !== "자차" ? carNum : "",
@@ -3881,7 +3883,7 @@ function NewPost({
       display: "flex",
       gap: 8
     }
-  }, ["양산출하", "일반출하", "사내출하"].map(c => {
+  }, ["양산출하", "일반출하", "공정출하", "사내출하"].map(c => {
     const ccc = CAT[c] || CAT["일반출하"];
     const sel = cat === c;
     return /*#__PURE__*/React.createElement("button", {
@@ -8115,7 +8117,7 @@ function RequestForm({
       display: "flex",
       gap: 8
     }
-  }, ["양산출하", "일반출하", "사내출하"].map(c => {
+  }, ["양산출하", "일반출하", "공정출하", "사내출하"].map(c => {
     const ccc = CAT[c] || CAT["일반출하"],
       sel = cat === c;
     return /*#__PURE__*/React.createElement("button", {
