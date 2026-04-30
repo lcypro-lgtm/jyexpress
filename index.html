@@ -2760,352 +2760,480 @@ function ViewerDash({
   onLogout
 }) {
   const [tab, setTab] = useState("출하현황");
-  const [dateFilter, setDateFilter] = useState("all"); // "today" or "all"
-  const [searchText, setSearchText] = useState("");
-  
   const isStaff = user.role === "staff";
   const today = todayStr();
-  
-  // 날짜 필터링
-  let filtered = posts;
-  if (dateFilter === "today") {
-    filtered = posts.filter(p => p.date === today);
-  }
-  
-  // 검색 필터링 (거래처명, 의뢰자, 품목, 포장)
-  if (searchText.trim()) {
-    const search = searchText.toLowerCase();
-    filtered = filtered.filter(p => 
-      (p.client || "").toLowerCase().includes(search) ||
-      (p.requester || "").toLowerCase().includes(search) ||
-      (p.packaging || "").toLowerCase().includes(search) ||
-      (p.groups || []).some(g => 
-        (g.items || []).some(i => 
-          (i.text || "").toLowerCase().includes(search)
-        )
-      )
-    );
-  }
-  
-  // 탭 구성
-  let baseTabs = isStaff 
-    ? ["출하현황", "전체일정", "운행거리", "내 의뢰"]
-    : ["출하현황", "전체일정"];  // 조회자는 운행거리 제외
-  
-  // 출하 등록 권한 있으면 "출하등록" 탭 추가
-  if (user.permissions?.canRegister) {
-    baseTabs = [...baseTabs.slice(0, 2), "출하등록", ...baseTabs.slice(2)];
-  }
-  const tabs = baseTabs;
-
-  return React.createElement("div", { style: { minHeight: "100vh", paddingBottom: 80 } },
-    // 헤더
-    React.createElement("div", {
+  const todayPs = posts.filter(p => p.date === today);
+  const myGroups = isStaff ? todayPs.filter(p => p.category !== "사내방문").flatMap(p => p.groups.filter(g => g.assignee === user.id).map(g => ({
+    ...g,
+    postId: p.id,
+    category: p.category,
+    client: p.client
+  }))) : [];
+  const getKm = route => {
+    let k = 0;
+    for (let i = 1; i < route.stops.length; i++) {
+      const a = route.stops[i - 1],
+        b = route.stops[i];
+      if (a.lat && b.lat) k += haversine(a.lat, a.lng, b.lat, b.lng);
+    }
+    return k;
+  };
+  const myRoute = routes.find(r => r.date === today && r.staffId === user.id);
+  const myKm = myRoute ? getKm(myRoute) : 0;
+  const yangItems = todayPs.filter(p => p.category === "양산출하").flatMap(p => p.groups.flatMap(g => g.items));
+  const genItems = todayPs.filter(p => p.category === "일반출하").flatMap(p => p.groups.flatMap(g => g.items));
+  const yangPct = yangItems.length ? Math.round(yangItems.filter(i => i.done || i.stage === "회수").length / yangItems.length * 100) : 0;
+  const genPct = genItems.length ? Math.round(genItems.filter(i => i.done || i.stage === "회수").length / genItems.length * 100) : 0;
+  const myReqCnt = (requests || []).filter(r => r.requestedBy === user.id).length;
+  const myPendingCnt = (requests || []).filter(r => r.requestedBy === user.id && r.status === "대기").length;
+  const [vSearch, setVSearch] = useState("");
+  const tabs = isStaff ? ["출하현황", "내 담당", "방문기록", "전체 일정"] : ["출하현황", "방문기록", "전체 일정"];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: C.bg
+    }
+  }, /*#__PURE__*/React.createElement(Hdr, {
+    title: "\uC9C0\uC6A9\uAE08\uC18D \uCD9C\uD558\uAD00\uB9AC",
+    sub: isStaff ? `${user.name} · ${user.specialty === "양산" ? "🏭 양산전담" : "📦 일반담당"}` : `${user.name} · ${user.dept}`,
+    right: /*#__PURE__*/React.createElement("div", {
       style: {
-        background: "linear-gradient(135deg, " + C.accentL + ", " + C.accent + ")",
-        padding: "16px 16px 12px",
-        color: "#fff"
+        display: "flex",
+        gap: 7
       }
-    },
-      React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
-        React.createElement("div", null,
-          React.createElement("div", { style: { fontSize: 13, opacity: 0.9 } }, user.name + " (" + user.role + ")"),
-          React.createElement("div", { style: { fontSize: 20, fontWeight: "700", marginTop: 4 } }, "🏭 지용금속")
-        ),
-        React.createElement("button", {
-          onClick: onLogout,
-          style: {
-            background: "rgba(255,255,255,0.2)",
-            border: "none",
-            color: "#fff",
-            padding: "6px 12px",
-            borderRadius: 8,
-            fontSize: 13,
-            cursor: "pointer"
-          }
-        }, "로그아웃")
-      ),
-      
-      // 탭
-      React.createElement("div", { style: { display: "flex", gap: 6 } },
-        tabs.map(t =>
-          React.createElement("button", {
-            key: t,
-            onClick: () => setTab(t),
-            style: {
-              flex: 1,
-              padding: "8px 12px",
-              background: tab === t ? "#fff" : "rgba(255,255,255,0.2)",
-              color: tab === t ? C.accent : "#fff",
-              border: "none",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: tab === t ? "700" : "500",
-              cursor: "pointer"
-            }
-          }, t)
-        )
-      )
-    ),
-
-    // 검색바 + 필터 (전체일정 탭에서만)
-    tab === "전체일정" && React.createElement("div", {
+    }, isStaff && /*#__PURE__*/React.createElement("button", {
+      onClick: onLocation,
       style: {
-        padding: "12px 16px",
-        background: C.surface,
-        borderBottom: "1px solid " + C.border
+        background: C.muted,
+        color: C.loc,
+        border: `1px solid ${C.border}`,
+        borderRadius: 9,
+        padding: "7px 9px",
+        fontSize: 13,
+        cursor: "pointer"
       }
-    },
-      // 날짜 필터
-      React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 10 } },
-        React.createElement("button", {
-          onClick: () => setDateFilter("today"),
-          style: {
-            flex: 1,
-            padding: "10px",
-            background: dateFilter === "today" ? C.accent : C.surface,
-            color: dateFilter === "today" ? "#fff" : C.text,
-            border: "1.5px solid " + (dateFilter === "today" ? C.accent : C.border),
-            borderRadius: 8,
-            fontSize: 14,
-            fontWeight: dateFilter === "today" ? "700" : "500",
-            cursor: "pointer"
-          }
-        }, "📅 당일일정"),
-        React.createElement("button", {
-          onClick: () => setDateFilter("all"),
-          style: {
-            flex: 1,
-            padding: "10px",
-            background: dateFilter === "all" ? C.accent : C.surface,
-            color: dateFilter === "all" ? "#fff" : C.text,
-            border: "1.5px solid " + (dateFilter === "all" ? C.accent : C.border),
-            borderRadius: 8,
-            fontSize: 14,
-            fontWeight: dateFilter === "all" ? "700" : "500",
-            cursor: "pointer"
-          }
-        }, "📋 전체일정")
-      ),
-      
-      // 검색바
-      React.createElement("div", { style: { position: "relative" } },
-        React.createElement("input", {
-          type: "text",
-          placeholder: "거래처명, 의뢰자, 품목으로 검색...",
-          value: searchText,
-          onChange: e => setSearchText(e.target.value),
-          style: {
-            width: "100%",
-            padding: "10px 40px 10px 14px",
-            border: "1.5px solid " + C.border,
-            borderRadius: 8,
-            fontSize: 14,
-            outline: "none"
-          }
-        }),
-        searchText && React.createElement("button", {
-          onClick: () => setSearchText(""),
-          style: {
-            position: "absolute",
-            right: 10,
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "none",
-            border: "none",
-            fontSize: 18,
-            cursor: "pointer",
-            color: C.textSec
-          }
-        }, "✕"),
-        React.createElement("div", { 
-          style: { 
-            fontSize: 12, 
-            color: C.textSec, 
-            marginTop: 6 
-          } 
-        }, "검색 결과: " + filtered.length + "건")
-      )
-    ),
-
-    // 출하현황 탭
-    tab === "출하현황" && React.createElement("div", { style: { padding: 16 } },
-      React.createElement("div", { style: { marginBottom: 16 } },
-        React.createElement("div", { style: { fontSize: 18, fontWeight: "700", marginBottom: 12 } }, "📊 진행 단계별 현황"),
-        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 } },
-          STAGES.map(st => {
-            const cnt = posts.filter(p => {
-              const allItems = (p.groups || []).flatMap(g => (g.items || []));
-              return allItems.some(i => i.stage === st);
-            }).length;
-            return React.createElement("div", {
-              key: st,
-              style: {
-                background: C.surface,
-                padding: 16,
-                borderRadius: 12,
-                border: "1.5px solid " + C.border
-              }
-            },
-              React.createElement("div", { style: { fontSize: 24, marginBottom: 6 } }, STAGE_ICON[st]),
-              React.createElement("div", { style: { fontSize: 13, color: C.textSec, marginBottom: 4 } }, st),
-              React.createElement("div", { style: { fontSize: 22, fontWeight: "700", color: STAGE_COLOR[st] } }, cnt + "건")
-            );
-          })
-        )
-      )
-    ),
-
-    // 전체일정 탭 (필터링된 목록)
-    tab === "전체일정" && React.createElement("div", { style: { padding: 16 } },
-      filtered.length === 0 
-        ? React.createElement("div", { style: { textAlign: "center", padding: 40, color: C.textSec } }, "검색 결과가 없습니다")
-        : (filtered || []).map(p =>
-            React.createElement("div", {
-              key: p.id,
-              onClick: () => onOpen(p),
-              style: {
-                background: C.surface,
-                padding: 14,
-                borderRadius: 12,
-                marginBottom: 10,
-                border: "1.5px solid " + C.border,
-                cursor: "pointer"
-              }
-            },
-              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 8 } },
-                React.createElement("div", null,
-                  React.createElement("div", { style: { fontSize: 15, fontWeight: "700", marginBottom: 4 } }, p.client || "거래처 미정"),
-                  React.createElement("div", { style: { fontSize: 13, color: C.textSec } }, p.date + " · " + (p.requester || ""))
-                ),
-                React.createElement("div", {
-                  style: {
-                    padding: "4px 10px",
-                    background: URG_COLOR[p.urgency] || C.muted,
-                    color: "#fff",
-                    borderRadius: 6,
-                    fontSize: 12,
-                    fontWeight: "600"
-                  }
-                }, p.urgency || "일반")
-              ),
-              React.createElement("div", { style: { fontSize: 13, color: C.text } },
-                (p.groups || []).flatMap(g => (g.items || []).map(i => i.text)).filter(Boolean).join(", ").substring(0, 50) + 
-                ((p.groups || []).flatMap(g => g.items || []).filter(i => i.text).length > 2 ? "..." : "")
-              )
-            )
-          )
-    ),
-
-    // 운행거리 탭
-    tab === "운행거리" && React.createElement("div", { style: { padding: 16 } },
-      React.createElement("button", {
-        onClick: onRoute,
-        style: {
-          width: "100%",
-          padding: 16,
-          background: "linear-gradient(135deg, " + C.accentL + ", " + C.accent + ")",
-          color: "#fff",
-          border: "none",
-          borderRadius: 12,
-          fontSize: 15,
-          fontWeight: "700",
-          cursor: "pointer"
-        }
-      }, "🚚 운행 거리 확인")
-    ),
-
-    // 내 의뢰 탭
-    tab === "내 의뢰" && isStaff && React.createElement("div", { style: { padding: 16 } },
-      React.createElement("button", {
-        onClick: onMyRequests,
-        style: {
-          width: "100%",
-          padding: 16,
-          background: "linear-gradient(135deg, " + C.accentL + ", " + C.accent + ")",
-          color: "#fff",
-          border: "none",
-          borderRadius: 12,
-          fontSize: 15,
-          fontWeight: "700",
-          cursor: "pointer",
-          marginBottom: 12
-        }
-      }, "📝 내 의뢰 보기"),
-      requests > 0 && React.createElement("div", {
-        style: {
-          background: C.warning + "20",
-          padding: 14,
-          borderRadius: 10,
-          border: "1.5px solid " + C.warning,
-          color: C.warning,
-          fontSize: 14,
-          fontWeight: "600",
-          textAlign: "center"
-        }
-      }, "⏳ 승인 대기 중: " + requests + "건")
-    ),
-
-    // 출하등록 탭
-    tab === "출하등록" && React.createElement("div", { style: { padding: 16 } },
-      React.createElement("div", { 
-        style: { 
-          background: C.surface,
-          padding: 24,
-          borderRadius: 16,
-          textAlign: "center",
-          marginBottom: 16
-        }
-      },
-        React.createElement("div", { style: { fontSize: 48, marginBottom: 12 } }, "📝"),
-        React.createElement("div", { style: { fontSize: 18, fontWeight: "700", marginBottom: 8, color: C.text } }, "출하 의뢰 등록"),
-        React.createElement("div", { style: { fontSize: 14, color: C.textSec, marginBottom: 20 } }, "새로운 출하 일정을 등록합니다")
-      ),
-      React.createElement("button", {
-        onClick: onNewRequest,
-        style: {
-          width: "100%",
-          padding: 16,
-          background: "linear-gradient(135deg, " + C.accentL + ", " + C.accent + ")",
-          color: "#fff",
-          border: "none",
-          borderRadius: 12,
-          fontSize: 16,
-          fontWeight: "700",
-          cursor: "pointer",
-          boxShadow: "0 4px 12px rgba(18,89,195,0.3)"
-        }
-      }, "✏️ 출하 의뢰 등록하기")
-    ),
-
-    // 하단 버튼 제거 (이제 탭으로 이동함)
-    false && user.permissions?.canRegister && React.createElement("div", {
+    }, "\uD83D\uDCCD"), isStaff && /*#__PURE__*/React.createElement("button", {
+      onClick: onRoute,
       style: {
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 16,
-        background: C.surface,
-        borderTop: "1px solid " + C.border
+        background: C.muted,
+        color: C.route,
+        border: `1px solid ${C.border}`,
+        borderRadius: 9,
+        padding: "7px 9px",
+        fontSize: 13,
+        cursor: "pointer"
       }
-    },
-      React.createElement("button", {
-        onClick: onNewRequest,
-        style: {
-          width: "100%",
-          padding: 14,
-          background: "linear-gradient(135deg, " + C.accentL + ", " + C.accent + ")",
-          color: "#fff",
-          border: "none",
-          borderRadius: 12,
-          fontSize: 15,
-          fontWeight: "700",
-          cursor: "pointer"
-        }
-      }, "+ 출하 의뢰 등록")
-    )
-  );
+    }, "\uD83D\uDDFA\uFE0F"), /*#__PURE__*/React.createElement("button", {
+      onClick: onMyRequests,
+      style: {
+        position: "relative",
+        background: C.muted,
+        color: C.accent,
+        border: `1px solid ${C.accent}33`,
+        borderRadius: 9,
+        padding: "7px 10px",
+        fontSize: 13,
+        cursor: "pointer",
+        fontWeight: 700
+      }
+    }, "\uD83D\uDCEC", myReqCnt > 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        position: "absolute",
+        top: -4,
+        right: -4,
+        background: myPendingCnt > 0 ? C.warn : C.done,
+        color: "#fff",
+        fontSize: 9,
+        fontWeight: 800,
+        borderRadius: 8,
+        padding: "1px 5px"
+      }
+    }, myReqCnt)), user.permissions?.canInternalShip && /*#__PURE__*/React.createElement("button", {
+      onClick: onNewInternalShip,
+      style: {
+        background: `linear-gradient(135deg,${C.process},#0F7A56)`,
+        color: "#fff",
+        border: "none",
+        borderRadius: 9,
+        padding: "7px 10px",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "\uD83C\uDFE2\uC0AC\uB0B4"), user.permissions?.canRegister && /*#__PURE__*/React.createElement("button", {
+      onClick: onNew,
+      style: {
+        background: `linear-gradient(135deg,${C.accentL},${C.accent})`,
+        color: "#fff",
+        border: "none",
+        borderRadius: 9,
+        padding: "7px 10px",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "+ \uB4F1\uB85D"), /*#__PURE__*/React.createElement("button", {
+      onClick: onNewRequest,
+      style: {
+        background: `linear-gradient(135deg,${C.accentL},${C.accent})`,
+        color: "#fff",
+        border: "none",
+        borderRadius: 9,
+        padding: "7px 11px",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "+\uC694\uCCAD"), /*#__PURE__*/React.createElement("button", {
+      onClick: onLogout,
+      style: {
+        background: C.muted,
+        color: C.sub,
+        border: `1px solid ${C.border}`,
+        borderRadius: 9,
+        padding: "7px 10px",
+        fontSize: 12,
+        cursor: "pointer"
+      }
+    }, "\uB098\uAC00\uAE30"))
+  }), isStaff && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: `${C.route}08`,
+      borderBottom: `1px solid ${C.route}22`,
+      padding: "10px 16px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.route,
+      fontWeight: 700
+    }
+  }, "\uD83D\uDE97 \uC624\uB298 \uC6B4\uD589: ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      fontFamily: "monospace"
+    }
+  }, myKm.toFixed(1), "km"), " \xB7 ", myRoute?.stops.length || 0, "\uAC1C \uC815\uB958\uC7A5"), /*#__PURE__*/React.createElement("button", {
+    onClick: onRoute,
+    style: {
+      background: C.route,
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "5px 10px",
+      fontSize: 11,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, "\uAE30\uB85D")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.surface,
+      borderBottom: `1px solid ${C.border}`,
+      display: "flex",
+      overflowX: "auto"
+    }
+  }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t,
+    onClick: () => setTab(t),
+    style: {
+      padding: "13px 14px",
+      background: "none",
+      border: "none",
+      borderBottom: `3px solid ${tab === t ? C.accent : "transparent"}`,
+      color: tab === t ? C.accent : C.sub,
+      fontSize: 13,
+      fontWeight: 700,
+      cursor: "pointer",
+      whiteSpace: "nowrap"
+    }
+  }, t))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "16px 14px 100px"
+    }
+  }, tab === "출하현황" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      marginBottom: 14
+    }
+  }, [{
+    label: "양산출하",
+    color: C.yangsan,
+    icon: "🏭",
+    pct: yangPct,
+    items: yangItems
+  }, {
+    label: "일반출하",
+    color: C.general,
+    icon: "📦",
+    pct: genPct,
+    items: genItems
+  }].map(x => /*#__PURE__*/React.createElement(Card, {
+    key: x.label,
+    style: {
+      flex: 1,
+      padding: "15px 12px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      marginBottom: 4
+    }
+  }, x.icon), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: x.color,
+      fontWeight: 800,
+      marginBottom: 5
+    }
+  }, x.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 30,
+      fontWeight: 900,
+      fontFamily: "monospace",
+      color: x.pct === 100 ? C.done : x.color,
+      lineHeight: 1
+    }
+  }, x.pct, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14
+    }
+  }, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "8px 0 5px"
+    }
+  }, /*#__PURE__*/React.createElement(PBar, {
+    pct: x.pct,
+    color: x.color,
+    h: 5
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.sub
+    }
+  }, x.items.filter(i => i.done || i.stage === "회수").length, "/", x.items.length, "\uAC74")))), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      padding: "16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 800,
+      color: C.text,
+      marginBottom: 14
+    }
+  }, "\uD83D\uDCCD \uC9C0\uC5ED\xB7\uAC70\uB798\uCC98 \uD604\uD669"), todayPs.filter(p => p.category !== "사내방문").map(post => {
+    const {
+      done,
+      total,
+      pct
+    } = calcDone(post);
+    const cc = CAT[post.category] || CAT["일반출하"];
+    return /*#__PURE__*/React.createElement("div", {
+      key: post.id,
+      onClick: () => onOpen(post.id),
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "10px 0",
+        borderBottom: `1px solid ${C.border}`,
+        cursor: "pointer"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 40,
+        height: 40,
+        borderRadius: "50%",
+        flexShrink: 0,
+        background: pct === 100 ? `${C.done}15` : pct > 50 ? `${C.warn}10` : C.muted,
+        border: `2px solid ${pct === 100 ? C.done : pct > 50 ? C.warn : C.border}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: pct === 100 ? 16 : 11,
+        fontWeight: 900,
+        color: pct === 100 ? C.done : pct > 50 ? C.warn : C.sub
+      }
+    }, pct === 100 ? "✓" : pct + "%")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        marginBottom: 3
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700,
+        color: C.text
+      }
+    }, post.client), /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: cc.bg,
+        color: cc.color,
+        fontSize: 10,
+        fontWeight: 700,
+        padding: "1px 6px",
+        borderRadius: 10
+      }
+    }, cc.icon), /*#__PURE__*/React.createElement(UrgBadge, {
+      urgency: post.urgency
+    })), /*#__PURE__*/React.createElement(PBar, {
+      pct: pct,
+      color: pct === 100 ? C.done : cc.color,
+      h: 4
+    })), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: pct === 100 ? C.done : C.sub,
+        fontWeight: 700
+      }
+    }, done, "/", total));
+  }))), tab === "내 담당" && isStaff && (myGroups.length === 0 ? /*#__PURE__*/React.createElement(Card, {
+    style: {
+      padding: "40px 20px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: C.sub,
+      fontSize: 14
+    }
+  }, "\uC624\uB298 \uBC30\uC815\uB41C \uB2F4\uB2F9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4")) : myGroups.map(group => {
+    const cc = CAT[group.category] || CAT["일반출하"];
+    const done = group.items.filter(i => i.done || i.stage === "회수").length;
+    const pct = group.items.length ? Math.round(done / group.items.length * 100) : 0;
+    const unconf = group.items.filter(i => !i.loc?.confirmed).length;
+    return /*#__PURE__*/React.createElement(Card, {
+      key: group.id,
+      onClick: () => onOpen(group.postId),
+      style: {
+        marginBottom: 12,
+        cursor: "pointer",
+        WebkitTapHighlightColor: "transparent"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 4,
+        background: cc.color
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "14px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 15,
+        fontWeight: 800,
+        color: C.text
+      }
+    }, group.client || group.region), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: cc.color,
+        marginTop: 2
+      }
+    }, cc.icon, " ", group.category)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 26,
+        fontWeight: 900,
+        fontFamily: "monospace",
+        color: pct === 100 ? C.done : pct > 50 ? C.warn : C.accent
+      }
+    }, pct, "%")), unconf > 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: `${C.loc}10`,
+        borderRadius: 8,
+        padding: "6px 10px",
+        marginBottom: 8,
+        fontSize: 11,
+        color: C.loc,
+        fontWeight: 700
+      }
+    }, "\uD83D\uDCCD \uC704\uCE58 \uBBF8\uD655\uC778 ", unconf, "\uAC74 \u2014 \uCC3D\uACE0 \uD655\uC778 \uD6C4 \uCD9C\uBC1C\uD558\uC138\uC694"), /*#__PURE__*/React.createElement(PBar, {
+      pct: pct,
+      color: cc.color,
+      h: 6
+    }), group.items.slice(0, 2).map(i => i.loc?.zone && /*#__PURE__*/React.createElement("div", {
+      key: i.id,
+      style: {
+        fontSize: 10,
+        color: C.sub,
+        marginTop: 4
+      }
+    }, "\uD83D\uDCCD ", i.text, ": ", i.loc.zone, i.loc.rack ? ` ${i.loc.rack}` : "", i.loc.pallet ? `-${i.loc.pallet}` : "")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 10,
+        padding: "8px 12px",
+        background: C.muted,
+        borderRadius: 8,
+        fontSize: 12,
+        color: C.accent,
+        textAlign: "center",
+        fontWeight: 700
+      }
+    }, "\uD0ED\uD574\uC11C \uD655\uC778\uD558\uAE30 \u2192")));
+  })), tab === "방문기록" && posts.filter(p => p.category === "사내방문").sort((a, b) => b.date.localeCompare(a.date)).map(p => /*#__PURE__*/React.createElement(PostCard, {
+    key: p.id,
+    post: p,
+    onClick: () => onOpen(p.id)
+  })), tab === "전체 일정" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: vSearch,
+    onChange: e => setVSearch(e.target.value),
+    placeholder: "\uD83D\uDD0D \uC5C5\uCCB4\uBA85 / \uAC70\uB798\uCC98 \uAC80\uC0C9",
+    style: {
+      width: "100%",
+      background: C.card,
+      border: `1.5px solid ${vSearch ? C.accent : C.border}`,
+      borderRadius: 12,
+      padding: "11px 42px 11px 16px",
+      fontSize: 14,
+      outline: "none",
+      color: C.text,
+      boxSizing: "border-box",
+      boxShadow: C.shadow,
+      transition: "border-color 0.2s"
+    }
+  }), vSearch && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setVSearch(""),
+    style: {
+      position: "absolute",
+      right: 12,
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: "none",
+      border: "none",
+      color: C.sub,
+      fontSize: 16,
+      cursor: "pointer",
+      lineHeight: 1
+    }
+  }, "\u2715")), (vSearch.trim() ? posts.filter(p => (p.client || "").includes(vSearch) || (p.requester || "").includes(vSearch) || (p.groups || []).some(g => (g.region || "").includes(vSearch))) : posts).map(p => /*#__PURE__*/React.createElement(PostCard, {
+    key: p.id,
+    post: p,
+    onClick: () => onOpen(p.id)
+  })))));
 }
 
 /* ══ 게시글 상세 ══ */
@@ -3132,7 +3260,7 @@ function PostDetail({
   const cc = CAT[post.category] || CAT["일반출하"];
   const isAdmin = user.role === "admin";
   const isStaff = user.role === "staff";
-  const canEdit = isAdmin || isStaff || (user.permissions?.canRegister);
+  const canEdit = isAdmin || isStaff;
   // 안전 기본값: groups가 없을 때 빈 배열로
   const safeGroups = post.groups || [];
   const [viewImg, setViewImg] = useState(null);
@@ -3666,7 +3794,6 @@ function NewPost({
   const [date, setDate] = useState(todayStr());
   const [cat, setCat] = useState("양산출하");
   const [client, setClient] = useState("");
-  const [vendor, setVendor] = useState("");
   const [requester, setRequester] = useState("");
   const [urgency, setUrgency] = useState("일반");
   const [packaging, setPackaging] = useState("");
@@ -3754,7 +3881,6 @@ function NewPost({
       time: nowTime(),
       category: cat,
       client: client.trim(),
-      vendor: vendor.trim(),
       requester: requester.trim(),
       transport,
       carNum: transport !== "자차" ? carNum : "",
@@ -3883,7 +4009,7 @@ function NewPost({
       display: "flex",
       gap: 8
     }
-  }, ["양산출하", "일반출하", "공정출하", "사내출하"].map(c => {
+  }, ["양산출하", "일반출하", "사내출하"].map(c => {
     const ccc = CAT[c] || CAT["일반출하"];
     const sel = cat === c;
     return /*#__PURE__*/React.createElement("button", {
@@ -6940,14 +7066,7 @@ function UserMgmt({
       fontWeight: 700,
       marginBottom: 8
     }
-  }, "⭐ 중요: 권한 설정"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.textSec,
-      marginBottom: 8,
-      marginTop: -4
-    }
-  }, "체크하면 출하 등록/수정 가능"), /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDEE1\uFE0F \uCD94\uAC00 \uAD8C\uD55C \uBD80\uC5EC"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -8117,7 +8236,7 @@ function RequestForm({
       display: "flex",
       gap: 8
     }
-  }, ["양산출하", "일반출하", "공정출하", "사내출하"].map(c => {
+  }, ["양산출하", "일반출하", "사내출하"].map(c => {
     const ccc = CAT[c] || CAT["일반출하"],
       sel = cat === c;
     return /*#__PURE__*/React.createElement("button", {
@@ -10238,9 +10357,7 @@ function App() {
       setUser(null);
       setScreen("main");
     }
-  }), screen === "detail" && (!fbReady ? /*#__PURE__*/React.createElement("div", {
-    style: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }
-  }, /*#__PURE__*/React.createElement("div", { style: { fontSize: 16, color: C.textSec } }, "로딩 중...")) : activePost ? /*#__PURE__*/React.createElement(PostDetail, {
+  }), screen === "detail" && (activePost ? /*#__PURE__*/React.createElement(PostDetail, {
     post: activePost,
     members: members,
     user: user,
