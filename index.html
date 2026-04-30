@@ -3132,7 +3132,7 @@ function PostDetail({
   const cc = CAT[post.category] || CAT["일반출하"];
   const isAdmin = user.role === "admin";
   const isStaff = user.role === "staff";
-  const canEdit = isAdmin || isStaff;
+  const canEdit = isAdmin || isStaff || (user.permissions?.canRegister);
   // 안전 기본값: groups가 없을 때 빈 배열로
   const safeGroups = post.groups || [];
   const [viewImg, setViewImg] = useState(null);
@@ -10236,7 +10236,9 @@ function App() {
       setUser(null);
       setScreen("main");
     }
-  }), screen === "detail" && (activePost ? /*#__PURE__*/React.createElement(PostDetail, {
+  }), screen === "detail" && (!fbReady ? /*#__PURE__*/React.createElement("div", {
+    style: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }
+  }, /*#__PURE__*/React.createElement("div", { style: { fontSize: 16, color: C.textSec } }, "로딩 중...")) : activePost ? /*#__PURE__*/React.createElement(PostDetail, {
     post: activePost,
     members: members,
     user: user,
