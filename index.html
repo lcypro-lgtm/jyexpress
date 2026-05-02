@@ -2744,6 +2744,236 @@ function AdminDash({
 }
 
 /* ══ 열람자·직원 대시보드 ══ */
+
+// 달력 컴포넌트
+function CalendarView({ posts, onSelectDate }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  
+  // 이번 달 첫날과 마지막날
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  
+  // 달력 시작일 (이전 달 포함)
+  const startDate = new Date(firstDay);
+  startDate.setDate(startDate.getDate() - firstDay.getDay());
+  
+  // 달력 종료일 (다음 달 포함)
+  const endDate = new Date(lastDay);
+  endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
+  
+  // 달력 날짜 배열 생성
+  const days = [];
+  const current = new Date(startDate);
+  while (current <= endDate) {
+    days.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  
+  // 날짜별 출하 건수
+  const getPostCount = (date) => {
+    const dateStr = date.getFullYear() + "-" + 
+      String(date.getMonth() + 1).padStart(2, "0") + "-" + 
+      String(date.getDate()).padStart(2, "0");
+    return posts.filter(p => p.date === dateStr).length;
+  };
+  
+  const prevMonth = () => {
+    setCurrentMonth(new Date(year, month - 1, 1));
+  };
+  
+  const nextMonth = () => {
+    setCurrentMonth(new Date(year, month + 1, 1));
+  };
+  
+  const today = new Date();
+  const isToday = (date) => {
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
+  };
+  
+  const isCurrentMonth = (date) => {
+    return date.getMonth() === month;
+  };
+  
+  return React.createElement("div", { 
+    style: { 
+      minHeight: "100vh", 
+      background: C.bg,
+      paddingBottom: 80 
+    } 
+  },
+    // 헤더 (년월 선택)
+    React.createElement("div", {
+      style: {
+        background: "linear-gradient(135deg, " + C.accentL + ", " + C.accent + ")",
+        padding: 16,
+        color: "#fff"
+      }
+    },
+      React.createElement("div", {
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16
+        }
+      },
+        React.createElement("button", {
+          onClick: prevMonth,
+          style: {
+            background: "rgba(255,255,255,0.2)",
+            border: "none",
+            color: "#fff",
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            fontSize: 18,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, "◀"),
+        React.createElement("div", {
+          style: {
+            fontSize: 20,
+            fontWeight: "700"
+          }
+        }, year + "년 " + (month + 1) + "월"),
+        React.createElement("button", {
+          onClick: nextMonth,
+          style: {
+            background: "rgba(255,255,255,0.2)",
+            border: "none",
+            color: "#fff",
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            fontSize: 18,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, "▶")
+      ),
+      
+      // 요일 헤더
+      React.createElement("div", {
+        style: {
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 4,
+          marginBottom: 4
+        }
+      },
+        ["일", "월", "화", "수", "목", "금", "토"].map((day, idx) =>
+          React.createElement("div", {
+            key: day,
+            style: {
+              textAlign: "center",
+              fontSize: 12,
+              fontWeight: "600",
+              padding: "8px 0",
+              color: idx === 0 ? "#ff6b6b" : idx === 6 ? "#4dabf7" : "#fff",
+              opacity: 0.9
+            }
+          }, day)
+        )
+      )
+    ),
+    
+    // 달력 그리드
+    React.createElement("div", {
+      style: {
+        padding: 8,
+        background: "#fff"
+      }
+    },
+      React.createElement("div", {
+        style: {
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 4
+        }
+      },
+        days.map((date, idx) => {
+          const count = getPostCount(date);
+          const isCurrent = isCurrentMonth(date);
+          const isNow = isToday(date);
+          
+          return React.createElement("div", {
+            key: idx,
+            onClick: () => {
+              if (count > 0) {
+                const dateStr = date.getFullYear() + "-" + 
+                  String(date.getMonth() + 1).padStart(2, "0") + "-" + 
+                  String(date.getDate()).padStart(2, "0");
+                onSelectDate(dateStr);
+              }
+            },
+            style: {
+              aspectRatio: "1",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              border: isNow ? "2px solid " + C.accent : "1px solid " + C.border,
+              borderRadius: 8,
+              background: count > 0 ? (isNow ? C.accentL : C.surface) : "#fff",
+              cursor: count > 0 ? "pointer" : "default",
+              opacity: isCurrent ? 1 : 0.4,
+              position: "relative"
+            }
+          },
+            React.createElement("div", {
+              style: {
+                fontSize: 14,
+                fontWeight: isNow ? "700" : "500",
+                color: idx % 7 === 0 ? "#ff6b6b" : idx % 7 === 6 ? "#4dabf7" : C.text,
+                marginBottom: 2
+              }
+            }, date.getDate()),
+            count > 0 && React.createElement("div", {
+              style: {
+                fontSize: 10,
+                fontWeight: "600",
+                color: "#fff",
+                background: C.accent,
+                borderRadius: 8,
+                padding: "2px 6px",
+                minWidth: 20,
+                textAlign: "center"
+              }
+            }, count)
+          );
+        })
+      )
+    ),
+    
+    // 범례
+    React.createElement("div", {
+      style: {
+        padding: 16,
+        background: "#fff",
+        marginTop: 8,
+        fontSize: 12,
+        color: C.textSec
+      }
+    },
+      React.createElement("div", { style: { marginBottom: 8, fontWeight: "600" } }, "📌 사용 안내"),
+      React.createElement("div", null, "• 숫자 배지: 출하 건수"),
+      React.createElement("div", null, "• 날짜 클릭: 해당일 출하 목록 조회"),
+      React.createElement("div", null, "• 파란 테두리: 오늘 날짜")
+    )
+  );
+}
+
+
 function ViewerDash({
   posts,
   routes,
@@ -2762,13 +2992,18 @@ function ViewerDash({
   const [tab, setTab] = useState("출하현황");
   const [dateFilter, setDateFilter] = useState("all"); // "today" or "all"
   const [searchText, setSearchText] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null); // 달력에서 선택한 날짜
   
   const isStaff = user.role === "staff";
   const today = todayStr();
   
   // 날짜 필터링
   let filtered = posts;
-  if (dateFilter === "today") {
+  if (selectedDate) {
+    // 달력에서 선택한 날짜
+    filtered = posts.filter(p => p.date === selectedDate);
+  } else if (dateFilter === "today") {
+    // 당일일정 필터
     filtered = posts.filter(p => p.date === today);
   }
   
@@ -2777,6 +3012,7 @@ function ViewerDash({
     const search = searchText.toLowerCase();
     filtered = filtered.filter(p => 
       (p.client || "").toLowerCase().includes(search) ||
+      (p.vendor || "").toLowerCase().includes(search) ||
       (p.requester || "").toLowerCase().includes(search) ||
       (p.packaging || "").toLowerCase().includes(search) ||
       (p.groups || []).some(g => 
@@ -2789,8 +3025,8 @@ function ViewerDash({
   
   // 탭 구성
   let baseTabs = isStaff 
-    ? ["출하현황", "전체일정", "운행거리", "내 의뢰"]
-    : ["출하현황", "전체일정"];  // 조회자는 운행거리 제외
+    ? ["출하현황", "전체일정", "달력", "운행거리", "내 의뢰"]
+    : ["출하현황", "전체일정", "달력"];  // 조회자는 운행거리 제외
   
   // 출하 등록 권한 있으면 "출하등록" 탭 추가
   if (user.permissions?.canRegister) {
@@ -2956,8 +3192,46 @@ function ViewerDash({
       )
     ),
 
+    // 달력 탭
+    tab === "달력" && React.createElement(CalendarView, {
+      posts: posts,
+      onSelectDate: (dateStr) => {
+        setSelectedDate(dateStr);
+        setDateFilter("all");
+        setSearchText("");
+        setTab("전체일정");
+      }
+    }),
+    
     // 전체일정 탭 (필터링된 목록)
     tab === "전체일정" && React.createElement("div", { style: { padding: 16 } },
+      selectedDate && React.createElement("div", {
+        style: {
+          background: C.accentL,
+          padding: "12px 16px",
+          borderRadius: 8,
+          marginBottom: 12,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }
+      },
+        React.createElement("div", {
+          style: { fontSize: 14, fontWeight: "700", color: C.accent }
+        }, "📅 " + selectedDate + " 일정"),
+        React.createElement("button", {
+          onClick: () => setSelectedDate(null),
+          style: {
+            background: "transparent",
+            border: "none",
+            color: C.accent,
+            fontSize: 20,
+            cursor: "pointer",
+            padding: 4
+          }
+        }, "✕")
+      ),
+
       filtered.length === 0 
         ? React.createElement("div", { style: { textAlign: "center", padding: 40, color: C.textSec } }, "검색 결과가 없습니다")
         : (filtered || []).map(p =>
