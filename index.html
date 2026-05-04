@@ -10177,10 +10177,38 @@ function App() {
     }
     // Firebase 연결됨 → 실시간 구독
     const unsubs = [fbOn("posts", v => {
-      if (v) setPosts(Array.isArray(v) ? v : Object.values(v));
+      if (v) {
+        // 배열이면 객체로 변환 후 재저장
+        if (Array.isArray(v)) {
+          const obj = {};
+          v.forEach(item => {
+            if (item && item.id) {
+              obj[item.id] = item;
+            }
+          });
+          // Firebase에 객체 형식으로 다시 저장
+          db.ref(`${DB_PATH}/posts`).set(obj);
+          setPosts(Object.values(obj));
+        } else {
+          setPosts(Object.values(v));
+        }
+      }
       setFbReady(true);
     }), fbOn("members", v => {
-      if (v) setMembers(Array.isArray(v) ? v : Object.values(v));
+      if (v) {
+        if (Array.isArray(v)) {
+          const obj = {};
+          v.forEach(item => {
+            if (item && item.id) {
+              obj[item.id] = item;
+            }
+          });
+          db.ref(`${DB_PATH}/members`).set(obj);
+          setMembers(Object.values(obj));
+        } else {
+          setMembers(Object.values(v));
+        }
+      }
     }), fbOn("pending", v => {
       setPending(v ? Array.isArray(v) ? v : Object.values(v) : []);
     }), fbOn("routes", v => {
