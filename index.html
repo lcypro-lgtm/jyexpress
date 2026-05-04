@@ -1878,7 +1878,22 @@ function Login({
       fontWeight: 600,
       cursor: "pointer"
     }
-  }, "\uCC98\uC74C \uC624\uC168\uB098\uC694? \uC811\uC18D \uC2E0\uCCAD \u2192")));
+  }, "\uCC98\uC74C \uC624\uC168\uB098\uC694? \uC811\uC18D \uC2E0\uCCAD \u2192"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginTop: 24,
+      paddingTop: 20,
+      borderTop: "1px solid " + C.border,
+      fontSize: 11,
+      color: C.textSec
+    }
+  }, /*#__PURE__*/React.createElement("div", null, "지용금속 출하관리 시스템"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4,
+      fontWeight: "600",
+      color: C.accent
+    }
+  }, APP_VERSION + " (" + BUILD_DATE + ")"))));
 }
 
 /* ══ 접속 신청 ══ */
@@ -2997,20 +3012,19 @@ function ViewerDash({
   onLogout
 }) {
   const [tab, setTab] = useState("출하현황");
+  const [selectedDate, setSelectedDate] = useState(null);
   const [dateFilter, setDateFilter] = useState("all"); // "today" or "all"
   const [searchText, setSearchText] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null); // 달력에서 선택한 날짜
   
   const isStaff = user.role === "staff";
   const today = todayStr();
   
   // 날짜 필터링
-  let filtered = posts;
-  if (selectedDate) {
-    // 달력에서 선택한 날짜
-    filtered = posts.filter(p => p.date === selectedDate);
-  } else if (dateFilter === "today") {
-    // 당일일정 필터
+  // 날짜 필터링
+  let filtered = selectedDate 
+    ? posts.filter(p => p.date === selectedDate)
+    : posts;
+  if (dateFilter === "today") {
     filtered = posts.filter(p => p.date === today);
   }
   
@@ -3019,7 +3033,6 @@ function ViewerDash({
     const search = searchText.toLowerCase();
     filtered = filtered.filter(p => 
       (p.client || "").toLowerCase().includes(search) ||
-      (p.vendor || "").toLowerCase().includes(search) ||
       (p.requester || "").toLowerCase().includes(search) ||
       (p.packaging || "").toLowerCase().includes(search) ||
       (p.groups || []).some(g => 
@@ -3032,8 +3045,8 @@ function ViewerDash({
   
   // 탭 구성
   let baseTabs = isStaff 
-    ? ["출하현황", "전체일정", "달력", "운행거리", "내 의뢰"]
-    : ["출하현황", "전체일정", "달력"];  // 조회자는 운행거리 제외
+    ? ["출하현황", "전체일정", "📅달력", "운행거리", "내 의뢰"]
+    : ["출하현황", "전체일정", "📅달력"];  // 조회자는 운행거리 제외
   
   // 출하 등록 권한 있으면 "출하등록" 탭 추가
   if (user.permissions?.canRegister) {
@@ -3053,7 +3066,8 @@ function ViewerDash({
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 } },
         React.createElement("div", null,
           React.createElement("div", { style: { fontSize: 13, opacity: 0.9 } }, user.name + " (" + user.role + ")"),
-          React.createElement("div", { style: { fontSize: 20, fontWeight: "700", marginTop: 4 } }, "🏭 지용금속")
+          React.createElement("div", { style: { fontSize: 20, fontWeight: "700", marginTop: 4 } }, "🏭 지용금속"),
+          React.createElement("div", { style: { fontSize: 10, opacity: 0.7, marginTop: 2 } }, APP_VERSION)
         ),
         React.createElement("button", {
           onClick: onLogout,
@@ -3199,18 +3213,15 @@ function ViewerDash({
       )
     ),
 
-    // 달력 탭
-    tab === "달력" && React.createElement(CalendarView, {
+    // 전체일정 탭 (필터링된 목록)
+    tab === "📅달력" && React.createElement(CalendarView, {
       posts: posts,
       onSelectDate: (dateStr) => {
         setSelectedDate(dateStr);
-        setDateFilter("all");
-        setSearchText("");
         setTab("전체일정");
       }
     }),
     
-    // 전체일정 탭 (필터링된 목록)
     tab === "전체일정" && React.createElement("div", { style: { padding: 16 } },
       selectedDate && React.createElement("div", {
         style: {
@@ -3238,13 +3249,12 @@ function ViewerDash({
           }
         }, "✕")
       ),
-
       filtered.length === 0 
         ? React.createElement("div", { style: { textAlign: "center", padding: 40, color: C.textSec } }, "검색 결과가 없습니다")
         : (filtered || []).map(p =>
             React.createElement("div", {
               key: p.id,
-              onClick: () => onOpen(p),
+              onClick: () => onOpen(p.id),
               style: {
                 background: C.surface,
                 padding: 14,
@@ -10184,38 +10194,10 @@ function App() {
     }
     // Firebase 연결됨 → 실시간 구독
     const unsubs = [fbOn("posts", v => {
-      if (v) {
-        // 배열이면 객체로 변환 후 재저장
-        if (Array.isArray(v)) {
-          const obj = {};
-          v.forEach(item => {
-            if (item && item.id) {
-              obj[item.id] = item;
-            }
-          });
-          // Firebase에 객체 형식으로 다시 저장
-          db.ref(`${DB_PATH}/posts`).set(obj);
-          setPosts(Object.values(obj));
-        } else {
-          setPosts(Object.values(v));
-        }
-      }
+      if (v) setPosts(Array.isArray(v) ? v : Object.values(v));
       setFbReady(true);
     }), fbOn("members", v => {
-      if (v) {
-        if (Array.isArray(v)) {
-          const obj = {};
-          v.forEach(item => {
-            if (item && item.id) {
-              obj[item.id] = item;
-            }
-          });
-          db.ref(`${DB_PATH}/members`).set(obj);
-          setMembers(Object.values(obj));
-        } else {
-          setMembers(Object.values(v));
-        }
-      }
+      if (v) setMembers(Array.isArray(v) ? v : Object.values(v));
     }), fbOn("pending", v => {
       setPending(v ? Array.isArray(v) ? v : Object.values(v) : []);
     }), fbOn("routes", v => {
@@ -10444,7 +10426,9 @@ function App() {
     });
   }
   function openPost(id) {
+
     const post = posts.find(p => p.id === id);
+
     setPostId(id);
     setScreen(post?.category === "사내방문" ? "visitlog" : "detail");
   }
@@ -10484,7 +10468,9 @@ function App() {
     }]);
     updPending(ps => ps.filter(x => x.id !== p.id));
   }
+
   const activePost = posts.find(p => p.id === postId);
+
 
   /* ── 로그인 전 화면 ── */
   if (!user) {
