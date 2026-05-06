@@ -2126,6 +2126,7 @@ function AdminDash({
   onUserMgmt,
   onZoneMgmt,
   onReqReview,
+  onNewInternalShip,
   onLogout
 }) {
   const [tab, setTab] = useState("오늘");
@@ -2996,6 +2997,193 @@ function CalendarView({ posts, onSelectDate }) {
 }
 
 
+
+// 사내출하 간단 등록
+function InternalShipmentForm({ onSave, onBack }) {
+  const [date, setDate] = useState(todayStr());
+  const [client, setClient] = useState("");
+  const [carNum, setCarNum] = useState("");
+  const [items, setItems] = useState("");
+  const [note, setNote] = useState("");
+  const [photos, setPhotos] = useState([]);
+  
+  const canSave = client.trim() && items.trim();
+  
+  function save() {
+    onSave({
+      id: uid(),
+      date,
+      time: nowTime(),
+      author: "사내출하",
+      category: "사내출하",
+      client: client.trim(),
+      carNum: carNum.trim(),
+      items: items.trim(),
+      note: note.trim(),
+      photos,
+      status: "완료"
+    });
+  }
+  
+  const inp = {
+    width: "100%",
+    padding: "10px 12px",
+    border: "1.5px solid " + C.border,
+    borderRadius: 8,
+    fontSize: 14,
+    background: C.surface
+  };
+  
+  return React.createElement("div", {
+    style: { minHeight: "100vh", background: C.bg }
+  },
+    React.createElement(Hdr, {
+      title: "사내출하 등록",
+      onBack: onBack
+    }),
+    React.createElement("div", { style: { padding: 16 } },
+      // 날짜
+      React.createElement("div", { style: { marginBottom: 14 } },
+        React.createElement("div", { 
+          style: { fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 6 }
+        }, "출하날짜"),
+        React.createElement("input", {
+          type: "date",
+          value: date,
+          onChange: e => setDate(e.target.value),
+          style: inp
+        })
+      ),
+      
+      // 거래처명
+      React.createElement("div", { style: { marginBottom: 14 } },
+        React.createElement("div", { 
+          style: { fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 6 }
+        }, "거래처명 *"),
+        React.createElement("input", {
+          placeholder: "예) 삼성전자, LG화학",
+          value: client,
+          onChange: e => setClient(e.target.value),
+          style: inp
+        })
+      ),
+      
+      // 차량번호
+      React.createElement("div", { style: { marginBottom: 14 } },
+        React.createElement("div", { 
+          style: { fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 6 }
+        }, "차량번호"),
+        React.createElement("input", {
+          placeholder: "예) 12가3456",
+          value: carNum,
+          onChange: e => setCarNum(e.target.value),
+          style: inp
+        })
+      ),
+      
+      // 품목/수량
+      React.createElement("div", { style: { marginBottom: 14 } },
+        React.createElement("div", { 
+          style: { fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 6 }
+        }, "품목 / 수량 *"),
+        React.createElement("textarea", {
+          placeholder: "예) 브라켓 100개\n케이스 50박스",
+          value: items,
+          onChange: e => setItems(e.target.value),
+          rows: 3,
+          style: { ...inp, resize: "vertical" }
+        })
+      ),
+      
+      // 메모
+      React.createElement("div", { style: { marginBottom: 14 } },
+        React.createElement("div", { 
+          style: { fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 6 }
+        }, "메모 (선택)"),
+        React.createElement("textarea", {
+          placeholder: "특이사항이 있으면 입력",
+          value: note,
+          onChange: e => setNote(e.target.value),
+          rows: 2,
+          style: { ...inp, resize: "vertical" }
+        })
+      ),
+      
+      // 사진
+      React.createElement("div", { style: { marginBottom: 20 } },
+        React.createElement("div", { 
+          style: { fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 6 }
+        }, "사진 (선택)"),
+        React.createElement("input", {
+          type: "file",
+          accept: "image/*",
+          multiple: true,
+          onChange: e => {
+            const files = Array.from(e.target.files);
+            files.forEach(f => {
+              const reader = new FileReader();
+              reader.onload = ev => {
+                setPhotos(prev => [...prev, ev.target.result]);
+              };
+              reader.readAsDataURL(f);
+            });
+          },
+          style: { ...inp, padding: "8px" }
+        }),
+        photos.length > 0 && React.createElement("div", {
+          style: { display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }
+        },
+          photos.map((p, i) => 
+            React.createElement("div", {
+              key: i,
+              style: { position: "relative", width: 80, height: 80 }
+            },
+              React.createElement("img", {
+                src: p,
+                style: { width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }
+              }),
+              React.createElement("button", {
+                onClick: () => setPhotos(prev => prev.filter((_, idx) => idx !== i)),
+                style: {
+                  position: "absolute",
+                  top: -6,
+                  right: -6,
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  background: C.danger,
+                  color: "#fff",
+                  border: "none",
+                  fontSize: 12,
+                  cursor: "pointer"
+                }
+              }, "✕")
+            )
+          )
+        )
+      ),
+      
+      // 저장 버튼
+      React.createElement("button", {
+        onClick: save,
+        disabled: !canSave,
+        style: {
+          width: "100%",
+          padding: "14px",
+          background: canSave ? C.accent : C.muted,
+          color: "#fff",
+          border: "none",
+          borderRadius: 12,
+          fontSize: 16,
+          fontWeight: "700",
+          cursor: canSave ? "pointer" : "not-allowed"
+        }
+      }, "✅ 출하 기록 저장")
+    )
+  );
+}
+
+
 function ViewerDash({
   posts,
   routes,
@@ -3016,7 +3204,7 @@ function ViewerDash({
   const [dateFilter, setDateFilter] = useState("all"); // "today" or "all"
   const [searchText, setSearchText] = useState("");
   
-  const isStaff = user.role === "staff";
+  const isStaff = user.role === "staff" || user.role === "quality";
   const today = todayStr();
   
   // 날짜 필터링
@@ -3045,8 +3233,8 @@ function ViewerDash({
   
   // 탭 구성
   let baseTabs = isStaff 
-    ? ["출하현황", "전체일정", "📅달력", "운행거리", "내 의뢰"]
-    : ["출하현황", "전체일정", "📅달력"];  // 조회자는 운행거리 제외
+    ? ["출하현황", "전체일정", "📅달력", "🏢사내출하", "운행거리", "내 의뢰"]
+    : ["출하현황", "전체일정", "📅달력", "🏢사내출하"];  // 조회자는 운행거리 제외
   
   // 출하 등록 권한 있으면 "출하등록" 탭 추가
   if (user.permissions?.canRegister) {
@@ -3069,18 +3257,32 @@ function ViewerDash({
           React.createElement("div", { style: { fontSize: 20, fontWeight: "700", marginTop: 4 } }, "🏭 지용금속"),
           React.createElement("div", { style: { fontSize: 10, opacity: 0.7, marginTop: 2 } }, APP_VERSION)
         ),
-        React.createElement("button", {
-          onClick: onLogout,
-          style: {
-            background: "rgba(255,255,255,0.2)",
-            border: "none",
-            color: "#fff",
-            padding: "6px 12px",
-            borderRadius: 8,
-            fontSize: 13,
-            cursor: "pointer"
-          }
-        }, "로그아웃")
+        React.createElement("div", { style: { display: "flex", gap: 8 } },
+          React.createElement("button", {
+            onClick: () => window.location.reload(),
+            style: {
+              background: "rgba(255,255,255,0.2)",
+              border: "none",
+              color: "#fff",
+              padding: "6px 10px",
+              borderRadius: 6,
+              fontSize: 16,
+              cursor: "pointer"
+            }
+          }, "🔄"),
+          React.createElement("button", {
+            onClick: onLogout,
+            style: {
+              background: "rgba(255,255,255,0.2)",
+              border: "none",
+              color: "#fff",
+              padding: "6px 12px",
+              borderRadius: 8,
+              fontSize: 13,
+              cursor: "pointer"
+            }
+          }, "로그아웃")
+        )
       ),
       
       // 탭
@@ -3221,6 +3423,64 @@ function ViewerDash({
         setTab("전체일정");
       }
     }),
+    
+    tab === "🏢사내출하" && React.createElement("div", {
+      style: { padding: 16 }
+    },
+      React.createElement("button", {
+        onClick: onNewInternalShip,
+        style: {
+          width: "100%",
+          padding: "16px",
+          background: C.done,
+          color: "#fff",
+          border: "none",
+          borderRadius: 12,
+          fontSize: 16,
+          fontWeight: "700",
+          cursor: "pointer",
+          marginBottom: 16,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8
+        }
+      }, "➕ 사내출하 기록하기"),
+      
+      React.createElement("div", {
+        style: {
+          fontSize: 13,
+          color: C.textSec,
+          marginBottom: 16,
+          padding: "12px 16px",
+          background: C.surface,
+          borderRadius: 8
+        }
+      }, "💡 방문자가 제품을 찾아간 경우 기록해주세요"),
+      
+      // 사내출하 목록 표시
+      React.createElement("div", { style: { fontSize: 14, fontWeight: "700", marginBottom: 12 } }, "최근 사내출하"),
+      posts.filter(p => p.category === "사내출하").slice(0, 10).map(p =>
+        React.createElement("div", {
+          key: p.id,
+          onClick: () => onOpen(p.id),
+          style: {
+            background: C.surface,
+            padding: 14,
+            borderRadius: 12,
+            marginBottom: 8,
+            cursor: "pointer"
+          }
+        },
+          React.createElement("div", {
+            style: { fontSize: 15, fontWeight: "700", marginBottom: 4 }
+          }, p.client),
+          React.createElement("div", {
+            style: { fontSize: 12, color: C.textSec }
+          }, p.date + " · " + (p.items || "품목 미입력"))
+        )
+      )
+    ),
     
     tab === "전체일정" && React.createElement("div", { style: { padding: 16 } },
       selectedDate && React.createElement("div", {
@@ -3422,7 +3682,7 @@ function PostDetail({
   });
   const cc = CAT[post.category] || CAT["일반출하"];
   const isAdmin = user.role === "admin";
-  const isStaff = user.role === "staff";
+  const isStaff = user.role === "staff" || user.role === "quality";
   const canEdit = isAdmin || isStaff || (user.permissions?.canRegister);
   // 안전 기본값: groups가 없을 때 빈 배열로
   const safeGroups = post.groups || [];
@@ -6911,6 +7171,11 @@ function UserMgmt({
       color: C.general,
       icon: "👷"
     },
+    quality: {
+      label: "품질팀",
+      color: "#9C27B0",
+      icon: "🔬"
+    },
     viewer: {
       label: "조회",
       color: C.done,
@@ -10152,11 +10417,24 @@ function fbOn(collection, cb) {
 
 /* ══ ROOT APP ══ */
 function App() {
-  // 로그인 상태 유지 (localStorage)
+  // 로그인 상태 유지 (24시간)
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('jy_user');
-      return saved ? JSON.parse(saved) : null;
+      if (!saved) return null;
+      
+      const data = JSON.parse(saved);
+      const loginTime = data.loginTime || 0;
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000; // 24시간
+      
+      // 24시간 경과 확인
+      if (now - loginTime > oneDay) {
+        localStorage.removeItem('jy_user');
+        return null;
+      }
+      
+      return data.user;
     } catch {
       return null;
     }
@@ -10486,6 +10764,10 @@ function App() {
       pendingCount: pending.length,
       onLogin: u => {
         setUser(u);
+        localStorage.setItem('jy_user', JSON.stringify({
+          user: u,
+          loginTime: Date.now()
+        }));
         setScreen("main");
       },
       onRequest: () => setScreen("request")
@@ -10536,8 +10818,9 @@ function App() {
     onRoute: () => setScreen("route"),
     onLocation: () => setScreen("location"),
     onNewRequest: () => setScreen("reqform"),
+    onNewInternalShip: () => setScreen("internalship"),
     onMyRequests: () => setScreen("myreqs"),
-    onNewInternalShip: () => setScreen("new"),
+    onNewInternalShip: () => setScreen("internalship"),
     onLogout: () => {
       setUser(null);
       localStorage.removeItem('jy_user');
@@ -10593,6 +10876,12 @@ function App() {
     onBack: () => setScreen("main"),
     onAddVisit: addVisit,
     onAddVisitPhoto: addVisitPhoto
+  }), screen === "internalship" && /*#__PURE__*/React.createElement(InternalShipmentForm, {
+    onSave: p => {
+      updPosts(ps => [p, ...ps]);
+      setScreen("main");
+    },
+    onBack: () => setScreen("main")
   }), screen === "new" && /*#__PURE__*/React.createElement(NewPost, {
     members: members,
     zones: zones,
